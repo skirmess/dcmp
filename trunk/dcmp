@@ -1,0 +1,169 @@
+#!/usr/bin/perl -w
+
+use Cwd;
+use Fcntl ':mode';
+
+use Getopt::Long;
+
+# Getopt::Long::Configure qw(require_order bundling no_ignore_case);
+
+sub usage {
+  print "usage: $0 <dir> <dir>\n";
+  exit 99;
+}
+
+# flags
+#
+# -r recursive (or not) (show only topmost unmatching dir)
+# -l oder -ls long output (wie ls -l bzw find -ls)
+#    permission check
+#    show only matches.
+#    no CVS
+
+
+my $dir1;
+my $dir2;
+
+# my $nocvs = undef;
+my $cvs = 0;
+
+
+my $Additional_Dir = "+";
+my $Additional_File = "+";
+my $Missing_Dir = "-";
+my $Missing_File = "-";
+
+
+sub _readdir {
+  my $entry = readdir($_[0]);
+  return unless (defined $entry);
+  
+  unless ($cvs) {
+    if ($entry =~ m#^(CVS|RCS)$#) {
+      $entry = _readdir($_[0]);
+    }
+  }
+  return $entry;
+}
+
+sub scanDir {
+  # $_[0] already contain a tailing /
+  my $_dir = $_[0];
+
+
+  my %dir1dir;
+  my %dir1ndir;
+  my %dir2dir;
+  my %dir2ndir;
+  my %merged;
+
+  if ( -d "$dir1/$_dir") {
+    opendir DIR, "$dir1/$_dir";
+    while ($_ = _readdir(DIR)) {
+      next if (m/^\.{1,2}$/);
+      if ( ! -l "$dir1/$_dir$_" && -d "$dir1/$_dir$_" ) {
+        $dir1dir{$_}="$Additional_Dir $_dir";
+      }
+      $dir1ndir{$_}="$Additional_File $_dir";
+    }
+    closedir DIR;
+  }
+  
+
+  if ( -d "$dir2/$_dir") {
+    opendir DIR, "$dir2/$_dir";
+    while ($_ = _readdir(DIR)) {
+      next if (m/^\.{1,2}$/);
+      if ( ! -l "$dir2/$_dir$_" && -d "$dir2/$_dir$_" ) {
+        $dir2dir{$_}="$Missing_Dir $_dir";
+      }
+      $dir2ndir{$_}="$Missing_File $_dir";
+    }
+    closedir DIR;
+  }
+
+  foreach (sort keys %dir1ndir) {
+    if (defined $dir2ndir{$_}) {
+      # File is present in both locations.
+      delete $dir1ndir{$_};
+      delete $dir2ndir{$_};
+      if (S_IFMT((lstat("$dir1/$_dir/$_"))[2]) !=
+	  S_IFMT((lstat("$dir2/$_dir/$_"))[2])) {
+        # File is not the same filetype.
+        print "@ $_dir$_\n";
+      } elsif ( -l "$dir1/$_dir$_" ) {
+        if (readlink("$dir1/$_dir$_") ne readlink("$dir2/$_dir$_")) {
+          print "L $_dir$_\n";
+	}
+      } elsif ( -d "$dir1/$_dir$_" ) {
+          # both are directories
+      } elsif ( -f "$dir1/$_dir$_" ) {
+        if (system("cmp \'$dir1/$_dir$_\' \'$dir2/$_dir$_\' >/dev/null 2>&1")) {
+          print "M $_dir$_\n";
+	}
+      } else {
+        print "? $_dir$_\n";
+      }
+    }
+  }
+
+  %merged = (%dir1ndir, %dir2ndir);
+  foreach (sort keys %merged) {
+    # unless ( ! -l "$dir2/$_dir$_" && -d "$dir2/$_dir$_" ) {
+    unless (defined $dir1dir{$_} || defined $dir2dir{$_}) {
+      print "$merged{$_}$_\n";
+    }
+  }
+
+  foreach (sort keys %dir1dir) {
+    if (defined $dir2dir{$_}) {
+      $dir1dir{$_} = '#';
+      delete $dir2dir{$_};
+    }
+  }
+
+  %merged = (%dir1dir, %dir2dir);
+  foreach (sort keys %merged) {
+    if ($merged{$_} ne '#') {
+      print "$merged{$_}$_\n";
+    }
+    scanDir("$_dir$_/");
+  }
+
+}
+
+
+sub _checkDir {
+  my $d		= $_[0];
+
+  if (! -d $d ) {
+    print STDERR "FUCK: Could not find directory $d\n";
+    exit 1;
+  }
+
+  return $d;
+}
+
+sub main {
+  my $_verbose = undef;
+
+  GetOptions("left-file=s"		=> \$Additional_File,
+             "right-file=s"		=> \$Missing_File,
+	     "left-dir=s"		=> \$Additional_Dir,
+	     "right-dir=s"		=> \$Missing_Dir,
+             "cvs!"			=> \$cvs);
+
+
+  usage() unless (defined $ARGV[1]);
+
+  $dir1 = _checkDir(shift(@ARGV));
+  $dir2 = _checkDir(shift(@ARGV));
+
+  
+  scanDir("");
+}
+
+
+
+
+main()
