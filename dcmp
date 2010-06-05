@@ -137,7 +137,7 @@ sub _checkDir {
   my $d		= $_[0];
 
   if (! -d $d ) {
-    print STDERR "FUCK: Could not find directory $d\n";
+    print STDERR "Could not find directory: $d\n";
     exit 1;
   }
 
