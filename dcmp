@@ -42,7 +42,7 @@ sub _readdir {
   return unless (defined $entry);
   
   unless ($cvs) {
-    if ($entry =~ m#^(CVS|RCS)$#) {
+    if ($entry =~ m#^(CVS|RCS|.svn)$#) {
       $entry = _readdir($_[0]);
     }
   }
