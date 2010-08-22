@@ -33,6 +33,7 @@
 #
 #Basic Options:
 # -i=n    use n columns per indentation level (default n=4)
+-i=2
 # -t      tabs: use one tab character per indentation level, not recommeded
 # -nt     no tabs: use n spaces per indentation level (default)
 # -et=n   entab leading whitespace n spaces per tab; not recommended
