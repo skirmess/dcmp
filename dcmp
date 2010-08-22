@@ -3,6 +3,8 @@
 # (c) 2002-2010 Sven Kirmess
 #
 
+use strict;
+
 use Cwd;
 use Fcntl ':mode';
 use File::Compare;
@@ -59,27 +61,27 @@ sub scanDir {
     my %merged;
 
     if ( -d "$dir1/$_dir" ) {
-        opendir DIR, "$dir1/$_dir";
-        while ( $_ = _readdir(DIR) ) {
+        opendir 'DIR', "$dir1/$_dir";
+        while ( $_ = _readdir('DIR') ) {
             next if (m/^\.{1,2}$/);
             if ( !-l "$dir1/$_dir$_" && -d "$dir1/$_dir$_" ) {
                 $dir1dir{$_} = "$Additional_Dir $_dir";
             }
             $dir1ndir{$_} = "$Additional_File $_dir";
         }
-        closedir DIR;
+        closedir 'DIR';
     }
 
     if ( -d "$dir2/$_dir" ) {
-        opendir DIR, "$dir2/$_dir";
-        while ( $_ = _readdir(DIR) ) {
+        opendir 'DIR', "$dir2/$_dir";
+        while ( $_ = _readdir('DIR') ) {
             next if (m/^\.{1,2}$/);
             if ( !-l "$dir2/$_dir$_" && -d "$dir2/$_dir$_" ) {
                 $dir2dir{$_} = "$Missing_Dir $_dir";
             }
             $dir2ndir{$_} = "$Missing_File $_dir";
         }
-        closedir DIR;
+        closedir 'DIR';
     }
 
     foreach ( sort keys %dir1ndir ) {
