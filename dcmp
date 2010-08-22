@@ -90,9 +90,7 @@ sub scanDir {
       # File is present in both locations.
       delete $dir1ndir{$_};
       delete $dir2ndir{$_};
-      if ( S_IFMT( ( lstat("$dir1/$_dir/$_") )[2] ) !=
-        S_IFMT( ( lstat("$dir2/$_dir/$_") )[2] ) )
-      {
+      if ( S_IFMT( ( lstat("$dir1/$_dir/$_") )[2] ) != S_IFMT( ( lstat("$dir2/$_dir/$_") )[2] ) ) {
 
         # File is not the same filetype.
         print "@ $_dir$_\n";
@@ -108,9 +106,7 @@ sub scanDir {
       }
       elsif ( -f "$dir1/$_dir$_" ) {
 
-        if (
-          compare( $dir1 . '/' . $_dir . $_, $dir2 . '/' . $_dir . $_ ) != 0 )
-        {
+        if ( compare( $dir1 . '/' . $_dir . $_, $dir2 . '/' . $_dir . $_ ) != 0 ) {
           print "M $_dir$_\n";
         }
       }
