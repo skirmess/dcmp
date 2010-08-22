@@ -5,6 +5,7 @@
 
 use Cwd;
 use Fcntl ':mode';
+use File::Compare;
 
 use Getopt::Long;
 
@@ -104,12 +105,8 @@ sub scanDir {
                 # both are directories
             }
             elsif ( -f "$dir1/$_dir$_" ) {
-                if (
-                    system(
-"cmp \'$dir1/$_dir$_\' \'$dir2/$_dir$_\' >/dev/zero 2>&1"
-                    )
-                  )
-                {
+
+		if ( compare($dir1.'/'.$_dir.$_, $dir2.'/'.$_dir.$_) != 0 ) {
                     print "M $_dir$_\n";
                 }
             }
