@@ -108,7 +108,11 @@ sub scanDir {
             }
             elsif ( -f "$dir1/$_dir$_" ) {
 
-		if ( compare($dir1.'/'.$_dir.$_, $dir2.'/'.$_dir.$_) != 0 ) {
+                if (
+                    compare( $dir1 . '/' . $_dir . $_,
+                        $dir2 . '/' . $_dir . $_ ) != 0
+                  )
+                {
                     print "M $_dir$_\n";
                 }
             }
