@@ -18,14 +18,6 @@ sub usage {
   exit 255;
 }
 
-# flags
-#
-# -r recursive (or not) (show only topmost unmatching dir)
-# -l oder -ls long output (wie ls -l bzw find -ls)
-#    permission check
-#    show only matches.
-#    no CVS
-
 my $dir1;
 my $dir2;
 
