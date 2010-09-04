@@ -29,6 +29,8 @@ my $Additional_File = "+";
 my $Missing_Dir     = "-";
 my $Missing_File    = "-";
 
+my $RC = 0;
+
 sub _readdir {
   my $entry = readdir( $_[0] );
   return unless ( defined $entry );
@@ -86,10 +88,12 @@ sub scanDir {
 
         # File is not the same filetype.
         print "@ $_dir$_\n";
+        $RC = 1;
       }
       elsif ( -l "$dir1/$_dir$_" ) {
         if ( readlink("$dir1/$_dir$_") ne readlink("$dir2/$_dir$_") ) {
           print "L $_dir$_\n";
+          $RC = 1;
         }
       }
       elsif ( -d "$dir1/$_dir$_" ) {
@@ -100,10 +104,12 @@ sub scanDir {
 
         if ( compare( $dir1 . '/' . $_dir . $_, $dir2 . '/' . $_dir . $_ ) != 0 ) {
           print "M $_dir$_\n";
+          $RC = 1;
         }
       }
       else {
         print "? $_dir$_\n";
+        $RC = 1;
       }
     }
   }
@@ -114,6 +120,7 @@ sub scanDir {
     # unless ( ! -l "$dir2/$_dir$_" && -d "$dir2/$_dir$_" ) {
     unless ( defined $dir1dir{$_} || defined $dir2dir{$_} ) {
       print "$merged{$_}$_\n";
+      $RC = 1;
     }
   }
 
@@ -128,6 +135,7 @@ sub scanDir {
   foreach ( sort keys %merged ) {
     if ( $merged{$_} ne '#' ) {
       print "$merged{$_}$_\n";
+      $RC = 1;
     }
     scanDir("$_dir$_/");
   }
@@ -164,4 +172,6 @@ sub main {
   scanDir("");
 }
 
-main()
+main();
+
+exit $RC;
