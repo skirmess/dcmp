@@ -156,7 +156,7 @@ sub main {
     "cvs!"         => \$cvs
   );
 
-  usage() unless ( defined $ARGV[1] );
+  usage if ( ( !defined $ARGV[1] ) || ( defined $ARGV[2] ) );
 
   $dir1 = _checkDir( shift(@ARGV) );
   $dir2 = _checkDir( shift(@ARGV) );
