@@ -86,7 +86,7 @@
 # -ce     cuddled else; use this style: '} else {'
 # -dnl    delete old newlines (default)
 # -l=n    maximum line length;  default n=80
--l=200
+-l=10000
 # -bl     opening brace on new line 
 # -sbl    opening sub brace on new line.  value of -bl is used if not given.
 # -bli    opening brace on new line and indented
