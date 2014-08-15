@@ -1,168 +1,239 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-# (c) 2002-2011 Sven Kirmess
+# (c) 2002-2014 Sven Kirmess
 #
 
 use strict;
+use warnings;
+no warnings 'recursion';
 
+use Cwd qw( getcwd );
 use Fcntl ':mode';
 use File::Compare;
-use Getopt::Long;
+
+# ----------------------------------------------------------
+#
 
 sub usage {
 	print "usage: $0 <dir> <dir>\n";
 	exit 255;
 }
 
-my $rc  = 0;
-my $cvs = 0;
+my $rc   = 0;
+my @path = ();
 
 # ----------------------------------------------------------
 #
 
-GetOptions( "cvs!" => \$cvs );
-
-usage() if ( $#ARGV != 1 );
-
-my $ldir = shift(@ARGV);
-my $rdir = shift(@ARGV);
-
-usage() if ( ( $ldir eq '' ) || ( $rdir eq '' ) );
-
-if ( ( -l $ldir ) || ( !-d $ldir ) ) {
-	die "File $ldir does not exist or is not directory.\n";
-}
-if ( ( -l $rdir ) || ( !-d $rdir ) ) {
-	die "File $rdir does not exist or is not directory.\n";
+if ( $#ARGV != 1 ) {
+	usage();
 }
 
-# disable buffering of stdout
-select( ( select(STDOUT), $| = 1 )[0] );
+my $lDirName = shift(@ARGV);
+my $rDirName = shift(@ARGV);
 
-my @dirs = ("");
-while ( defined( my $dir = shift(@dirs) ) ) {
+opendir( my $lDirFH, $lDirName ) or die "$!: $lDirName\n";
+opendir( my $rDirFH, $rDirName ) or die "$!: $rDirName\n";
 
-	# $dir already contain a tailing /
+sub ChdirToPath {
+	my ($dirFH) = @_;
 
-	my %ldir;
-	my %rdir;
+	chdir($dirFH) or die "$!\n";
 
-	if ( ( !-l "$ldir/$dir" ) and ( -d "$ldir/$dir" ) ) {
-		if ( opendir( DIR, "$ldir/$dir" ) ) {
-			while ( my $entry = readdir(DIR) ) {
-				next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
+	foreach my $dir (@path) {
+		chdir($dir) or die "$!: Cannot chdir to " . $dir . " in " . getcwd() . "\n";
+	}
+}
 
-				unless ($cvs) {
-					next if ( ( $entry eq 'CVS' ) or ( $entry eq 'RCS' ) or ( $entry eq '.svn' ) );
-				}
+sub CompareLink {
+	my ($file) = @_;
 
-				$ldir{$entry} = 1;
-			}
-			closedir(DIR) or die "Could not read directory: $ldir/$dir\n";
-		}
-		else {
-			warn "Could not read directory: $ldir/$dir\n";
-		}
+	ChdirToPath($lDirFH);
+	my $ldest = readlink($file);
+	die "$!: " . $file . " in " . getcwd() . "\n" if ( !defined $ldest );
+
+	ChdirToPath($rDirFH);
+	my $rdest = readlink($file);
+	die "$!: " . $file . " in " . getcwd() . "\n" if ( !defined $rdest );
+
+	if ( $ldest eq $rdest ) {
+		return 1;
 	}
 
-	if ( ( !-l "$rdir/$dir" ) and ( -d "$rdir/$dir" ) ) {
-		if ( opendir( DIR, "$rdir/$dir" ) ) {
-			while ( my $entry = readdir(DIR) ) {
-				next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
+	return 0;
+}
 
-				unless ($cvs) {
-					next if ( ( $entry eq 'CVS' ) or ( $entry eq 'RCS' ) or ( $entry eq '.svn' ) );
-				}
+sub CompareFile {
+	my ($file) = @_;
 
-				$rdir{$entry} = 1;
-			}
-			closedir(DIR) or die "Could not read directory: $rdir/$dir\n";
-		}
-		else {
-			warn "Could not read directory: $rdir/$dir\n";
-		}
+	my $lFH;
+	my $rFH;
+
+	ChdirToPath($lDirFH);
+	if ( !open( $lFH, $file ) ) {
+		die "$!: Cannot read file " . join( "/", $rDirName, @path, $file ) . "\n";
+		return 0;
 	}
 
-	my @newdirs;
-	foreach my $entry ( sort keys %{ { %ldir, %rdir } } ) {
+	ChdirToPath($rDirFH);
+	if ( !open( $rFH, $file ) ) {
+		die "$!: Cannot read file " . join( "/", $rDirName, @path, $file ) . "\n";
+		return 0;
+	}
 
-		my $l_entry = "$ldir/$dir$entry";
-		my $r_entry = "$rdir/$dir$entry";
+	my $rc = 0;
+	if ( compare( $lFH, $rFH ) == 0 ) {
+		$rc = 1;
+	}
 
-		if ( defined $ldir{$entry} ) {
-			if ( defined $rdir{$entry} ) {
+	if ( !close($lFH) ) {
+		die "$!: Cannot read file " . join( "/", $lDirName, @path, $file ) . "\n";
+		return 0;
+	}
 
-				# file is present in both locations
-				delete $ldir{$entry};
-				delete $rdir{$entry};
+	if ( !close($rFH) ) {
+		die "$!: Cannot read file " . join( "/", $rDirName, @path, $file ) . "\n";
+		return 0;
+	}
 
-				if ( S_IFMT( ( lstat("$l_entry") )[2] ) != S_IFMT( ( lstat("$r_entry") )[2] ) ) {
+	return $rc;
+}
 
-					# file is not the same filetype
-					print "@ $dir$entry\n";
-					$rc = 1;
+sub ScanDir {
 
-					if ( ( ( !-l $l_entry ) and ( -d $l_entry ) ) or ( ( !-l $r_entry ) and ( -d $r_entry ) ) ) {
-						push( @newdirs, "$dir$entry/" );
-					}
-				}
-				elsif ( -l "$l_entry" ) {
-					if ( readlink("$l_entry") ne readlink("$r_entry") ) {
-						print "L $dir$entry\n";
-						$rc = 1;
-					}
-				}
-				elsif ( -d "$l_entry" ) {
+	my ( $dirFH, $dirName ) = @_;
 
-					# both are directories
-					push( @newdirs, "$dir$entry/" );
-				}
-				elsif ( -f "$l_entry" ) {
-					if ( compare( "$l_entry", "$r_entry" ) != 0 ) {
-						print "M $dir$entry\n";
-						$rc = 1;
-					}
-				}
-				else {
-					print "? $dir$entry\n";
-					$rc = 1;
-				}
+	ChdirToPath($dirFH);
+
+	my %content;
+
+	my $dh;
+	if ( opendir( $dh, "." ) ) {
+		while ( my $entry = readdir($dh) ) {
+			next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
+
+			my @lstat = lstat($entry);
+			$content{$entry} = \@lstat;
+		}
+		closedir($dh) or die "$!: Could not read directory: " . join( "/", $dirName, @path ) . "\n";
+	}
+	else {
+		die "$!: Could not read directory: " . join( "/", $dirName, @path ) . "\n";
+	}
+
+	return \%content;
+}
+
+sub ListLonelyTree {
+	my ( $dirFH, $dirName, $c ) = @_;
+
+	my $files = ScanDir( $dirFH, $dirName );
+
+	foreach my $entry ( sort keys %{$files} ) {
+		print $c. " " . join( "/", @path, $entry ) . "\n";
+
+		if ( S_ISDIR( $files->{$entry}[2] ) ) {
+			push( @path, $entry );
+			ListLonelyTree(@_);
+			pop(@path);
+		}
+	}
+}
+
+sub CompareDir {
+
+	my $lFiles = ScanDir( $lDirFH, $lDirName );
+	my $rFiles = ScanDir( $rDirFH, $rDirName );
+
+	foreach my $entry ( sort keys %{ { %{$lFiles}, %{$rFiles} } } ) {
+
+		if ( !defined $rFiles->{$entry} ) {
+
+			# file is only present in the left tree
+
+			print "+ " . join( "/", @path, $entry ) . "\n";
+			$rc = 1;
+
+			if ( S_ISDIR( $lFiles->{$entry}[2] ) ) {
+				push( @path, $entry );
+				ListLonelyTree( $lDirFH, $lDirName, "+" );
+				pop(@path);
 			}
-			else {
 
-				# file is only present in the left directory
-				delete $ldir{$entry};
+			delete $lFiles->{$entry};
+			next;
+		}
 
-				if ( ( -l "$l_entry" ) or ( !-d "$l_entry" ) ) {
-					print "- $dir$entry\n";
-				}
-				else {
-					print "- $dir$entry\n";
-					push( @newdirs, "$dir$entry/" );
-				}
+		if ( !defined $lFiles->{$entry} ) {
 
+			# file is only present in the right tree
+
+			print "- " . join( "/", @path, $entry ) . "\n";
+			$rc = 1;
+
+			if ( S_ISDIR( $rFiles->{$entry}[2] ) ) {
+				push( @path, $entry );
+				ListLonelyTree( $rDirFH, $rDirName, "-" );
+				pop(@path);
+			}
+
+			delete $rFiles->{$entry};
+			next;
+		}
+
+		# file is present in both locations
+		if ( S_IFMT( $lFiles->{$entry}[2] ) != S_IFMT( $rFiles->{$entry}[2] ) ) {
+
+			# file is not the same filetype
+			print "@ " . join( "/", @path, $entry ) . "\n";
+			$rc = 1;
+
+			if ( S_ISDIR( $lFiles->{$entry}[2] ) ) {
+				push( @path, $entry );
+				ListLonelyTree( $lDirFH, $lDirName, "+" );
+				pop(@path);
+			}
+			elsif ( S_ISDIR( $rFiles->{$entry}[2] ) ) {
+				push( @path, $entry );
+				ListLonelyTree( $rDirFH, $rDirName, "-" );
+				pop(@path);
+			}
+
+		}
+		elsif ( S_ISLNK( $lFiles->{$entry}[2] ) ) {
+
+			# both are symlinks
+			if ( !CompareLink($entry) ) {
+				print "L " . join( "/", @path, $entry ) . "\n";
+				$rc = 1;
+			}
+		}
+		elsif ( S_ISDIR( $lFiles->{$entry}[2] ) ) {
+
+			# both are directories
+
+			push( @path, $entry );
+			CompareDir();
+			pop(@path);
+		}
+		elsif ( S_ISREG( $lFiles->{$entry}[2] ) ) {
+
+			# both are regular files
+			if ( !CompareFile($entry) ) {
+				print "M " . join( "/", @path, $entry ) . "\n";
 				$rc = 1;
 			}
 		}
 		else {
-
-			# file is only present in the right directory
-			delete $rdir{$entry};
-
-			if ( ( -l "$r_entry" ) or ( !-d "$r_entry" ) ) {
-				print "+ $dir$entry\n";
-			}
-			else {
-				print "+ $dir$entry\n";
-				push( @newdirs, "$dir$entry/" );
-			}
-
+			print "? " . join( "/", @path, $entry ) . "\n";
 			$rc = 1;
-
 		}
-	}
 
-	unshift( @dirs, @newdirs );
+		delete $lFiles->{$entry};
+		delete $rFiles->{$entry};
+	}
 }
+
+CompareDir();
 
 exit $rc;
