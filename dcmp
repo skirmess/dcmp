@@ -10,20 +10,24 @@ no warnings 'recursion';
 use Cwd qw( getcwd );
 use Fcntl ':mode';
 use File::Compare;
+use Getopt::Long;
 
 # ----------------------------------------------------------
 #
 
 sub usage {
-	print "usage: $0 <dir> <dir>\n";
+	print "usage: $0 [ -i <ignore> ... ] <dir> <dir>\n";
 	exit 255;
 }
 
-my $rc   = 0;
-my @path = ();
+my $rc                  = 0;
+my @path                = ();
+my @directoriesToIgnore = ();
 
 # ----------------------------------------------------------
 #
+
+GetOptions( "i=s" => \@directoriesToIgnore );
 
 if ( $#ARGV != 1 ) {
 	usage();
@@ -111,6 +115,18 @@ sub ScanDir {
 	if ( opendir( $dh, "." ) ) {
 		while ( my $entry = readdir($dh) ) {
 			next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
+
+			my $skipThis = 0;
+			foreach my $id (@directoriesToIgnore) {
+				if ( $entry eq $id ) {
+					$skipThis = 1;
+					last;
+				}
+			}
+
+			if ($skipThis) {
+				next;
+			}
 
 			my @lstat = lstat($entry);
 			$content{$entry} = \@lstat;
