@@ -33,10 +33,12 @@
 #
 #Basic Options:
 # -i=n    use n columns per indentation level (default n=4)
--i=2
+-i=8
 # -t      tabs: use one tab character per indentation level, not recommeded
+-t
 # -nt     no tabs: use n spaces per indentation level (default)
 # -et=n   entab leading whitespace n spaces per tab; not recommended
+-et=8
 # -io     "indent only": just do indentation, no other formatting.
 # -sil=n  set starting indentation level to n;  use if auto detection fails
 # -ole=s  specify output line ending (s=dos or win, mac, unix)

@@ -10,8 +10,8 @@ use File::Compare;
 use Getopt::Long;
 
 sub usage {
-  print "usage: $0 <dir> <dir>\n";
-  exit 255;
+	print "usage: $0 <dir> <dir>\n";
+	exit 255;
 }
 
 my $rc  = 0;
@@ -30,10 +30,10 @@ my $rdir = shift(@ARGV);
 usage() if ( ( $ldir eq '' ) || ( $rdir eq '' ) );
 
 if ( ( -l $ldir ) || ( !-d $ldir ) ) {
-  die "File $ldir does not exist or is not directory.\n";
+	die "File $ldir does not exist or is not directory.\n";
 }
 if ( ( -l $rdir ) || ( !-d $rdir ) ) {
-  die "File $rdir does not exist or is not directory.\n";
+	die "File $rdir does not exist or is not directory.\n";
 }
 
 # disable buffering of stdout
@@ -42,127 +42,127 @@ select( ( select(STDOUT), $| = 1 )[0] );
 my @dirs = ("");
 while ( defined( my $dir = shift(@dirs) ) ) {
 
-  # $dir already contain a tailing /
+	# $dir already contain a tailing /
 
-  my %ldir;
-  my %rdir;
+	my %ldir;
+	my %rdir;
 
-  if ( ( !-l "$ldir/$dir" ) and ( -d "$ldir/$dir" ) ) {
-    if ( opendir( DIR, "$ldir/$dir" ) ) {
-      while ( my $entry = readdir(DIR) ) {
-        next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
+	if ( ( !-l "$ldir/$dir" ) and ( -d "$ldir/$dir" ) ) {
+		if ( opendir( DIR, "$ldir/$dir" ) ) {
+			while ( my $entry = readdir(DIR) ) {
+				next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
 
-        unless ($cvs) {
-          next if ( ( $entry eq 'CVS' ) or ( $entry eq 'RCS' ) or ( $entry eq '.svn' ) );
-        }
+				unless ($cvs) {
+					next if ( ( $entry eq 'CVS' ) or ( $entry eq 'RCS' ) or ( $entry eq '.svn' ) );
+				}
 
-        $ldir{$entry} = 1;
-      }
-      closedir(DIR) or die "Could not read directory: $ldir/$dir\n";
-    }
-    else {
-      warn "Could not read directory: $ldir/$dir\n";
-    }
-  }
+				$ldir{$entry} = 1;
+			}
+			closedir(DIR) or die "Could not read directory: $ldir/$dir\n";
+		}
+		else {
+			warn "Could not read directory: $ldir/$dir\n";
+		}
+	}
 
-  if ( ( !-l "$rdir/$dir" ) and ( -d "$rdir/$dir" ) ) {
-    if ( opendir( DIR, "$rdir/$dir" ) ) {
-      while ( my $entry = readdir(DIR) ) {
-        next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
+	if ( ( !-l "$rdir/$dir" ) and ( -d "$rdir/$dir" ) ) {
+		if ( opendir( DIR, "$rdir/$dir" ) ) {
+			while ( my $entry = readdir(DIR) ) {
+				next if ( ( $entry eq '.' ) or ( $entry eq '..' ) );
 
-        unless ($cvs) {
-          next if ( ( $entry eq 'CVS' ) or ( $entry eq 'RCS' ) or ( $entry eq '.svn' ) );
-        }
+				unless ($cvs) {
+					next if ( ( $entry eq 'CVS' ) or ( $entry eq 'RCS' ) or ( $entry eq '.svn' ) );
+				}
 
-        $rdir{$entry} = 1;
-      }
-      closedir(DIR) or die "Could not read directory: $rdir/$dir\n";
-    }
-    else {
-      warn "Could not read directory: $rdir/$dir\n";
-    }
-  }
+				$rdir{$entry} = 1;
+			}
+			closedir(DIR) or die "Could not read directory: $rdir/$dir\n";
+		}
+		else {
+			warn "Could not read directory: $rdir/$dir\n";
+		}
+	}
 
-  my @newdirs;
-  foreach my $entry ( sort keys %{ { %ldir, %rdir } } ) {
+	my @newdirs;
+	foreach my $entry ( sort keys %{ { %ldir, %rdir } } ) {
 
-    my $l_entry = "$ldir/$dir$entry";
-    my $r_entry = "$rdir/$dir$entry";
+		my $l_entry = "$ldir/$dir$entry";
+		my $r_entry = "$rdir/$dir$entry";
 
-    if ( defined $ldir{$entry} ) {
-      if ( defined $rdir{$entry} ) {
+		if ( defined $ldir{$entry} ) {
+			if ( defined $rdir{$entry} ) {
 
-        # file is present in both locations
-        delete $ldir{$entry};
-        delete $rdir{$entry};
+				# file is present in both locations
+				delete $ldir{$entry};
+				delete $rdir{$entry};
 
-        if ( S_IFMT( ( lstat("$l_entry") )[2] ) != S_IFMT( ( lstat("$r_entry") )[2] ) ) {
+				if ( S_IFMT( ( lstat("$l_entry") )[2] ) != S_IFMT( ( lstat("$r_entry") )[2] ) ) {
 
-          # file is not the same filetype
-          print "@ $dir$entry\n";
-          $rc = 1;
+					# file is not the same filetype
+					print "@ $dir$entry\n";
+					$rc = 1;
 
-          if ( ( ( !-l $l_entry ) and ( -d $l_entry ) ) or ( ( !-l $r_entry ) and ( -d $r_entry ) ) ) {
-            push( @newdirs, "$dir$entry/" );
-          }
-        }
-        elsif ( -l "$l_entry" ) {
-          if ( readlink("$l_entry") ne readlink("$r_entry") ) {
-            print "L $dir$entry\n";
-            $rc = 1;
-          }
-        }
-        elsif ( -d "$l_entry" ) {
+					if ( ( ( !-l $l_entry ) and ( -d $l_entry ) ) or ( ( !-l $r_entry ) and ( -d $r_entry ) ) ) {
+						push( @newdirs, "$dir$entry/" );
+					}
+				}
+				elsif ( -l "$l_entry" ) {
+					if ( readlink("$l_entry") ne readlink("$r_entry") ) {
+						print "L $dir$entry\n";
+						$rc = 1;
+					}
+				}
+				elsif ( -d "$l_entry" ) {
 
-          # both are directories
-          push( @newdirs, "$dir$entry/" );
-        }
-        elsif ( -f "$l_entry" ) {
-          if ( compare( "$l_entry", "$r_entry" ) != 0 ) {
-            print "M $dir$entry\n";
-            $rc = 1;
-          }
-        }
-        else {
-          print "? $dir$entry\n";
-          $rc = 1;
-        }
-      }
-      else {
+					# both are directories
+					push( @newdirs, "$dir$entry/" );
+				}
+				elsif ( -f "$l_entry" ) {
+					if ( compare( "$l_entry", "$r_entry" ) != 0 ) {
+						print "M $dir$entry\n";
+						$rc = 1;
+					}
+				}
+				else {
+					print "? $dir$entry\n";
+					$rc = 1;
+				}
+			}
+			else {
 
-        # file is only present in the left directory
-        delete $ldir{$entry};
+				# file is only present in the left directory
+				delete $ldir{$entry};
 
-        if ( ( -l "$l_entry" ) or ( !-d "$l_entry" ) ) {
-          print "- $dir$entry\n";
-        }
-        else {
-          print "- $dir$entry\n";
-          push( @newdirs, "$dir$entry/" );
-        }
+				if ( ( -l "$l_entry" ) or ( !-d "$l_entry" ) ) {
+					print "- $dir$entry\n";
+				}
+				else {
+					print "- $dir$entry\n";
+					push( @newdirs, "$dir$entry/" );
+				}
 
-        $rc = 1;
-      }
-    }
-    else {
+				$rc = 1;
+			}
+		}
+		else {
 
-      # file is only present in the right directory
-      delete $rdir{$entry};
+			# file is only present in the right directory
+			delete $rdir{$entry};
 
-      if ( ( -l "$r_entry" ) or ( !-d "$r_entry" ) ) {
-        print "+ $dir$entry\n";
-      }
-      else {
-        print "+ $dir$entry\n";
-        push( @newdirs, "$dir$entry/" );
-      }
+			if ( ( -l "$r_entry" ) or ( !-d "$r_entry" ) ) {
+				print "+ $dir$entry\n";
+			}
+			else {
+				print "+ $dir$entry\n";
+				push( @newdirs, "$dir$entry/" );
+			}
 
-      $rc = 1;
+			$rc = 1;
 
-    }
-  }
+		}
+	}
 
-  unshift( @dirs, @newdirs );
+	unshift( @dirs, @newdirs );
 }
 
 exit $rc;
