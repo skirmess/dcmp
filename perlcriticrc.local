@@ -4,5 +4,8 @@
 # We have to call private subroutines to test them
 [-Subroutines::ProtectPrivateSubs]
 
+# Writing tests without magic numbers is quite painful
+[-ValuesAndExpressions::ProhibitMagicNumbers]
+
 # We use not interpolated variable names in our test comment
 [-ValuesAndExpressions::RequireInterpolationOfMetachars]

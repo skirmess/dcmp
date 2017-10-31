@@ -30,6 +30,20 @@ sub _chdir {
     return;
 }
 
+sub _longest_length {
+    my @strings = @_;
+
+    my $longest_length = 0;
+
+    for my $str (@strings) {
+        if ( length $str > $longest_length ) {
+            $longest_length = length $str;
+        }
+    }
+
+    return $longest_length;
+}
+
 1;
 
 __END__
