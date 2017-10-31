@@ -1,9 +1,14 @@
+requires "Cwd" => "0";
 requires "perl" => "5.006";
 requires "strict" => "0";
 requires "warnings" => "0";
 
 on 'test' => sub {
-  requires "Test::More" => "0";
+  requires "File::Spec" => "0";
+  requires "Test::Fatal" => "0";
+  requires "Test::More" => "0.88";
+  requires "Test::TempDir::Tiny" => "0";
+  requires "autodie" => "0";
   requires "lib" => "0";
   requires "perl" => "5.006";
 };
@@ -69,7 +74,6 @@ on 'develop' => sub {
   requires "Perl::Critic::Policy::Modules::ProhibitModuleShebang" => "95";
   requires "Perl::Critic::Policy::Modules::ProhibitPOSIXimport" => "95";
   requires "Perl::Critic::Policy::Modules::ProhibitUseQuotedVersion" => "95";
-  requires "Perl::Critic::Policy::Modules::RequireExplicitInclusion" => "0.05";
   requires "Perl::Critic::Policy::Modules::RequirePerlVersion" => "1.003";
   requires "Perl::Critic::Policy::Moo::ProhibitMakeImmutable" => "0.01";
   requires "Perl::Critic::Policy::Moose::ProhibitDESTROYMethod" => "1.05";

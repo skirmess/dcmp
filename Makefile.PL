@@ -20,11 +20,16 @@ my %WriteMakefileArgs = (
   "MIN_PERL_VERSION" => "5.006",
   "NAME" => "App::dcmp",
   "PREREQ_PM" => {
+    "Cwd" => 0,
     "strict" => 0,
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
-    "Test::More" => 0,
+    "File::Spec" => 0,
+    "Test::Fatal" => 0,
+    "Test::More" => "0.88",
+    "Test::TempDir::Tiny" => 0,
+    "autodie" => 0,
     "lib" => 0
   },
   "VERSION" => "0.001",
@@ -35,7 +40,12 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "Test::More" => 0,
+  "Cwd" => 0,
+  "File::Spec" => 0,
+  "Test::Fatal" => 0,
+  "Test::More" => "0.88",
+  "Test::TempDir::Tiny" => 0,
+  "autodie" => 0,
   "lib" => 0,
   "strict" => 0,
   "warnings" => 0

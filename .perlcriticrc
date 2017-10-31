@@ -121,7 +121,6 @@ modules = Class::ISA {Found use of Class::ISA. This module is deprecated by the 
 [Subroutines::ProhibitUnusedPrivateSubroutines]
 private_name_regex = _(?!build_)\w+
 
-[Subroutines::ProtectPrivateSubs]
 [Subroutines::RequireArgUnpacking]
 [Subroutines::RequireFinalReturn]
 [TestingAndDebugging::ProhibitNoStrict]
@@ -150,7 +149,6 @@ forbid_use_version = 1
 [ValuesAndExpressions::ProhibitSpecialLiteralHeredocTerminator]
 [ValuesAndExpressions::ProhibitVersionStrings]
 [ValuesAndExpressions::RequireConstantVersion]
-[ValuesAndExpressions::RequireInterpolationOfMetachars]
 [ValuesAndExpressions::RequireNumberSeparators]
 [ValuesAndExpressions::RequireQuotedHeredocTerminator]
 [ValuesAndExpressions::RequireUpperCaseHeredocTerminator]
@@ -379,7 +377,6 @@ allow_unused_subroutine_arguments = 1
 # Perl::Critic::StricterSubs
 # ----------------------------------------------------------
 
-[Modules::RequireExplicitInclusion]
 #[Subroutines::ProhibitCallsToUndeclaredSubs]
 #[Subroutines::ProhibitCallsToUnexportedSubs]
 [Subroutines::ProhibitExportingUndeclaredSubs]

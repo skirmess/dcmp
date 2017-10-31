@@ -8,6 +8,28 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
+sub _chdir {
+    my ( $basedir, $dirs_ref ) = @_;
+
+    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
+
+    for my $i ( 0 .. $#{$dirs_ref} ) {
+        if ( !chdir ${$dirs_ref}[$i] ) {
+
+            # We have to store $! before calling cwd(), otherwise the
+            # non-failed error of cwd() overwrites the error message
+            my $error = qq{$!};
+
+            require Cwd;
+            my $msg = sprintf 'Cannot chdir to %s in %s: %s', ${$dirs_ref}[$i], Cwd::cwd(), $error;
+
+            die "$msg\n";
+        }
+    }
+
+    return;
+}
+
 1;
 
 __END__
