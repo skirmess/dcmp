@@ -118,9 +118,6 @@ modules = Class::ISA {Found use of Class::ISA. This module is deprecated by the 
 [Subroutines::ProhibitReturnSort]
 [Subroutines::ProhibitSubroutinePrototypes]
 
-[Subroutines::ProhibitUnusedPrivateSubroutines]
-private_name_regex = _(?!build_)\w+
-
 [Subroutines::RequireArgUnpacking]
 [Subroutines::RequireFinalReturn]
 [TestingAndDebugging::ProhibitNoStrict]

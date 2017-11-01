@@ -1,6 +1,9 @@
 # Test does not recognite App::DCMP which is included from the bin/dcmp
 [-Modules::RequireExplicitInclusion]
 
+# tmp
+[-Subroutines::ProhibitUnusedPrivateSubroutines]
+
 # We have to call private subroutines to test them
 [-Subroutines::ProtectPrivateSubs]
 
