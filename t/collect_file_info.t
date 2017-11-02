@@ -39,9 +39,6 @@ sub main {
         close $fh;
         my $file_size = -s $file;
 
-        symlink $file,           $valid_link;
-        symlink $invalid_target, $invalid_link;
-
         mkdir $dir;
 
         # ----------------------------------------------------------
@@ -69,26 +66,35 @@ sub main {
         ok( S_ISREG( ${$file_info}[1] ), '... which is from a file' );
         is( ${$file_info}[2], $file_size, '... the file size' );
 
-        # ----------------------------------------------------------
-        note( decode( 'UTF-8', $valid_link ) );
-        $file_info = App::DCMP::_collect_file_info($valid_link);
-        is( ref $file_info, ref [], '_collect_file_info() returns am array ref' );
-        is( scalar @{$file_info}, 3,           '... consisting of three values' );
-        is( ${$file_info}[0],     $valid_link, '... the file name' );
-        like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
-        ok( S_ISLNK( ${$file_info}[1] ), '... which is from a symlink' );
-        is( ${$file_info}[2], $file, '... the links valid target' );
+      SKIP: {
+            {
+                no autodie;
+                skip 'The symlink function is unimplemented' if !eval { symlink q{}, q{}; 1 };
+            }
 
-        # ----------------------------------------------------------
-        note( decode( 'UTF-8', $invalid_link ) );
-        $file_info = App::DCMP::_collect_file_info($invalid_link);
-        is( ref $file_info, ref [], '_collect_file_info() returns am array ref' );
-        is( scalar @{$file_info}, 3,             '... consisting of three values' );
-        is( ${$file_info}[0],     $invalid_link, '... the file name' );
-        like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
-        ok( S_ISLNK( ${$file_info}[1] ), '... which is from a symlink' );
-        is( ${$file_info}[2], $invalid_target, '... the links invalid target' );
+            symlink $file,           $valid_link;
+            symlink $invalid_target, $invalid_link;
 
+            # ----------------------------------------------------------
+            note( decode( 'UTF-8', $valid_link ) );
+            $file_info = App::DCMP::_collect_file_info($valid_link);
+            is( ref $file_info, ref [], '_collect_file_info() returns am array ref' );
+            is( scalar @{$file_info}, 3,           '... consisting of three values' );
+            is( ${$file_info}[0],     $valid_link, '... the file name' );
+            like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+            ok( S_ISLNK( ${$file_info}[1] ), '... which is from a symlink' );
+            is( ${$file_info}[2], $file, '... the links valid target' );
+
+            # ----------------------------------------------------------
+            note( decode( 'UTF-8', $invalid_link ) );
+            $file_info = App::DCMP::_collect_file_info($invalid_link);
+            is( ref $file_info, ref [], '_collect_file_info() returns am array ref' );
+            is( scalar @{$file_info}, 3,             '... consisting of three values' );
+            is( ${$file_info}[0],     $invalid_link, '... the file name' );
+            like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+            ok( S_ISLNK( ${$file_info}[1] ), '... which is from a symlink' );
+            is( ${$file_info}[2], $invalid_target, '... the links invalid target' );
+        }
     }
 
     # ----------------------------------------------------------
