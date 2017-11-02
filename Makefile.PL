@@ -21,11 +21,13 @@ my %WriteMakefileArgs = (
   "NAME" => "App::dcmp",
   "PREREQ_PM" => {
     "Cwd" => 0,
+    "Fcntl" => 0,
     "strict" => 0,
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
-    "File::Spec" => 0,
+    "Encode" => 0,
+    "Test2::Plugin::UTF8" => 0,
     "Test::Fatal" => 0,
     "Test::More" => "0.88",
     "Test::TempDir::Tiny" => 0,
@@ -41,7 +43,9 @@ my %WriteMakefileArgs = (
 
 my %FallbackPrereqs = (
   "Cwd" => 0,
-  "File::Spec" => 0,
+  "Encode" => 0,
+  "Fcntl" => 0,
+  "Test2::Plugin::UTF8" => 0,
   "Test::Fatal" => 0,
   "Test::More" => "0.88",
   "Test::TempDir::Tiny" => 0,

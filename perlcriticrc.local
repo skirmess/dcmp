@@ -1,5 +1,14 @@
+# but we need them
+[-Bangs::ProhibitBitwiseOperators]
+
+[ControlStructures::ProhibitPostfixControls]
+flowcontrol = skip
+
 # Test does not recognite App::DCMP which is included from the bin/dcmp
 [-Modules::RequireExplicitInclusion]
+
+# \d is stupid because it is not even remotely the same as [0-9]
+[-RegularExpressions::ProhibitEnumeratedClasses]
 
 # tmp
 [-Subroutines::ProhibitUnusedPrivateSubroutines]
@@ -10,5 +19,14 @@
 # Writing tests without magic numbers is quite painful
 [-ValuesAndExpressions::ProhibitMagicNumbers]
 
+# \N{U+} should be ok without
+[-ValuesAndExpressions::ProhibitUnknownBackslash]
+
 # We use not interpolated variable names in our test comment
 [-ValuesAndExpressions::RequireInterpolationOfMetachars]
+
+#
+[-ValuesAndExpressions::ProhibitEscapedCharacters]
+
+[Variables::ProhibitPunctuationVars]
+allow = $@ $! $/ $0 $^O

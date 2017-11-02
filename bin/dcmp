@@ -8,8 +8,11 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
+use Cwd qw(cwd);
+
 #use Cwd qw(abs_path cwd);
-#use Fcntl ':mode';
+use Fcntl ':mode';
+
 #use File::Compare qw(compare);
 #use File::Spec;
 #use Getopt::Long;
@@ -23,48 +26,49 @@ package App::DCMP;
 #    LINK_TARGET_DIFFERS         => 5,   # L
 #};
 
-sub _chdir {
-    my ( $basedir, $dirs_ref ) = @_;
+#sub _chdir {
+#    my ( $basedir, $dirs_ref ) = @_;
+#
+#    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
+#
+#    for my $i ( 0 .. $#{$dirs_ref} ) {
+#        if ( !chdir ${$dirs_ref}[$i] ) {
+#
+#            # We have to store $! before calling cwd(), otherwise the
+#            # non-failed error of cwd() overwrites the error message
+#            my $error = qq{$!};
+#
+#            require Cwd;
+#            my $msg = sprintf 'Cannot chdir to %s in %s: %s', ${$dirs_ref}[$i], Cwd::cwd(), $error;
+#
+#            die "$msg\n";
+#        }
+#    }
+#
+#    return;
+#}
 
-    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
+sub _collect_file_info {
+    my ($filename) = @_;
 
-    for my $i ( 0 .. $#{$dirs_ref} ) {
-        if ( !chdir ${$dirs_ref}[$i] ) {
+    my @stat = lstat $filename;
+    if ( @stat == 0 ) {
 
-            # We have to store $! before calling cwd(), otherwise the
-            # non-failed error of cwd() overwrites the error message
-            my $error = qq{$!};
-
-            require Cwd;
-            my $msg = sprintf 'Cannot chdir to %s in %s: %s', ${$dirs_ref}[$i], Cwd::cwd(), $error;
-
-            die "$msg\n";
-        }
+        # We have to store $! before calling cwd(), otherwise the
+        # non-failed error of cwd() overwrites the error message
+        my $msg = ": $!";
+        $msg = cwd() . $msg;
+        $msg = "Cannot stat file $filename in $msg";
+        die "$msg\n";
     }
 
-    return;
+    my $mode = $stat[2] & S_IFMT;
+    my $size = $stat[7];
+
+    return [ $filename, $mode, readlink $filename ] if S_ISLNK($mode);
+    return [ $filename, $mode, $size ]              if S_ISREG($mode);
+    return [ $filename, $mode ];
 }
-
-#sub _collect_file_info {
-#	my ($filename) = @_;
-
-#    my @stat = lstat $filename;
-#    if (@stat == 0) {
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
-#        my $msg = ": $!";
-#        $msg = cwd() . $msg;
-#        $msg = "Cannot stat file $filename in $msg";
-#        die "$msg\n";
-#    }
-
-#    my $mode = $stat[2] & S_IFMT;
-#	my $size = $stat[7];
-
-#	return [ $filename, $mode, readlink $filename ] if S_ISLNK($mode);
-#	return [ $filename, $mode, $size ] if S_ISREG($mode);
-#	return [ $filename, $mode ];
-#}
 
 #sub _collect_file_info_report {
 #	my ($_filename) = @_;
