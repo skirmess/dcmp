@@ -1,0 +1,136 @@
+#!perl
+
+use 5.006;
+use strict;
+use warnings;
+
+use Test::More 0.88;
+use Test::TempDir::Tiny;
+
+use File::Spec;
+
+use lib qw(.);
+
+main();
+
+sub main {
+    require_ok('bin/dcmp') or BAIL_OUT();
+
+    my $dir_l = tempdir();
+    my $chdir_l = sub { return App::dcmp::_chdir($dir_l, @_); };
+    my $it_l = sub {
+        return App::dcmp::_iterator_dir_fs($chdir_l, sub { return App::dcmp::_collect_file_info(@_); }, undef, @_ );
+    };
+
+    symlink 'invalid_target.txt', File::Spec->catfile($dir_l, 'invalid_link.txt');
+
+    mkdir File::Spec->catdir($dir_l, 'dir');
+
+    open my $fh, '>', File::Spec->catfile($dir_l, 'dir', 'file2.txt');
+    close $fh;
+
+    symlink 'file.txt', File::Spec->catfile($dir_l, 'valid_link.txt');
+
+    open $fh, '>', File::Spec->catfile($dir_l, 'file.txt');
+    print $fh "hello world\n";
+    close $fh;
+
+    #
+    my $dir_r = tempdir();
+    my $chdir_r = sub { return App::dcmp::_chdir($dir_r, @_); };
+    my $it_r = sub {
+        return App::dcmp::_iterator_dir_fs($chdir_r, sub { return App::dcmp::_collect_file_info(@_); }, undef, @_ );
+    };
+
+    #
+    my $compare_file = sub { App::dcmp::_compare_file_fs_fs($chdir_l, $chdir_r, @_) };
+
+    my @output;
+    my $printer = sub {
+        my ( $action, $dirs_ref, $name ) = @_;
+        push @output, [ $action, File::Spec->catdir(@{ $dirs_ref }, $name) ];
+        return;
+    };
+
+    is(App::dcmp::_dcmp($it_l, $it_r, $compare_file, $printer), undef, '_dcmp returns undef');
+
+    my @output_expected = (
+        [ 0, 'dir' ],
+        [ 0, 'dir/file2.txt' ],
+        [ 0, 'file.txt' ],
+        [ 0, 'invalid_link.txt' ],
+        [ 0, 'valid_link.txt' ],
+    );
+
+    is_deeply(\@output, \@output_expected, '... and prints the correct output');
+
+    # ----------------------------------------------------------
+    $dir_r = tempdir();
+    $chdir_r = sub { return App::dcmp::_chdir($dir_r, @_); };
+    $it_r = sub {
+        return App::dcmp::_iterator_dir_fs($chdir_r, sub { return App::dcmp::_collect_file_info(@_); }, undef, @_ );
+    };
+
+    symlink 'invalid_target.txt', File::Spec->catfile($dir_r, 'invalid_link.txt');
+
+    mkdir File::Spec->catdir($dir_r, 'dir');
+
+    open $fh, '>', File::Spec->catfile($dir_r, 'dir', 'file2.txt');
+    close $fh;
+
+    symlink 'file.txt', File::Spec->catfile($dir_r, 'valid_link.txt');
+
+    open $fh, '>', File::Spec->catfile($dir_r, 'file.txt');
+    print $fh "hello world\n";
+    close $fh;
+
+    undef @output;
+
+    is(App::dcmp::_dcmp($it_l, $it_r, $compare_file, $printer), undef, '_dcmp returns undef');
+
+    @output_expected = ();
+
+    is_deeply(\@output, \@output_expected, '... and prints the correct output');
+
+    # -----------------------
+    $dir_r = tempdir();
+    $chdir_r = sub { return App::dcmp::_chdir($dir_r, @_); };
+    $it_r = sub {
+        return App::dcmp::_iterator_dir_fs($chdir_r, sub { return App::dcmp::_collect_file_info(@_); }, undef, @_ );
+    };
+
+    symlink 'invalid_target2.txt', File::Spec->catfile($dir_r, 'invalid_link.txt');
+
+    mkdir File::Spec->catdir($dir_r, 'dir');
+
+    open $fh, '>', File::Spec->catfile($dir_r, 'dir', 'file2.txt');
+    print $fh "test\n";
+    close $fh;
+
+    symlink 'file.txt', File::Spec->catfile($dir_r, 'valid_link2.txt');
+
+    open $fh, '>', File::Spec->catfile($dir_r, 'file.txt');
+    print $fh "\nhello world\n";
+    close $fh;
+
+    undef @output;
+
+    is(App::dcmp::_dcmp($it_l, $it_r, $compare_file, $printer), undef, '_dcmp returns undef');
+
+    @output_expected = (
+        [ 4, 'dir/file2.txt' ],
+        [ 4, 'file.txt' ],
+        [ 5, 'invalid_link.txt' ],
+        [ 0, 'valid_link.txt' ],
+        [ 1, 'valid_link2.txt' ],
+    );
+
+    is_deeply(\@output, \@output_expected, '... and prints the correct output');
+
+    #
+    done_testing();
+
+    exit 0;
+}
+
+# vim: ts=4 sts=4 sw=4 et: syntax=perl

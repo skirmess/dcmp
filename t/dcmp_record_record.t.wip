@@ -1,0 +1,137 @@
+#!perl
+
+use 5.006;
+use strict;
+use warnings;
+
+use Test::More 0.88;
+use Test::TempDir::Tiny;
+
+#use Capture::Tiny qw(capture);
+use File::Spec;
+
+use lib qw(.);
+
+main();
+
+sub main {
+    require_ok('bin/dcmp') or BAIL_OUT();
+
+    my $dcmp_file_1 = File::Spec->catfile(tempdir(), 'file1.dcmp');
+    open my $fh, '>', $dcmp_file_1;
+    print $fh <<'RECORD_FILE';
+LINK invalid_link.txt invalid_target.txt
+DIR dir
+FILE file2.txt 0 d41d8cd98f00b204e9800998ecf8427e
+-DIR
+LINK valid_link.txt file.txt
+FILE file.txt 12 6f5902ac237024bdd0c176cb93063dc4
+-DIR
+RECORD_FILE
+    close $fh;
+
+    my $it_l = App::dcmp::_load_dcmp_file($dcmp_file_1);
+    is(ref $it_l, ref sub {}, '_load_records() returns a sub');
+
+    #
+    my $dcmp_file_2 = File::Spec->catfile(tempdir(), 'file2.dcmp');
+    open $fh, '>', $dcmp_file_2;
+    print $fh <<'RECORD_FILE';
+-DIR
+RECORD_FILE
+    close $fh;
+
+    #
+    my $it_r = App::dcmp::_load_dcmp_file($dcmp_file_2);
+    is(ref $it_r, ref sub {}, '_load_records() returns a sub');
+
+    #
+    my $compare_file = sub { App::dcmp::_compare_file_record_record(@_) };
+
+    my @output;
+    my $printer = sub {
+        my ( $action, $dirs_ref, $name ) = @_;
+        push @output, [ $action, File::Spec->catdir(@{ $dirs_ref }, $name) ];
+        return;
+    };
+
+    is(App::dcmp::_dcmp($it_l, $it_r, $compare_file, $printer), undef, '_dcmp returns undef');
+
+    my @output_expected = (
+        [ 0, 'dir' ],
+        [ 0, 'dir/file2.txt' ],
+        [ 0, 'file.txt' ],
+        [ 0, 'invalid_link.txt' ],
+        [ 0, 'valid_link.txt' ],
+    );
+
+    is_deeply(\@output, \@output_expected, '... and prints the correct output');
+
+    # ----------------------------------------------------------
+    open $fh, '>', $dcmp_file_2;
+    print $fh <<'RECORD_FILE';
+LINK invalid_link.txt invalid_target.txt
+DIR dir
+FILE file2.txt 0 d41d8cd98f00b204e9800998ecf8427e
+-DIR
+LINK valid_link.txt file.txt
+FILE file.txt 12 6f5902ac237024bdd0c176cb93063dc4
+-DIR
+RECORD_FILE
+    close $fh;
+
+    $it_r = App::dcmp::_load_dcmp_file($dcmp_file_2);
+    is(ref $it_r, ref sub {}, '_load_records() returns a sub');
+
+    undef @output;
+
+    is(App::dcmp::_dcmp($it_l, $it_r, $compare_file, $printer), undef, '_dcmp returns undef');
+
+    @output_expected = ();
+
+    is_deeply(\@output, \@output_expected, '... and prints the correct output');
+
+    # ----------------------------------------------------------
+    open $fh, '>', $dcmp_file_2;
+    print $fh <<'RECORD_FILE';
+LINK invalid_link.txt invalid_target2.txt
+DIR dir
+FILE file2.txt 0 d41d8cd98f00b204e9810998ecf8427e
+-DIR
+LINK valid_link2.txt file.txt
+FILE file.txt 13 6f5902ac237024bdd0c176cb93063dc4
+-DIR
+RECORD_FILE
+    close $fh;
+
+    $it_r = App::dcmp::_load_dcmp_file($dcmp_file_2);
+    is(ref $it_r, ref sub {}, '_load_records() returns a sub');
+
+    undef @output;
+
+    is(App::dcmp::_dcmp($it_l, $it_r, $compare_file, $printer), undef, '_dcmp returns undef');
+
+    @output_expected = (
+        [ 4, 'dir/file2.txt' ],
+        [ 4, 'file.txt' ],
+        [ 5, 'invalid_link.txt' ],
+        [ 0, 'valid_link.txt' ],
+        [ 1, 'valid_link2.txt' ],
+    );
+
+    is_deeply(\@output, \@output_expected, '... and prints the correct output');
+
+
+
+
+
+
+
+
+
+    done_testing();
+
+    exit 0;
+}
+
+# vim: ts=4 sts=4 sw=4 et: syntax=perl

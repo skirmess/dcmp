@@ -8,6 +8,21 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
+#use Cwd qw(abs_path cwd);
+#use Fcntl ':mode';
+#use File::Compare qw(compare);
+#use File::Spec;
+#use Getopt::Long;
+
+#use constant {
+#    FILE_ADDITIONAL             => 0,   # +
+#    FILE_MISSING                => 1,   # -
+#    FILE_TYPE_DIFFERS           => 2,   # @
+#    FILE_TYPE_UNKNOWN           => 3,   # ?
+#    FILE_CONTENT_DIFFERS        => 4,   # M
+#    LINK_TARGET_DIFFERS         => 5,   # L
+#};
+
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
 
@@ -30,6 +45,392 @@ sub _chdir {
     return;
 }
 
+#sub _collect_file_info {
+#	my ($filename) = @_;
+
+#    my @stat = lstat $filename;
+#    if (@stat == 0) {
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $msg = ": $!";
+#        $msg = cwd() . $msg;
+#        $msg = "Cannot stat file $filename in $msg";
+#        die "$msg\n";
+#    }
+
+#    my $mode = $stat[2] & S_IFMT;
+#	my $size = $stat[7];
+
+#	return [ $filename, $mode, readlink $filename ] if S_ISLNK($mode);
+#	return [ $filename, $mode, $size ] if S_ISREG($mode);
+#	return [ $filename, $mode ];
+#}
+
+#sub _collect_file_info_report {
+#	my ($_filename) = @_;
+
+#    my $file_info_ref = _collect_file_info($_filename);
+
+#    my ($filename, $mode) = @{ $file_info_ref };
+
+#    return $file_info_ref if !S_ISREG($mode);
+
+#    require Digest::MD5;
+#    my $md5 = Digest::MD5->new();
+
+#    my $fh;
+#    if ( !open $fh, '<', $filename ) {
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $msg = ": $!";
+#        $msg = cwd() . $msg;
+#        $msg = "Cannot read file $filename in $msg";
+#        die "$msg\n";
+#    }
+
+#    binmode $fh;
+#    $md5->addfile($fh);
+#    close $fh or die "Unable to read file $filename: $!";
+
+#    push @{ $file_info_ref }, lc $md5->hexdigest();
+
+#    return $file_info_ref;
+#}
+
+## $md5_l and $md5_r are not used
+#sub _compare_file_fs_fs {
+#    my ($chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r) = @_;
+
+#    my $fh_l;
+#    my $fh_r;
+
+#    $chdir_l->($dirs_ref);
+
+#    if ( !open $fh_l, '<', $filename ) {
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $msg = ": $!";
+#        $msg = cwd() . $msg;
+#        $msg = "Cannot read file $filename in $msg";
+#        die "$msg\n";
+#    }
+
+#    $chdir_r->($dirs_ref);
+#    if ( !open $fh_r, '<', $filename ) {
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $msg = ": $!";
+#        $msg = cwd() . $msg;
+#        $msg = "Cannot read file $filename in $msg";
+#        die "$msg\n";
+#    }
+
+#    my $rc = compare($fh_l, $fh_r);
+
+#    close $fh_l or die "Cannot read file $filename\n";
+#    close $fh_r or die "Cannot read file $filename\n";
+
+#    # File::Compare::compare and its sibling functions return 0 if the files
+#    # are equal, 1 if the files are unequal, or -1 if an error was
+#    # encountered.
+#    return 1 if $rc == 0;
+#    return if $rc == 1;
+#    die "Unable to compare file $filename\n";
+#}
+
+## $md5_r is not used
+#sub _compare_file_record_fs {
+#    my ($chdir_r, $dirs_ref, $filename, $md5_l, $md5_r) = @_;
+
+#    require Digest::MD5;
+#    my $md5 = Digest::MD5->new();
+
+#    $chdir_r->($dirs_ref);
+
+#    my $fh;
+#    if ( !open $fh, '<', $filename ) {
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $msg = ": $!";
+#        $msg = cwd() . $msg;
+#        $msg = "Cannot read file $filename in $msg";
+#        die "$msg\n";
+#    }
+
+#    binmode $fh;
+#    $md5->addfile($fh);
+#    close $fh or die "Unable to read file $filename: $!";
+
+#    return 1 if lc $md5_l eq lc $md5->hexdigest();
+#    return;
+#}
+
+## $dirs_ref and $filename is not used
+#sub _compare_file_record_record {
+#    my ($dirs_ref, $filename, $md5_l, $md5_r) = @_;
+#    return lc $md5_l eq lc $md5_r;
+#}
+
+#sub _dcmp {
+#    my ($_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer) = @_;
+
+#    my @dirs;
+
+#    my $iterate_dir_l = sub { return $_iterate_dir_l->(\@dirs); };
+#    my $iterate_dir_r = sub { return $_iterate_dir_r->(\@dirs); };
+#    my $compare_file = sub { return $_compare_file->(\@dirs, @_); };
+
+#    my $differences = 0;
+#    my @iterators;
+#    push @iterators, _merge_iterators($iterate_dir_l->(), $iterate_dir_r->());
+
+#    while (@iterators) {
+#        FILE:
+#        while (defined (my $x = $iterators[-1]->())) {
+#            my ($x_l, $x_r) = @{ $x };
+
+#            if ( !defined $x_r ) {
+#                # file is only present in the left tree
+#                my ($name, $mode) = @{$x_l}[0,1];
+#                $printer->(FILE_ADDITIONAL, \@dirs, $name);
+#                $differences = 1;
+
+#                if ( S_ISDIR($mode) ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators($iterate_dir_l->(), undef);
+#                }
+
+#                next FILE;
+#            }
+
+#            if ( !defined $x_l ) {
+#                # file is only present in the right tree
+#                my ($name, $mode) = @{$x_r}[0,1];
+#                $printer->(FILE_MISSING, \@dirs, $name);
+#                $differences = 1;
+
+#                if ( S_ISDIR($mode) ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators(undef, $iterate_dir_r->());
+#                }
+
+#                next FILE;
+#            }
+
+#            my ($name, $mode_l) = @{$x_l}[0,1];
+#            my $mode_r = ${$x_r}[1];
+
+#            if ( S_IFMT( $mode_l ) != S_IFMT( $mode_r ) ) {
+#                # file is not the same filetype
+#                $printer->(FILE_TYPE_DIFFERS, \@dirs, $name);
+#                $differences = 1;
+
+#                if ( S_ISDIR( $mode_l ) ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators($iterate_dir_l->(), undef);
+#                }
+#                elsif ( S_ISDIR( $mode_r ) ) {
+#                    push @dirs, $name;
+#                    push @iterators,  _merge_iterators(undef, $iterate_dir_r->());
+#                }
+
+#                next FILE;
+#			}
+
+#            if ( S_ISLNK( $mode_l ) ) {
+#                # both are symlinks
+
+#                my ($link_l) = ${$x_l}[2];
+#                my ($link_r) = ${$x_r}[2];
+
+#                if ( $link_l ne $link_r ) {
+#                    $printer->(LINK_TARGET_DIFFERS, \@dirs, $name);
+#                    $differences = 1;
+#                }
+
+#                next FILE;
+#            }
+
+#            if ( S_ISDIR( $mode_l ) ) {
+#                # both are directories
+#                push @dirs, $name;
+#                push @iterators, _merge_iterators($iterate_dir_l->(),$iterate_dir_r->());
+
+#                next FILE;
+#            }
+
+#            if ( S_ISREG( $mode_l ) ) {
+#                # both are regular files
+
+#                my ($size_l, $md5_l) = @{$x_l}[2,3];
+#                my ($size_r, $md5_r) = @{$x_r}[2,3];
+
+#                if ( $size_l != $size_r || ! $compare_file->($name, $md5_l, $md5_r) ) {
+#                    $printer->(FILE_CONTENT_DIFFERS, \@dirs, $name);
+#                    $differences = 1;
+#                }
+
+#                next FILE;
+#            }
+
+#            $printer->(FILE_TYPE_UNKNOWN, \@dirs, $name);
+#            $differences = 1;
+#        }
+
+#        pop @iterators;
+#        pop @dirs;
+#    }
+
+#    return;
+#}
+
+#sub _iterator_dir_fs {
+#    my ($chdir, $collect_file_info, $ignore_ref, $dirs_ref) = @_;
+
+#    $chdir->($dirs_ref);
+
+#    my %ignore;
+#    if ( defined $ignore_ref ) {
+#        @ignore{@{ $ignore_ref }} = 1;
+#    }
+
+#    my $fh;
+#    opendir $fh, '.';
+#    my @STACK = map { $collect_file_info->($_) } sort grep { $_ ne '.' && $_ ne '..' && !exists $ignore{$_} } readdir $fh;
+#    closedir $fh;
+
+#    return sub {
+#        return if !@STACK;
+#        return shift @STACK;
+#    };
+#}
+
+#sub _load_dcmp_file {
+#    my ($filename, $ignore_ref) = @_;
+
+#    my %ignore;
+#    if ( defined $ignore_ref ) {
+#        @ignore{@{ $ignore_ref }} = 1;
+#    }
+
+#    my %path;
+#    my %file_seen;
+#    my @dirs;
+
+#    open my $fh, '<', $filename or die "Cannot read file $filename: $!\n";
+#    my $last_line_seen = 0;
+#    LINE:
+#    while (my $line = <$fh>) {
+#        if ( $last_line_seen ) {
+#            # The -DIR entry removes an element from @dirs. There is an
+#            # additional -DIR at the end of the dcmp file. If no element
+#            # can be removed from @dirs the $last_line_seen is set. But
+#            # that should only happen at the end of the file. If there
+#            # are more lines the file must be invalid.
+#            my $line_nr = $. - 1;
+#            die "Unbalanced -DIR on line $line_nr in file $filename\n";
+#        }
+
+#        if ( $line =~ m{ ^ - DIR $ }xsm ) {
+#            if ( @dirs ) {
+#                pop @dirs;
+#            }
+#            else {
+#                $last_line_seen = 1;
+#            }
+#            next LINE;
+#        }
+
+#        # The current file is under $path
+#        my $path = File::Spec->catdir(@dirs);
+
+#        #
+#        chomp $line;
+
+#        # From here on every line contains at leas an ACTION and a NAME
+#        my @line = split /\s+/, $line;
+#        die "Incorrect number of arguments at line $. in file $filename\n" if @line < 2;
+
+#        my $action = shift @line;
+#        my $name = shift @line;
+
+#        # Every directory must not contain files with the same name
+#        if ( exists $file_seen{$path}{$name} ) {
+#            my $msg = "Duplicate entry for $name";
+#            if ( length $path ) {
+#                $msg .= " under path $path";
+#            }
+#            die "$msg at line $. in file $filename\n";
+#        }
+#        $file_seen{$path}{$name} = 1;
+
+#        #
+#        if ( $action eq 'FILE' ) {
+#            die "Incorrect number of arguments for FILE entry at line $. in file $filename\n" if @line != 2;
+
+#            my ( $size, $md5 ) = @line;
+
+#            push @{$path{$path}}, [ $name, S_IFREG, $size, $md5 ];
+#            next LINE;
+#        }
+
+#        #
+#        if ( $action eq 'DIR' ) {
+#            die "Incorrect number of arguments for DIR entry at line $. in file $filename\n" if @line != 0;
+
+#            push @{ $path{$path} }, [ $name, S_IFDIR ];
+#            push @dirs, $name;
+
+#            next LINE;
+#        }
+
+#        #
+#        if ( $action eq 'LINK' ) {
+#            die "Incorrect number of arguments for LINK entry at line $. in file $filename\n" if @line != 1;
+#            my ($target) = @line;
+#            push @{ $path{$path} }, [ $name, S_IFLNK, $target ];
+
+#            next LINE;
+#        }
+
+#        #
+#        die "Invalid entry on line $. in file $filename\n";
+#    }
+#    close $fh or die "Cannot read file $filename: $!";
+
+#    die "Unbalanced -DIR at end of file $filename\n" if !$last_line_seen;
+
+#    # Remove ignored files from out loaded dcmp file.
+#    #
+#    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
+#    # get out of sync.
+#    PATH:
+#    for my $path ( keys %path ) {
+#        for my $dir ( File::Spec->splitdir($path) ) {
+#            if (exists $ignore{$dir}) {
+#                delete $path{$path};
+#                next PATH;
+#            }
+#        }
+
+#        @{ $path{$path} } = grep { !exists $ignore{${$_}[0]} } @{ $path{$path} };
+#    }
+
+#    # the returned sub is used instead of _iterate_dir_fs if the information
+#    # comes from a dcmp file instead of a directory structure on the disk.
+#    return sub {
+#        my ($dirs_ref) = @_;
+#        my $path = File::Spec->catdir(@{ $dirs_ref });
+
+#        my @STACK = sort { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} };
+
+#        return sub {
+#            return if !@STACK;
+#            return shift @STACK;
+#        };
+#    };
+#}
+
 sub _longest_length {
     my @strings = @_;
 
@@ -43,6 +444,208 @@ sub _longest_length {
 
     return $longest_length;
 }
+
+#sub _merge_iterators {
+#    my ($it_l, $it_r) = @_;
+
+#    my $next_l = defined $it_l ? $it_l->() : undef;
+#    my $next_r = defined $it_r ? $it_r->() : undef;
+
+#    return sub {
+#        return if !defined $next_l && !defined $next_r;
+
+#        my $current_l = $next_l;
+#        my $current_r = $next_r;
+
+#        if ( !defined $next_l ) {
+#            $next_r = $it_r->();
+#            return [ undef , $current_r ];
+#        }
+
+#        if ((!defined $next_r) || (${$next_l}[0] lt ${$next_r}[0])) {
+#            $next_l = $it_l->();
+#            return [ $current_l , undef ];
+#        }
+
+#        if (${$next_l}[0] gt ${$next_r}[0]) {
+#            $next_r = $it_r->();
+#            return [ undef , $current_r ];
+#        }
+
+#        $next_l = $it_l->();
+#        $next_r = $it_r->();
+
+#        return [ $current_l, $current_r ];
+#    };
+#}
+
+#sub _print_changes {
+#    my @status_code;
+
+#    $status_code[FILE_ADDITIONAL]             = q{+};
+#    $status_code[FILE_MISSING]                = q{-};
+#    $status_code[FILE_TYPE_DIFFERS]           = q{@};
+#    $status_code[FILE_TYPE_UNKNOWN]           = q{?};
+#    $status_code[FILE_CONTENT_DIFFERS]        = q{M};
+#    $status_code[LINK_TARGET_DIFFERS]         = q{L};
+
+#    my $status_code_length = _longest_length(@status_code);
+
+#    return sub {
+#        my ( $action, $dirs_ref, $name ) = @_;
+
+#        my $path = File::Spec->catfile(@{ $dirs_ref }, $name);
+
+#        printf "%-${status_code_length}s %s\n", $status_code[$action], $path;
+
+#        return;
+#    };
+#}
+
+#sub _print_dcmp_file {
+#    my ($_iterate_dir) = @_;
+
+#    my @dirs;
+
+#    my $iterate_dir = sub {
+#        return $_iterate_dir->(\@dirs);
+#    };
+
+#    my @iterators;
+#    push @iterators, $iterate_dir->();
+
+#    while (@iterators) {
+#        FILE:
+#        while (defined (my $file_info = $iterators[-1]->())) {
+#            my ($name, $mode) = @{ $file_info };
+
+#            if ( S_ISLNK( $mode ) ) {
+#                my ($link) = ${$file_info}[2];
+#                print "LINK $name $link\n";
+#                next FILE;
+#            }
+
+#            if ( S_ISDIR($mode) ) {
+#                print "DIR $name\n";
+
+#                push @dirs, $name;
+#                push @iterators, $iterate_dir->();
+
+#                next FILE;
+#            }
+
+#            if ( S_ISREG($mode) ) {
+#                my ($size, $md5) = @{$file_info}[2,3];
+#                print "FILE $name $size $md5\n";
+#                next FILE;
+#            }
+
+#            die "Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File " . File::Spec->catfile(@dirs, $name) . " is something else.\n";
+#        }
+
+#        pop @iterators;
+#        pop @dirs;
+#        print "-DIR\n";
+#    }
+
+#    return;
+#}
+
+## untested
+
+##sub _get_main_options_and_command {
+##    my %opt;
+##    GetOptions(
+##        \%opt,
+##        'i=s@',
+##    ) or die "\n";
+##
+##use Data::Dx;
+##Dx %opt;
+##    return \%opt, $command;
+##}
+
+##sub _usage {
+##    die "usage...\n";
+##}
+##
+##
+#if ( !caller ) {
+#    main();
+#    exit 0;
+##    my $rc = eval { main(); };
+##
+##    exit 2 if !defined $rc;
+##    exit 0 if $rc;
+##    exit 1;
+#}
+
+#sub main {
+#    return _main_print_dcmp_file(@ARGV) if @ARGV == 1;
+#    return _main_dcmp(@ARGV) if @ARGV == 2;
+
+#    die;
+#}
+
+#sub _main_dcmp {
+#    my @files = @_;
+
+#    my @chdir;
+#    my @it;
+#    my @type;
+
+#    FILE:
+#    for my $i (0 .. 1) {
+#        my $file = abs_path $files[$i];
+
+#        if ( -f $file ) {
+#            $type[$i] = S_IFREG;
+
+#            $it[$i] = _load_dcmp_file($file);
+
+#            next FILE;
+#        }
+
+#        if ( -d $file ) {
+#            $type[$i] = S_IFDIR;
+
+#            my $chdir = sub { return _chdir($file, @_); };
+#            $chdir[$i] = $chdir;
+
+#            # TODO add ignores (the undef here)
+#            $it[$i] = sub { return _iterator_dir_fs($chdir, sub { return _collect_file_info_report(@_); }, undef, @_); };
+
+#            next FILE;
+#        }
+
+#        die "$file is neither a file nor a directory";
+#    }
+
+#    my $compare_file = $type[0] == S_IFDIR && $type[1] == S_IFDIR ? sub { _compare_file_fs_fs($chdir[0], $chdir[1], @_) }
+#                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_record_fs($chdir[0], @_) }
+#                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_record_fs($chdir[1], @_) }
+#                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_record_record(@_) }
+#                     : die;
+
+#    my $printer = _print_changes();
+
+#    return _dcmp($it[0], $it[1], $compare_file, $printer);
+#}
+
+#sub _main_print_dcmp_file {
+#    my ( $basedir) = @_;
+
+#    die if ! -d $basedir;
+
+#    $basedir = abs_path $basedir;
+
+#    my $chdir = sub { return _chdir($basedir, @_); };
+#    my $collect_file_info = sub { return _collect_file_info_report(@_); };
+#    # TODO add ignores (the undef here)
+#    my $iterate_dir_fs = sub { return _iterator_dir_fs($chdir, $collect_file_info, undef, @_); };
+
+#    return _print_dcmp_file($iterate_dir_fs);
+#}
 
 1;
 
