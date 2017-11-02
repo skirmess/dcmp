@@ -431,20 +431,6 @@ sub _chdir {
 #    };
 #}
 
-sub _longest_length {
-    my @strings = @_;
-
-    my $longest_length = 0;
-
-    for my $str (@strings) {
-        if ( length $str > $longest_length ) {
-            $longest_length = length $str;
-        }
-    }
-
-    return $longest_length;
-}
-
 #sub _merge_iterators {
 #    my ($it_l, $it_r) = @_;
 
@@ -489,14 +475,12 @@ sub _longest_length {
 #    $status_code[FILE_CONTENT_DIFFERS]        = q{M};
 #    $status_code[LINK_TARGET_DIFFERS]         = q{L};
 
-#    my $status_code_length = _longest_length(@status_code);
-
 #    return sub {
 #        my ( $action, $dirs_ref, $name ) = @_;
 
 #        my $path = File::Spec->catfile(@{ $dirs_ref }, $name);
 
-#        printf "%-${status_code_length}s %s\n", $status_code[$action], $path;
+#        printf "%s %s\n", $status_code[$action], $path;
 
 #        return;
 #    };
