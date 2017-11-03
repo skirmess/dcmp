@@ -173,7 +173,6 @@ allow = $@ $! $/ $0 $^O
 
 #[Bangs::ProhibitCommentedOutCode]
 [Bangs::ProhibitDebuggingModules]
-[Bangs::ProhibitFlagComments]
 #[Bangs::ProhibitNoPlan]
 [Bangs::ProhibitNumberedNames]
 [Bangs::ProhibitRefProtoOrProto]

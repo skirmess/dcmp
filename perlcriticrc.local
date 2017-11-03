@@ -1,6 +1,9 @@
 # but we need them
 [-Bangs::ProhibitBitwiseOperators]
 
+# tmp
+[-Bangs::ProhibitFlagComments]
+
 [ControlStructures::ProhibitPostfixControls]
 flowcontrol = skip
 
