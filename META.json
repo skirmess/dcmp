@@ -33,7 +33,6 @@
             "File::Spec" : "0",
             "Perl::Critic" : "1.130",
             "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" : "1.12",
-            "Perl::Critic::Policy::Bangs::ProhibitFlagComments" : "1.12",
             "Perl::Critic::Policy::Bangs::ProhibitNumberedNames" : "1.12",
             "Perl::Critic::Policy::Bangs::ProhibitRefProtoOrProto" : "1.12",
             "Perl::Critic::Policy::Bangs::ProhibitUselessRegexModifiers" : "1.12",
@@ -72,7 +71,6 @@
             "Perl::Critic::Policy::Freenode::OverloadOptions" : "0.024",
             "Perl::Critic::Policy::Freenode::POSIXImports" : "0.024",
             "Perl::Critic::Policy::Freenode::PackageMatchesFilename" : "0.024",
-            "Perl::Critic::Policy::Freenode::Prototypes" : "0.024",
             "Perl::Critic::Policy::Freenode::StrictWarnings" : "0.024",
             "Perl::Critic::Policy::Freenode::Threads" : "0.024",
             "Perl::Critic::Policy::Freenode::Wantarray" : "0.024",
@@ -135,7 +133,7 @@
       "runtime" : {
          "requires" : {
             "Cwd" : "0",
-            "Fcntl" : "0",
+            "constant" : "1.01",
             "perl" : "5.006",
             "strict" : "0",
             "warnings" : "0"
@@ -144,13 +142,16 @@
       "test" : {
          "requires" : {
             "Encode" : "0",
+            "POSIX" : "0",
             "Test2::Plugin::UTF8" : "0",
             "Test::Fatal" : "0",
             "Test::More" : "0.88",
             "Test::TempDir::Tiny" : "0",
             "autodie" : "0",
+            "constant" : "1.01",
             "lib" : "0",
-            "perl" : "5.006"
+            "perl" : "5.006",
+            "subs" : "0"
          }
       }
    },
@@ -178,11 +179,10 @@
          "Cwd" : "3.63",
          "Encode" : "2.80",
          "ExtUtils::MakeMaker" : "7.30",
-         "Fcntl" : "1.13",
          "File::Spec" : "3.63",
+         "POSIX" : "1.65",
          "Perl::Critic" : "1.130",
          "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" : "1.12",
-         "Perl::Critic::Policy::Bangs::ProhibitFlagComments" : "1.12",
          "Perl::Critic::Policy::Bangs::ProhibitNumberedNames" : "1.12",
          "Perl::Critic::Policy::Bangs::ProhibitRefProtoOrProto" : "1.12",
          "Perl::Critic::Policy::Bangs::ProhibitUselessRegexModifiers" : "1.12",
@@ -221,7 +221,6 @@
          "Perl::Critic::Policy::Freenode::OverloadOptions" : "0.024",
          "Perl::Critic::Policy::Freenode::POSIXImports" : "0.024",
          "Perl::Critic::Policy::Freenode::PackageMatchesFilename" : "0.024",
-         "Perl::Critic::Policy::Freenode::Prototypes" : "0.024",
          "Perl::Critic::Policy::Freenode::StrictWarnings" : "0.024",
          "Perl::Critic::Policy::Freenode::Threads" : "0.024",
          "Perl::Critic::Policy::Freenode::Wantarray" : "0.024",
@@ -283,8 +282,10 @@
          "Test::TempDir::Tiny" : "0.016",
          "Test::Version" : "2.05",
          "autodie" : "2.29",
+         "constant" : "1.33",
          "lib" : "0.63",
          "strict" : "1.11",
+         "subs" : "1.02",
          "warnings" : "1.36"
       },
       "perl" : {

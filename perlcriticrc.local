@@ -7,6 +7,12 @@
 [ControlStructures::ProhibitPostfixControls]
 flowcontrol = skip
 
+#
+[-Freenode::Prototypes]
+
+#
+[-Modules::ProhibitMultiplePackages]
+
 # Test does not recognite App::DCMP which is included from the bin/dcmp
 [-Modules::RequireExplicitInclusion]
 
@@ -19,6 +25,9 @@ flowcontrol = skip
 # We have to call private subroutines to test them
 [-Subroutines::ProtectPrivateSubs]
 
+#
+[-Subroutines::ProhibitSubroutinePrototypes]
+
 # Writing tests without magic numbers is quite painful
 [-ValuesAndExpressions::ProhibitMagicNumbers]
 
@@ -29,7 +38,16 @@ flowcontrol = skip
 [-ValuesAndExpressions::RequireInterpolationOfMetachars]
 
 #
+[-ValuesAndExpressions::ProhibitConstantPragma]
+
+#
 [-ValuesAndExpressions::ProhibitEscapedCharacters]
+
+#
+[-ValuesAndExpressions::ProhibitLeadingZeros]
+
+#
+[-Variables::ProhibitPackageVars]
 
 [Variables::ProhibitPunctuationVars]
 allow = $@ $! $/ $0 $^O

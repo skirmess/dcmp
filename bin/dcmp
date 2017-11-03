@@ -8,7 +8,7 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
-#use Cwd qw(cwd);
+use Cwd qw(cwd);
 
 #use Cwd qw(abs_path cwd);
 #use Fcntl ':mode';
@@ -17,12 +17,10 @@ package App::DCMP;
 #use File::Spec;
 #use Getopt::Long;
 
-use constant {
-    FILE_TYPE_DIRECTORY => 1,
-    FILE_TYPE_OTHER     => 2,
-    FILE_TYPE_REGULAR   => 3,
-    FILE_TYPE_SYMLINK   => 4,
-};
+use constant FILE_TYPE_DIRECTORY => 1;
+use constant FILE_TYPE_OTHER     => 2;
+use constant FILE_TYPE_REGULAR   => 3;
+use constant FILE_TYPE_SYMLINK   => 4;
 
 #use constant {
 #    FILE_ADDITIONAL             => 0,   # +
@@ -55,27 +53,54 @@ use constant {
 #    return;
 #}
 
-#sub _collect_file_info {
-#    my ($filename) = @_;
-#
-#    my @stat = lstat $filename;
-#    if ( @stat == 0 ) {
-#
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
-#        my $msg = ": $!";
-#        $msg = cwd() . $msg;
-#        $msg = "Cannot stat file $filename in $msg";
-#        die "$msg\n";
-#    }
-#
-#    my $mode = $stat[2] & S_IFMT;
-#    my $size = $stat[7];
-#
-#    return [ $filename, $mode, readlink $filename ] if S_ISLNK($mode);
-#    return [ $filename, $mode, $size ]              if S_ISREG($mode);
-#    return [ $filename, $mode ];
-#}
+sub _collect_file_info {
+    my ($filename) = @_;
+
+  STAT:
+    {
+        my $is_link = -l $filename;
+        last STAT if !defined $is_link;
+
+        if ($is_link) {
+            my $target = readlink $filename;
+            if ( !defined $target ) {
+
+                # We have to store $! before calling cwd(), otherwise the
+                # non-failed error of cwd() overwrites the error message
+                my $msg = ": $!";
+                $msg = cwd() . $msg;
+                $msg = "readlink failed for $filename in $msg";
+                die "$msg\n";
+            }
+
+            return [ $filename, FILE_TYPE_SYMLINK, $target ];
+        }
+
+        my $is_file = -f _;
+        last STAT if !defined $is_file;
+
+        if ($is_file) {
+            my $size = -s _;
+            last STAT if !defined $size;
+
+            return [ $filename, FILE_TYPE_REGULAR, $size ];
+        }
+
+        my $is_dir = -d _;
+        last STAT if !defined $is_dir;
+
+        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
+
+        return [ $filename, FILE_TYPE_OTHER ];
+    }
+
+    # We have to store $! before calling cwd(), otherwise the
+    # non-failed error of cwd() overwrites the error message
+    my $msg = ": $!";
+    $msg = cwd() . $msg;
+    $msg = "Cannot stat file $filename in $msg";
+    die "$msg\n";
+}
 
 #sub _collect_file_info_report {
 #	my ($_filename) = @_;
