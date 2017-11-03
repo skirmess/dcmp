@@ -14,10 +14,23 @@ main();
 sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
-    ok( declared('App::DCMP::FILE_TYPE_DIRECTORY'), 'constant FILE_TYPE_DIRECTORY is defined' );
-    ok( declared('App::DCMP::FILE_TYPE_OTHER'),     'constant FILE_TYPE_OTHER is defined' );
-    ok( declared('App::DCMP::FILE_TYPE_REGULAR'),   'constant FILE_TYPE_REGULAR is defined' );
-    ok( declared('App::DCMP::FILE_TYPE_SYMLINK'),   'constant FILE_TYPE_SYMLINK is defined' );
+    my %const = (
+        'App::DCMP::FILE_TYPE_DIRECTORY' => App::DCMP::FILE_TYPE_DIRECTORY(),
+        'App::DCMP::FILE_TYPE_OTHER'     => App::DCMP::FILE_TYPE_OTHER(),
+        'App::DCMP::FILE_TYPE_REGULAR'   => App::DCMP::FILE_TYPE_REGULAR(),
+        'App::DCMP::FILE_TYPE_SYMLINK'   => App::DCMP::FILE_TYPE_SYMLINK(),
+    );
+
+    for my $const ( keys %const ) {
+        ok( declared($const), "constant $const is defined" );
+        like( $const{$const}, '/ ^ [0-9] + $ /xsm', '... is a number' );
+      OTHER_CONST:
+        for my $other_const ( keys %const ) {
+            next OTHER_CONST if $const eq $other_const;
+
+            isnt( $const{$const}, $const{$other_const}, "$const ($const{$const}) is not the same as $other_const ($const{$other_const})" );
+        }
+    }
 
     done_testing();
 
