@@ -10,6 +10,7 @@ use Test::Fatal;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
+use Cwd 'cwd';
 use Encode;
 use POSIX 'mkfifo';
 
@@ -20,7 +21,7 @@ main();
 sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
-    for my $suffix ( q{}, "_\x{20ac}", "_\x{00C0}", "_\x{0041}\x{0300}" ) {
+    for my $suffix ( q{}, "_\x{20ac}", "_\x{00C0}", "_\x{0041}\x{0300}", "a\nb" ) {
         note(q{----------------------------------------------------------});
         note("suffix: $suffix");
 
@@ -34,6 +35,11 @@ sub main {
 
         my $tmpdir = tempdir();
         chdir $tmpdir;
+
+        # cwd returns Unix dir separator on Windows but tempdir returns
+        # Windows path separator on Windows. The error message in dcmp is
+        # generated with cwd.
+        $tmpdir = cwd();
 
         open my $fh, '>', $file;
         print {$fh} "hello world\n";
@@ -96,7 +102,7 @@ sub main {
       SKIP: {
             {
                 no autodie;
-                skip 'The mkfifo function is unimplemented' if !eval { mkfifo q{}, q{}; 1 };
+                skip 'The mkfifo function is unimplemented' if !eval { mkfifo q{}, 0666; 1 };
             }
 
             mkfifo $fifo, 0666;
