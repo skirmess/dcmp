@@ -23,7 +23,6 @@ sub main {
 
     my @suffixes = ( q{}, "_\x{20ac}", "_\x{00C0}", "_\x{0041}\x{0300}" );
 
-    die "OS: $^O";
     if ( $^O ne 'MSWin32' ) {
         push @suffixes, "a\nb";
     }
