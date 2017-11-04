@@ -27,7 +27,7 @@ sub main {
         push @suffixes, "a\nb";
     }
 
-    for my $suffix ( @suffixes ) {
+    for my $suffix (@suffixes) {
         note(q{----------------------------------------------------------});
         note("suffix: $suffix");
 
