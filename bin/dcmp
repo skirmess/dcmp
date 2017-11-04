@@ -22,14 +22,12 @@ use constant FILE_TYPE_OTHER     => 2;
 use constant FILE_TYPE_REGULAR   => 3;
 use constant FILE_TYPE_SYMLINK   => 4;
 
-#use constant {
-#    FILE_ADDITIONAL             => 0,   # +
-#    FILE_MISSING                => 1,   # -
-#    FILE_TYPE_DIFFERS           => 2,   # @
-#    FILE_TYPE_UNKNOWN           => 3,   # ?
-#    FILE_CONTENT_DIFFERS        => 4,   # M
-#    LINK_TARGET_DIFFERS         => 5,   # L
-#};
+use constant FILE_ADDITIONAL      => 0;    # +
+use constant FILE_MISSING         => 1;    # -
+use constant FILE_TYPE_DIFFERS    => 2;    # @
+use constant FILE_TYPE_UNKNOWN    => 3;    # ?
+use constant FILE_CONTENT_DIFFERS => 4;    # M
+use constant LINK_TARGET_DIFFERS  => 5;    # L
 
 #sub _chdir {
 #    my ( $basedir, $dirs_ref ) = @_;
@@ -502,26 +500,26 @@ sub _collect_file_info_report {
 #    };
 #}
 
-#sub _print_changes {
-#    my @status_code;
+sub _print_changes {
+    my @status_code;
 
-#    $status_code[FILE_ADDITIONAL]             = q{+};
-#    $status_code[FILE_MISSING]                = q{-};
-#    $status_code[FILE_TYPE_DIFFERS]           = q{@};
-#    $status_code[FILE_TYPE_UNKNOWN]           = q{?};
-#    $status_code[FILE_CONTENT_DIFFERS]        = q{M};
-#    $status_code[LINK_TARGET_DIFFERS]         = q{L};
+    $status_code[FILE_ADDITIONAL]      = q{+};
+    $status_code[FILE_MISSING]         = q{-};
+    $status_code[FILE_TYPE_DIFFERS]    = q{@};
+    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
+    $status_code[FILE_CONTENT_DIFFERS] = q{M};
+    $status_code[LINK_TARGET_DIFFERS]  = q{L};
 
-#    return sub {
-#        my ( $action, $dirs_ref, $name ) = @_;
+    return sub {
+        my ( $action, $dirs_ref, $name ) = @_;
 
-#        my $path = File::Spec->catfile(@{ $dirs_ref }, $name);
+        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
 
-#        printf "%s %s\n", $status_code[$action], $path;
+        printf "%s %s\n", $status_code[$action], $path;
 
-#        return;
-#    };
-#}
+        return;
+    };
+}
 
 #sub _print_dcmp_file {
 #    my ($_iterate_dir) = @_;
