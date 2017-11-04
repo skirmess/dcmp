@@ -31,20 +31,20 @@ sub main {
 
     # ----------------------------------------------------------
     open my $fh, '>', 'file.txt';
-    print {$fh} "hello world\n";
+    print {$fh} 'hello world';
     close $fh;
     my $file_size = -s 'file.txt';
     my $md5       = Digest::MD5->new();
-    $md5->add("hello world\n");
+    $md5->add('hello world');
     my $md5_sum = lc $md5->hexdigest();
 
     # ----------------------------------------------------------
     open $fh, '>:encoding(UTF-8)', 'file_utf8.txt';
-    print {$fh} "hello world\n\x{20ac}\n\x{00C0}\n\x{0041}\x{0300}";
+    print {$fh} "hello world\t\x{20ac}\t\x{00C0}\t\x{0041}\x{0300}";
     close $fh;
     my $file_utf8_size = -s 'file_utf8.txt';
     $md5 = Digest::MD5->new();
-    $md5->add( encode( 'UTF-8', "hello world\n\x{20ac}\n\x{00C0}\n\x{0041}\x{0300}" ) );
+    $md5->add( encode( 'UTF-8', "hello world\t\x{20ac}\t\x{00C0}\t\x{0041}\x{0300}" ) );
     my $md5_utf8_sum = lc $md5->hexdigest();
 
     # ----------------------------------------------------------
