@@ -65,42 +65,54 @@ sub main {
             is( cwd(), $basedir, '... and the cwd is not changed' );
         }
 
-        #
-        note('basedir, 26 dirs');
-        $tmpdir = tempdir();
-        chdir $tmpdir;
-        if ( $dir ne q{} ) {
-            mkdir $dir;
-            chdir $dir;
+        my @DIRS = (
+            [ 'a' .. 'z' ],
+            [ "\N{U+20A0}", "\N{U+20A1}", "\N{U+20A2}", "\N{U+20A3}", "\N{U+20A4}", "\N{U+20A5}", "\N{U+20A6}", "\N{U+20A7}", "\N{U+20A8}", "\N{U+20A9}", ],
+            [ 'A',          "\N{U+20AA}", 'B',          "\N{U+20AB}", 'C',          "\N{U+20AC}", 'D',          "\N{U+20AD}", 'E',          "\N{U+20AE}", ],
+            [ "\N{U+20AA}", 'B',          "\N{U+20AB}", 'C',          "\N{U+20AC}", 'D',          "\N{U+20AD}", 'E',          "\N{U+20AE}", 'F' ],
+        );
+        for my $dirs_ref (@DIRS) {
+            for my $dir ( @{$dirs_ref} ) {
+                $dir = encode( 'UTF-8', $dir );
+            }
         }
-        $tmpdir = cwd();
-        note( '$tmpdir = ' . decode( 'UTF-8', $tmpdir ) );
+        for my $dirs_ref (@DIRS) {
 
-        for my $d ( 'a' .. 'z' ) {
-            mkdir $d;
-            chdir $d;
-        }
-
-        my $expected_dir = cwd();
-        note( '$expected_dir = ' . decode( 'UTF-8', $expected_dir ) );
-        chdir $basedir;
-
-        my @dirs = ( 'a' .. 'z' );
-
-        is( App::DCMP::_chdir( $tmpdir, \@dirs ), undef, '_chdir($tmpdir, \@dirs) returns undef' );
-        is( cwd(), $expected_dir, '... and the cwd is correct' );
-
-        #
-      SKIP: {
-            skip 'chmod 0 does not prevent us from entering a directory on Windows' if $^O eq 'MSWin32';
             #
-            note('basedir, 26 dirs, one without permissions');
-            chdir $basedir;
-            chmod 0, File::Spec->catdir( $tmpdir, 'a' .. 'f' );
+            note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs' );
+            $tmpdir = tempdir();
+            chdir $tmpdir;
+            if ( $dir ne q{} ) {
+                mkdir $dir;
+                chdir $dir;
+            }
+            $tmpdir = cwd();
+            note( '$tmpdir = ' . decode( 'UTF-8', $tmpdir ) );
 
-            my $last_good_dir = File::Spec->catdir( $tmpdir, 'a' .. 'e' );
-            like( exception { App::DCMP::_chdir( $tmpdir, \@dirs ) }, "/ ^ \QCannot chdir to f in $last_good_dir: \E /xsm", '_chdir($tmpdir, \@dirs) throws an error' );
-            is( cwd(), $last_good_dir, '... and the cwd is changed up to where the error happend' );
+            for my $d ( @{$dirs_ref} ) {
+                mkdir $d;
+                chdir $d;
+            }
+
+            my $expected_dir = cwd();
+            note( '$expected_dir = ' . decode( 'UTF-8', $expected_dir ) );
+            chdir $basedir;
+
+            is( App::DCMP::_chdir( $tmpdir, $dirs_ref ), undef, '_chdir($tmpdir, $dirs_ref) returns undef' );
+            is( cwd(), $expected_dir, '... and the cwd is correct' );
+
+            #
+          SKIP: {
+                skip 'chmod 0 does not prevent us from entering a directory on Windows' if $^O eq 'MSWin32';
+                #
+                note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs, one without permissions' );
+                chdir $basedir;
+                chmod 0, File::Spec->catdir( $tmpdir, @{$dirs_ref}[ 0 .. 6 ] );
+
+                my $last_good_dir = File::Spec->catdir( $tmpdir, @{$dirs_ref}[ 0 .. 5 ] );
+                like( exception { App::DCMP::_chdir( $tmpdir, $dirs_ref ) }, "/ ^ \QCannot chdir to ${$dirs_ref}[6] in $last_good_dir: \E /xsm", '_chdir($tmpdir, $dirs_ref) throws an error' );
+                is( cwd(), $last_good_dir, '... and the cwd is changed up to where the error happend' );
+            }
         }
     }
 
