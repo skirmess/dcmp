@@ -9,6 +9,7 @@ use Test::Fatal;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
+use Cwd qw(cwd);
 use Digest::MD5;
 use Encode;
 
@@ -23,9 +24,14 @@ sub main {
     my $tmpdir = tempdir();
     chdir $tmpdir;
 
+    # cwd returns Unix dir separator on Windows but tempdir returns
+    # Windows path separator on Windows. The error message in dcmp is
+    # generated with cwd.
+    $tmpdir = cwd();
+
     # ----------------------------------------------------------
     open my $fh, '>', 'file.txt';
-    print $fh "hello world\n";
+    print {$fh} "hello world\n";
     close $fh;
     my $file_size = -s 'file.txt';
     my $md5       = Digest::MD5->new();
@@ -34,7 +40,7 @@ sub main {
 
     # ----------------------------------------------------------
     open $fh, '>:encoding(UTF-8)', 'file_utf8.txt';
-    print $fh "hello world\n\x{20ac}\n\x{00C0}\n\x{0041}\x{0300}";
+    print {$fh} "hello world\n\x{20ac}\n\x{00C0}\n\x{0041}\x{0300}";
     close $fh;
     my $file_utf8_size = -s 'file_utf8.txt';
     $md5 = Digest::MD5->new();
@@ -45,7 +51,7 @@ sub main {
     mkdir 'dir';
 
     # ----------------------------------------------------------
-    like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, qr{ ^ \QCannot stat file invalid_file in $tmpdir: \E }xsm, '_collect_file_info_report throws an exception if stat failes' );
+    like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, "/ ^ \QCannot stat file invalid_file in $tmpdir: \E /xsm", '_collect_file_info_report throws an exception if stat failes' );
 
     # ----------------------------------------------------------
     open $fh, '>', 'invalid_file';
@@ -53,7 +59,7 @@ sub main {
     chmod 0, 'invalid_file';
 
     # ----------------------------------------------------------
-    like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, qr{ ^ \QCannot read file invalid_file in $tmpdir: \E }xsm, '_collect_file_info_report throws an exception if it cannot read the file' );
+    like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, "/ ^ \QCannot read file invalid_file in $tmpdir: \E /xsm", '_collect_file_info_report throws an exception if it cannot read the file' );
 
     # ----------------------------------------------------------
     note('dir');

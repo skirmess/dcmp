@@ -103,11 +103,11 @@ sub _collect_file_info {
 }
 
 sub _collect_file_info_report {
-	my ($_filename) = @_;
+    my ($_filename) = @_;
 
     my $file_info_ref = _collect_file_info($_filename);
 
-    my ($filename, $filetype) = @{ $file_info_ref };
+    my ( $filename, $filetype ) = @{$file_info_ref};
 
     return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
 
@@ -116,6 +116,7 @@ sub _collect_file_info_report {
 
     my $fh;
     if ( !open $fh, '<', $filename ) {
+
         # We have to store $! before calling cwd(), otherwise the
         # non-failed error of cwd() overwrites the error message
         my $msg = ": $!";
@@ -124,11 +125,11 @@ sub _collect_file_info_report {
         die "$msg\n";
     }
 
-    binmode $fh;
+    binmode $fh or die "binmode failed for $filename: $!\n";
     $md5->addfile($fh);
-    close $fh or die "Unable to read file $filename: $!";
+    close $fh or die "Unable to read file $filename: $!\n";
 
-    push @{ $file_info_ref }, lc $md5->hexdigest();
+    push @{$file_info_ref}, lc $md5->hexdigest();
 
     return $file_info_ref;
 }
