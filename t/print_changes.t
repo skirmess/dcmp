@@ -4,7 +4,6 @@ use 5.006;
 use strict;
 use warnings;
 
-use Test2::Plugin::UTF8;
 use Test::More 0.88;
 
 use Capture::Tiny qw(capture);
@@ -54,20 +53,20 @@ sub main {
 
     for my $suffix (@suffixes) {
         note(q{----------------------------------------------------------});
-        note("suffix: $suffix");
+        note( encode( 'UTF-8', "suffix: $suffix" ) );
 
         for my $dir_suffix (@suffixes) {
             note(q{----------------------------------------------------------});
-            note("dir suffix: $dir_suffix");
+            note( encode( 'UTF-8', "dir suffix: $dir_suffix" ) );
 
-            my $dir  = encode( 'UTF-8', "dir1${dir_suffix}" );
-            my $file = encode( 'UTF-8', "file${suffix}.txt" );
+            my $dir  = "dir1${dir_suffix}";
+            my $file = "file${suffix}.txt";
 
             note('printer with empty path / FILE_ADDITIONAL');
             @dirs = ();
             ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_ADDITIONAL(), \@dirs, $file ); };
             is( scalar @result, 0, '... which returns nothing' );
-            $expected_stdout = "+ $file\n";
+            $expected_stdout = encode( 'UTF-8', "+ $file\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
 
@@ -75,7 +74,7 @@ sub main {
             @dirs = ($dir);
             ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_MISSING(), \@dirs, $file ); };
             is( scalar @result, 0, '... which returns nothing' );
-            $expected_stdout = q{- } . File::Spec->catdir( $dir, $file ) . "\n";
+            $expected_stdout = encode( 'UTF-8', q{- } . File::Spec->catdir( $dir, $file ) . "\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
 
@@ -83,7 +82,7 @@ sub main {
             @dirs = ( $dir, 'dir2' );
             ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_TYPE_DIFFERS(), \@dirs, $file ); };
             is( scalar @result, 0, '... which returns nothing' );
-            $expected_stdout = q{@ } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
+            $expected_stdout = encode( 'UTF-8', q{@ } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
 
@@ -91,7 +90,7 @@ sub main {
             @dirs = ( $dir, 'dir2' );
             ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_TYPE_UNKNOWN(), \@dirs, $file ); };
             is( scalar @result, 0, '... which returns nothing' );
-            $expected_stdout = q{? } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
+            $expected_stdout = encode( 'UTF-8', q{? } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
 
@@ -99,7 +98,7 @@ sub main {
             @dirs = ( $dir, 'dir2' );
             ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_CONTENT_DIFFERS(), \@dirs, $file ); };
             is( scalar @result, 0, '... which returns nothing' );
-            $expected_stdout = q{M } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
+            $expected_stdout = encode( 'UTF-8', q{M } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
 
@@ -107,7 +106,7 @@ sub main {
             @dirs = ( $dir, 'dir2' );
             ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::LINK_TARGET_DIFFERS(), \@dirs, $file ); };
             is( scalar @result, 0, '... which returns nothing' );
-            $expected_stdout = q{L } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
+            $expected_stdout = encode( 'UTF-8', q{L } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
 
