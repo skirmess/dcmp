@@ -8,9 +8,6 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
-use Cwd qw(cwd);
-
-#use Cwd qw(abs_path cwd);
 #use Fcntl ':mode';
 
 #use File::Compare qw(compare);
@@ -30,27 +27,26 @@ use constant FILE_TYPE_UNKNOWN    => 3;    # ?
 use constant FILE_CONTENT_DIFFERS => 4;    # M
 use constant LINK_TARGET_DIFFERS  => 5;    # L
 
-#sub _chdir {
-#    my ( $basedir, $dirs_ref ) = @_;
-#
-#    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
-#
-#    for my $i ( 0 .. $#{$dirs_ref} ) {
-#        if ( !chdir ${$dirs_ref}[$i] ) {
-#
-#            # We have to store $! before calling cwd(), otherwise the
-#            # non-failed error of cwd() overwrites the error message
-#            my $error = qq{$!};
-#
-#            require Cwd;
-#            my $msg = sprintf 'Cannot chdir to %s in %s: %s', ${$dirs_ref}[$i], Cwd::cwd(), $error;
-#
-#            die "$msg\n";
-#        }
-#    }
-#
-#    return;
-#}
+sub _chdir {
+    my ( $basedir, $dirs_ref ) = @_;
+
+    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
+
+    for my $i ( 0 .. $#{$dirs_ref} ) {
+        if ( !chdir ${$dirs_ref}[$i] ) {
+
+            # We have to store $! before calling cwd(), otherwise the
+            # non-failed error of cwd() overwrites the error message
+            my $msg = ": $!";
+            require Cwd;
+            $msg = Cwd::cwd() . $msg;
+            $msg = "Cannot chdir to ${$dirs_ref}[$i] in $msg";
+            die "$msg\n";
+        }
+    }
+
+    return;
+}
 
 sub _collect_file_info {
     my ($filename) = @_;
@@ -67,7 +63,8 @@ sub _collect_file_info {
                 # We have to store $! before calling cwd(), otherwise the
                 # non-failed error of cwd() overwrites the error message
                 my $msg = ": $!";
-                $msg = cwd() . $msg;
+                require Cwd;
+                $msg = Cwd::cwd() . $msg;
                 $msg = "readlink failed for $filename in $msg";
                 die "$msg\n";
             }
@@ -96,7 +93,8 @@ sub _collect_file_info {
     # We have to store $! before calling cwd(), otherwise the
     # non-failed error of cwd() overwrites the error message
     my $msg = ": $!";
-    $msg = cwd() . $msg;
+    require Cwd;
+    $msg = Cwd::cwd() . $msg;
     $msg = "Cannot stat file $filename in $msg";
     die "$msg\n";
 }
@@ -119,7 +117,8 @@ sub _collect_file_info_report {
         # We have to store $! before calling cwd(), otherwise the
         # non-failed error of cwd() overwrites the error message
         my $msg = ": $!";
-        $msg = cwd() . $msg;
+        require Cwd;
+        $msg = Cwd::cwd() . $msg;
         $msg = "Cannot read file $filename in $msg";
         die "$msg\n";
     }
