@@ -54,12 +54,15 @@ sub main {
     like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, "/ ^ \QCannot stat file invalid_file in $tmpdir: \E /xsm", '_collect_file_info_report throws an exception if stat failes' );
 
     # ----------------------------------------------------------
-    open $fh, '>', 'invalid_file';
-    close $fh;
-    chmod 0, 'invalid_file';
+  SKIP: {
+        skip 'chmod 0 does not prevent us from reading a file on Windows' if $^O eq 'MSWin32';
 
-    # ----------------------------------------------------------
-    like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, "/ ^ \QCannot read file invalid_file in $tmpdir: \E /xsm", '_collect_file_info_report throws an exception if it cannot read the file' );
+        open $fh, '>', 'invalid_file';
+        close $fh;
+        chmod 0, 'invalid_file';
+
+        like( exception { App::DCMP::_collect_file_info_report('invalid_file') }, "/ ^ \QCannot read file invalid_file in $tmpdir: \E /xsm", '_collect_file_info_report throws an exception if it cannot read the file' );
+    }
 
     # ----------------------------------------------------------
     note('dir');
