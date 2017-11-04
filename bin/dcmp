@@ -102,36 +102,36 @@ sub _collect_file_info {
     die "$msg\n";
 }
 
-#sub _collect_file_info_report {
-#	my ($_filename) = @_;
+sub _collect_file_info_report {
+	my ($_filename) = @_;
 
-#    my $file_info_ref = _collect_file_info($_filename);
+    my $file_info_ref = _collect_file_info($_filename);
 
-#    my ($filename, $mode) = @{ $file_info_ref };
+    my ($filename, $filetype) = @{ $file_info_ref };
 
-#    return $file_info_ref if !S_ISREG($mode);
+    return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
 
-#    require Digest::MD5;
-#    my $md5 = Digest::MD5->new();
+    require Digest::MD5;
+    my $md5 = Digest::MD5->new();
 
-#    my $fh;
-#    if ( !open $fh, '<', $filename ) {
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
-#        my $msg = ": $!";
-#        $msg = cwd() . $msg;
-#        $msg = "Cannot read file $filename in $msg";
-#        die "$msg\n";
-#    }
+    my $fh;
+    if ( !open $fh, '<', $filename ) {
+        # We have to store $! before calling cwd(), otherwise the
+        # non-failed error of cwd() overwrites the error message
+        my $msg = ": $!";
+        $msg = cwd() . $msg;
+        $msg = "Cannot read file $filename in $msg";
+        die "$msg\n";
+    }
 
-#    binmode $fh;
-#    $md5->addfile($fh);
-#    close $fh or die "Unable to read file $filename: $!";
+    binmode $fh;
+    $md5->addfile($fh);
+    close $fh or die "Unable to read file $filename: $!";
 
-#    push @{ $file_info_ref }, lc $md5->hexdigest();
+    push @{ $file_info_ref }, lc $md5->hexdigest();
 
-#    return $file_info_ref;
-#}
+    return $file_info_ref;
+}
 
 ## $md5_l and $md5_r are not used
 #sub _compare_file_fs_fs {
