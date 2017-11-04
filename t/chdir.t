@@ -53,12 +53,13 @@ sub main {
         chdir $d;
     }
 
+    my $expected_dir = cwd();
     chdir $basedir;
 
     my @dirs = ( 'a' .. 'z' );
 
     is( App::DCMP::_chdir( $tmpdir, \@dirs ), undef, '_chdir($tmpdir, \@dirs) returns undef' );
-    is( cwd(), File::Spec->catdir( $tmpdir, 'a' .. 'z' ), '... and the cwd is correct' );
+    is( cwd(), $expected_dir, '... and the cwd is correct' );
 
     #
   SKIP: {
