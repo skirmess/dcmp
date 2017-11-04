@@ -132,16 +132,21 @@ sub _collect_file_info_report {
     return $file_info_ref;
 }
 
-## $md5_l and $md5_r are not used
+# $md5_l and $md5_r are not used
 #sub _compare_file_fs_fs {
 #    my ($chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r) = @_;
-
-#    my $fh_l;
-#    my $fh_r;
-
-#    $chdir_l->($dirs_ref);
-
-#    if ( !open $fh_l, '<', $filename ) {
+#
+#    my @fh;
+#
+#    DIR:
+#    for my $f ( $chdir_l, $chdir_r ) {
+#        $f->($dirs_ref);
+#
+#        if ( open my $fh, '<', $filename ) {
+#            push @fh, $fh;
+#            next DIR;
+#        }
+#
 #        # We have to store $! before calling cwd(), otherwise the
 #        # non-failed error of cwd() overwrites the error message
 #        my $msg = ": $!";
@@ -149,22 +154,13 @@ sub _collect_file_info_report {
 #        $msg = "Cannot read file $filename in $msg";
 #        die "$msg\n";
 #    }
-
-#    $chdir_r->($dirs_ref);
-#    if ( !open $fh_r, '<', $filename ) {
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
-#        my $msg = ": $!";
-#        $msg = cwd() . $msg;
-#        $msg = "Cannot read file $filename in $msg";
-#        die "$msg\n";
+#
+#    my $rc = compare(@fh);
+#
+#    for my $fh ( @fh ) {
+#        close $fh or die "Cannot read file $filename\n";
 #    }
-
-#    my $rc = compare($fh_l, $fh_r);
-
-#    close $fh_l or die "Cannot read file $filename\n";
-#    close $fh_r or die "Cannot read file $filename\n";
-
+#
 #    # File::Compare::compare and its sibling functions return 0 if the files
 #    # are equal, 1 if the files are unequal, or -1 if an error was
 #    # encountered.
