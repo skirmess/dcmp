@@ -14,7 +14,8 @@ use Cwd qw(cwd);
 #use Fcntl ':mode';
 
 #use File::Compare qw(compare);
-#use File::Spec;
+use File::Spec;
+
 #use Getopt::Long;
 
 use constant FILE_TYPE_DIRECTORY => 1;

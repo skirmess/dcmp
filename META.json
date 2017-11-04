@@ -30,7 +30,6 @@
       },
       "develop" : {
          "requires" : {
-            "File::Spec" : "0",
             "Perl::Critic" : "1.130",
             "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" : "1.12",
             "Perl::Critic::Policy::Bangs::ProhibitNumberedNames" : "1.12",
@@ -134,6 +133,7 @@
          "requires" : {
             "Cwd" : "0",
             "Digest::MD5" : "0",
+            "File::Spec" : "0",
             "constant" : "1.01",
             "perl" : "5.006",
             "strict" : "0",
@@ -142,6 +142,7 @@
       },
       "test" : {
          "requires" : {
+            "Capture::Tiny" : "0",
             "Encode" : "0",
             "POSIX" : "0",
             "Test2::Plugin::UTF8" : "0",
@@ -177,6 +178,7 @@
    "version" : "0.001",
    "x_BuiltWith" : {
       "modules" : {
+         "Capture::Tiny" : "0.46",
          "Cwd" : "3.63",
          "Digest::MD5" : "2.54",
          "Encode" : "2.80",
