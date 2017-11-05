@@ -8,11 +8,10 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
-#use Fcntl ':mode';
-
-#use File::Compare qw(compare);
+use Encode;
 use File::Spec;
 
+#use File::Compare qw(compare);
 #use Getopt::Long;
 
 use constant FILE_TYPE_DIRECTORY => 1;
@@ -30,18 +29,19 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
 
-    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
+    chdir $basedir or die encode( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
 
     for my $i ( 0 .. $#{$dirs_ref} ) {
         if ( !chdir ${$dirs_ref}[$i] ) {
 
             # We have to store $! before calling cwd(), otherwise the
             # non-failed error of cwd() overwrites the error message
-            my $msg = ": $!";
+            my $error = $!;
+
             require Cwd;
-            $msg = Cwd::cwd() . $msg;
-            $msg = "Cannot chdir to ${$dirs_ref}[$i] in $msg";
-            die "$msg\n";
+            my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+            die encode( 'UTF-8', "Cannot chdir to ${$dirs_ref}[$i] in $cwd: $error\n" );
         }
     }
 
@@ -51,22 +51,25 @@ sub _chdir {
 sub _collect_file_info {
     my ($filename) = @_;
 
+    my $filename_utf8 = encode( 'UTF-8', $filename );
+
   STAT:
     {
-        my $is_link = -l $filename;
+        my $is_link = -l $filename_utf8;
         last STAT if !defined $is_link;
 
         if ($is_link) {
-            my $target = readlink $filename;
+            my $target = decode( 'UTF-8', readlink $filename_utf8 );
             if ( !defined $target ) {
 
                 # We have to store $! before calling cwd(), otherwise the
                 # non-failed error of cwd() overwrites the error message
-                my $msg = ": $!";
+                my $error = $!;
+
                 require Cwd;
-                $msg = Cwd::cwd() . $msg;
-                $msg = "readlink failed for $filename in $msg";
-                die "$msg\n";
+                my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+                die encode( 'UTF-8', "readlink failed for $filename in $cwd: $error\n" );
             }
 
             return [ $filename, FILE_TYPE_SYMLINK, $target ];
@@ -92,11 +95,12 @@ sub _collect_file_info {
 
     # We have to store $! before calling cwd(), otherwise the
     # non-failed error of cwd() overwrites the error message
-    my $msg = ": $!";
+    my $error = $!;
+
     require Cwd;
-    $msg = Cwd::cwd() . $msg;
-    $msg = "Cannot stat file $filename in $msg";
-    die "$msg\n";
+    my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+    die encode( 'UTF-8', "Cannot stat file $filename in $cwd: $error\n" );
 }
 
 sub _collect_file_info_report {
@@ -108,24 +112,27 @@ sub _collect_file_info_report {
 
     return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
 
+    my $filename_utf8 = encode( 'UTF-8', $filename );
+
     require Digest::MD5;
     my $md5 = Digest::MD5->new();
 
     my $fh;
-    if ( !open $fh, '<', $filename ) {
+    if ( !open $fh, '<', $filename_utf8 ) {
 
         # We have to store $! before calling cwd(), otherwise the
         # non-failed error of cwd() overwrites the error message
-        my $msg = ": $!";
+        my $error = $!;
+
         require Cwd;
-        $msg = Cwd::cwd() . $msg;
-        $msg = "Cannot read file $filename in $msg";
-        die "$msg\n";
+        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
     }
 
-    binmode $fh or die "binmode failed for $filename: $!\n";
+    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
     $md5->addfile($fh);
-    close $fh or die "Unable to read file $filename: $!\n";
+    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!\n" );
 
     push @{$file_info_ref}, lc $md5->hexdigest();
 
@@ -511,7 +518,7 @@ sub _print_changes {
 
         my $path = File::Spec->catfile( @{$dirs_ref}, $name );
 
-        printf "%s %s\n", $status_code[$action], $path;
+        print encode( 'UTF-8', "$status_code[$action] $path\n" );
 
         return;
     };

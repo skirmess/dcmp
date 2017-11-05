@@ -1,11 +1,17 @@
 # but we need them
 [-Bangs::ProhibitBitwiseOperators]
 
+#
+[-Bangs::ProhibitNumberedNames]
+
 # tmp
 [-Bangs::ProhibitFlagComments]
 
 [ControlStructures::ProhibitPostfixControls]
 flowcontrol = skip
+
+#
+[-ErrorHandling::RequireCarping]
 
 #
 [-Freenode::Prototypes]

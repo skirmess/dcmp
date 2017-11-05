@@ -109,7 +109,6 @@ sub main {
             $expected_stdout = encode( 'UTF-8', q{L } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n" );
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
             is( $stderr, q{}, '... prints nothing to stderr' );
-
         }
     }
 

@@ -5,12 +5,11 @@ use strict;
 use warnings;
 use autodie;
 
-use Test2::Plugin::UTF8;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 use Test::Fatal;
 
-use Cwd qw(abs_path cwd);
+use Cwd qw(cwd);
 use Encode;
 use File::Spec;
 
@@ -31,7 +30,7 @@ sub main {
 
     for my $suffix (@suffixes) {
         note(q{----------------------------------------------------------});
-        note("suffix: $suffix");
+        note( encode( 'UTF-8', "suffix: $suffix" ) );
 
         my $dir = encode( 'UTF-8', "dir${suffix}" );
 
@@ -39,18 +38,16 @@ sub main {
         note('basedir, no dirs');
         my $tmpdir = tempdir();
         chdir $tmpdir;
-        if ( $dir ne q{} ) {
-            mkdir $dir;
-            chdir $dir;
-        }
+        mkdir $dir;
+        chdir $dir;
 
-        $tmpdir = cwd();
+        $tmpdir = decode( 'UTF-8', cwd() );
         chdir $basedir;
 
-        note( '$tmpdir = ' . decode( 'UTF-8', $tmpdir ) );
+        note( encode( 'UTF-8', "\$tmpdir = $tmpdir" ) );
 
         is( App::DCMP::_chdir( $tmpdir, undef ), undef, '_chdir($tmpdir, undef) returns undef' );
-        is( cwd(), $tmpdir, '... and the cwd is now $tmpdir' );
+        is( decode( 'UTF-8', cwd() ), $tmpdir, '... and the cwd is now $tmpdir' );
 
         #
       SKIP: {
@@ -59,47 +56,75 @@ sub main {
             #
             note('basedir without permissions, no dirs');
             chdir $basedir;
-            chmod 0, $tmpdir;
+            chmod 0, encode( 'UTF-8', $tmpdir );
 
-            like( exception { App::DCMP::_chdir( $tmpdir, undef ) }, "/ ^ \QCannot chdir to $tmpdir: \E /xsm", '_chdir($tmpdir, undef) throws am error' );
-            is( cwd(), $basedir, '... and the cwd is not changed' );
+            like( exception { App::DCMP::_chdir( $tmpdir, undef ) }, encode( 'UTF-8', "/ ^ \QCannot chdir to $tmpdir: \E /xsm" ), '_chdir($tmpdir, undef) throws am error' );
+            is( decode( 'UTF-8', cwd() ), $basedir, '... and the cwd is not changed' );
         }
 
         my @DIRS = (
             [ 'a' .. 'z' ],
-            [ "\N{U+20A0}", "\N{U+20A1}", "\N{U+20A2}", "\N{U+20A3}", "\N{U+20A4}", "\N{U+20A5}", "\N{U+20A6}", "\N{U+20A7}", "\N{U+20A8}", "\N{U+20A9}", ],
-            [ 'A',          "\N{U+20AA}", 'B',          "\N{U+20AB}", 'C',          "\N{U+20AC}", 'D',          "\N{U+20AD}", 'E',          "\N{U+20AE}", ],
-            [ "\N{U+20AA}", 'B',          "\N{U+20AB}", 'C',          "\N{U+20AC}", 'D',          "\N{U+20AD}", 'E',          "\N{U+20AE}", 'F' ],
+            [
+                "\N{U+20A0}",
+                "\N{U+20A1}",
+                "\N{U+20A2}",
+                "\N{U+20A3}",
+                "\N{U+20A4}",
+                "\N{U+20A5}",
+                "\N{U+20A6}",
+                "\N{U+20A7}",
+                "\N{U+20A8}",
+                "\N{U+20A9}",
+            ],
+            [
+                'A',
+                "\N{U+20AA}",
+                'B',
+                "\N{U+20AB}",
+                'C',
+                "\N{U+20AC}",
+                'D',
+                "\N{U+20AD}",
+                'E',
+                "\N{U+20AE}",
+            ],
+            [
+                "\N{U+20AA}",
+                'B',
+                "\N{U+20AB}",
+                'C',
+                "\N{U+20AC}",
+                'D',
+                "\N{U+20AD}",
+                'E',
+                "\N{U+20AE}",
+                'F',
+            ],
         );
-        for my $dirs_ref (@DIRS) {
-            for my $dir ( @{$dirs_ref} ) {
-                $dir = encode( 'UTF-8', $dir );
-            }
-        }
         for my $dirs_ref (@DIRS) {
 
             #
             note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs' );
             $tmpdir = tempdir();
             chdir $tmpdir;
-            if ( $dir ne q{} ) {
-                mkdir $dir;
-                chdir $dir;
-            }
-            $tmpdir = cwd();
-            note( '$tmpdir = ' . decode( 'UTF-8', $tmpdir ) );
+            mkdir $dir;
+            chdir $dir;
+
+            $tmpdir = decode( 'UTF-8', cwd() );
+            note( encode( 'UTF-8', "\$tmpdir = $tmpdir" ) );
 
             for my $d ( @{$dirs_ref} ) {
-                mkdir $d;
-                chdir $d;
+                my $d_utf8 = encode( 'UTF-8', $d );
+                mkdir $d_utf8;
+                chdir $d_utf8;
             }
 
-            my $expected_dir = cwd();
-            note( '$expected_dir = ' . decode( 'UTF-8', $expected_dir ) );
+            my $expected_dir = decode( 'UTF-8', cwd() );
+            note( encode( 'UTF-8', "\$expected_dir = $expected_dir" ) );
             chdir $basedir;
 
             is( App::DCMP::_chdir( $tmpdir, $dirs_ref ), undef, '_chdir($tmpdir, $dirs_ref) returns undef' );
-            is( cwd(), $expected_dir, '... and the cwd is correct' );
+            is( decode( 'UTF-8', cwd() ), $expected_dir, '... and the cwd is correct' );
 
             #
           SKIP: {
@@ -107,11 +132,11 @@ sub main {
                 #
                 note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs, one without permissions' );
                 chdir $basedir;
-                chmod 0, File::Spec->catdir( $tmpdir, @{$dirs_ref}[ 0 .. 6 ] );
+                chmod 0, encode( 'UTF-8', File::Spec->catdir( $tmpdir, @{$dirs_ref}[ 0 .. 6 ] ) );
 
                 my $last_good_dir = File::Spec->catdir( $tmpdir, @{$dirs_ref}[ 0 .. 5 ] );
-                like( exception { App::DCMP::_chdir( $tmpdir, $dirs_ref ) }, "/ ^ \QCannot chdir to ${$dirs_ref}[6] in $last_good_dir: \E /xsm", '_chdir($tmpdir, $dirs_ref) throws an error' );
-                is( cwd(), $last_good_dir, '... and the cwd is changed up to where the error happend' );
+                like( exception { App::DCMP::_chdir( $tmpdir, $dirs_ref ) }, encode( 'UTF-8', "/ ^ \QCannot chdir to ${$dirs_ref}[6] in $last_good_dir: \E /xsm" ), '_chdir($tmpdir, $dirs_ref) throws an error' );
+                is( decode( 'UTF-8', cwd() ), $last_good_dir, '... and the cwd is changed up to where the error happend' );
             }
         }
     }

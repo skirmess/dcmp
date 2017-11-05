@@ -32,7 +32,6 @@
          "requires" : {
             "Perl::Critic" : "1.130",
             "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" : "1.12",
-            "Perl::Critic::Policy::Bangs::ProhibitNumberedNames" : "1.12",
             "Perl::Critic::Policy::Bangs::ProhibitRefProtoOrProto" : "1.12",
             "Perl::Critic::Policy::Bangs::ProhibitUselessRegexModifiers" : "1.12",
             "Perl::Critic::Policy::BuiltinFunctions::ProhibitDeleteOnArrays" : "0.02",
@@ -133,6 +132,7 @@
          "requires" : {
             "Cwd" : "0",
             "Digest::MD5" : "0",
+            "Encode" : "0",
             "File::Spec" : "0",
             "constant" : "1.01",
             "perl" : "5.006",
@@ -143,9 +143,7 @@
       "test" : {
          "requires" : {
             "Capture::Tiny" : "0",
-            "Encode" : "0",
             "POSIX" : "0",
-            "Test2::Plugin::UTF8" : "0",
             "Test::Fatal" : "0",
             "Test::More" : "0.88",
             "Test::TempDir::Tiny" : "0",
@@ -187,7 +185,6 @@
          "POSIX" : "1.65",
          "Perl::Critic" : "1.130",
          "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" : "1.12",
-         "Perl::Critic::Policy::Bangs::ProhibitNumberedNames" : "1.12",
          "Perl::Critic::Policy::Bangs::ProhibitRefProtoOrProto" : "1.12",
          "Perl::Critic::Policy::Bangs::ProhibitUselessRegexModifiers" : "1.12",
          "Perl::Critic::Policy::BuiltinFunctions::ProhibitDeleteOnArrays" : "0.02",
@@ -265,7 +262,6 @@
          "Perl::Critic::Policy::Variables::ProhibitUselessInitialization" : "0.02",
          "Perl::Critic::Utils" : "1.130",
          "Pod::Wordlist" : "1.20",
-         "Test2::Plugin::UTF8" : "0.000070",
          "Test::CPAN::Changes" : "0.400002",
          "Test::CPAN::Meta" : "0.25",
          "Test::CPAN::Meta::JSON" : "0.16",

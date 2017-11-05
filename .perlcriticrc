@@ -54,9 +54,6 @@ flowcontrol = skip
 [Documentation::RequirePodLinksIncludeText]
 #[Documentation::RequirePodSections]
 
-[ErrorHandling::RequireCarping]
-allow_in_main_unless_in_subroutine = 1
-
 [ErrorHandling::RequireCheckingReturnValueOfEval]
 [InputOutput::ProhibitBacktickOperators]
 [InputOutput::ProhibitBarewordFileHandles]
@@ -166,8 +163,6 @@ allow = $@ $! $/ $0 $^O
 
 #[Bangs::ProhibitCommentedOutCode]
 [Bangs::ProhibitDebuggingModules]
-#[Bangs::ProhibitNoPlan]
-[Bangs::ProhibitNumberedNames]
 [Bangs::ProhibitRefProtoOrProto]
 [Bangs::ProhibitUselessRegexModifiers]
 #[Bangs::ProhibitVagueNames]
