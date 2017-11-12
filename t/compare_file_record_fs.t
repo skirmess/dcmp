@@ -29,10 +29,8 @@ sub main {
         note(q{----------------------------------------------------------});
         note( encode( 'UTF-8', "suffix: $suffix" ) );
 
-        my $dir       = "dir${suffix}";
-        my $dir_utf8  = encode( 'UTF-8', $dir );
-        my $file      = "file${suffix}.txt";
-        my $file_utf8 = encode( 'UTF-8', $file );
+        my $dir  = "dir${suffix}";
+        my $file = "file${suffix}.txt";
 
         my $tmpdir = tempdir();
 
@@ -47,11 +45,11 @@ sub main {
         like( exception { App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \QCannot read file $file in $tmpdir\E /xsm" ), '_compare_file_record_fs throws an error if the file cannot be read' );
 
         open my $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir, $dir, $file ) );
-        print $fh "hello world";
+        print {$fh} 'hello world';
         close $fh;
 
         my $md5 = Digest::MD5->new();
-        $md5->add("hello world");
+        $md5->add('hello world');
         my $md5_sum = $md5->hexdigest();
 
         is( App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, lc $md5_sum,     undef ), 1,     '_compare_file_record_fs returns 1 if the file matches the lowercase md5 sum' );

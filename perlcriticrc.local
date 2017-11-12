@@ -25,6 +25,9 @@ flowcontrol = skip
 # \d is stupid because it is not even remotely the same as [0-9]
 [-RegularExpressions::ProhibitEnumeratedClasses]
 
+#
+[-Subroutines::ProhibitManyArgs]
+
 # tmp
 [-Subroutines::ProhibitUnusedPrivateSubroutines]
 

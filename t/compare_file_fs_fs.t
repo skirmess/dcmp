@@ -31,27 +31,21 @@ sub main {
         note( encode( 'UTF-8', "left dir suffix: $dir_l_suffix" ) );
 
         my $dir_l = "dirL${dir_l_suffix}";
-        my $dir_l_utf8 = encode( 'UTF-8', $dir_l );
 
         for my $dir_r_suffix (@suffixes) {
             note(q{----------------------------------------------------------});
             note( encode( 'UTF-8', "right dir suffix: $dir_r_suffix" ) );
 
             my $dir_r = "dirR${dir_r_suffix}";
-            my $dir_r_utf8 = encode( 'UTF-8', $dir_r );
 
             for my $file_suffix (@suffixes) {
                 note(q{----------------------------------------------------------});
                 note( encode( 'UTF-8', "file suffix: $file_suffix" ) );
 
-                my $file        = "file${file_suffix}.txt";
-                my $file_utf8   = encode( 'UTF-8', $file );
-                my $file2       = "file2${file_suffix}.txt";
-                my $file2_utf8  = encode( 'UTF-8', $file );
-                my $file3l      = "file3l${file_suffix}.txt";
-                my $file3l_utf8 = encode( 'UTF-8', $file );
-                my $file3r      = "file3r${file_suffix}.txt";
-                my $file3r_utf8 = encode( 'UTF-8', $file );
+                my $file   = "file${file_suffix}.txt";
+                my $file2  = "file2${file_suffix}.txt";
+                my $file3l = "file3l${file_suffix}.txt";
+                my $file3r = "file3r${file_suffix}.txt";
 
                 my $tmpdir_l = tempdir();
                 my $tmpdir_r = tempdir();
@@ -79,27 +73,27 @@ sub main {
                 $chdir_r = sub { App::DCMP::_chdir( $tmpdir_r, @_ ) };
 
                 open $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir_l, $file ) );
-                print $fh "hello world\n";
+                print {$fh} "hello world\n";
                 close $fh;
 
                 open $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir_r, $file ) );
-                print $fh "hello world\n";
+                print {$fh} "hello world\n";
                 close $fh;
 
                 open $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir_l, $file2 ) );
-                print $fh "hello world L\n";
+                print {$fh} "hello world L\n";
                 close $fh;
 
                 open $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir_r, $file2 ) );
-                print $fh "hello world R\n";
+                print {$fh} "hello world R\n";
                 close $fh;
 
                 open $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir_l, $file3l ) );
-                print $fh "hello world L\n";
+                print {$fh} "hello world L\n";
                 close $fh;
 
                 open $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir_r, $file3r ) );
-                print $fh "hello world R\n";
+                print {$fh} "hello world R\n";
                 close $fh;
 
                 like( exception { App::DCMP::_compare_file_fs_fs( $chdir_l, $chdir_r, \@dirs, $file3l, undef, undef ) }, encode( 'UTF-8', "/ ^ \QCannot read file $file3l in $tmpdir_r: \E /xsm" ), '_compare_file_fs_fs throws an error if the left file cannot be read' );
