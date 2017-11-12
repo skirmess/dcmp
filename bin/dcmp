@@ -9,9 +9,9 @@ our $VERSION = '0.001';
 package App::DCMP;
 
 use Encode;
+use File::Compare qw(compare);
 use File::Spec;
 
-#use File::Compare qw(compare);
 #use Getopt::Long;
 
 use constant FILE_TYPE_DIRECTORY => 1;
@@ -29,10 +29,10 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
 
-    chdir $basedir or die encode( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
+    chdir encode( 'UTF-8', $basedir ) or die encode( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
 
     for my $i ( 0 .. $#{$dirs_ref} ) {
-        if ( !chdir ${$dirs_ref}[$i] ) {
+        if ( !chdir encode( 'UTF-8', ${$dirs_ref}[$i] ) ) {
 
             # We have to store $! before calling cwd(), otherwise the
             # non-failed error of cwd() overwrites the error message
@@ -140,41 +140,45 @@ sub _collect_file_info_report {
 }
 
 # $md5_l and $md5_r are not used
-#sub _compare_file_fs_fs {
-#    my ($chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r) = @_;
-#
-#    my @fh;
-#
-#    DIR:
-#    for my $f ( $chdir_l, $chdir_r ) {
-#        $f->($dirs_ref);
-#
-#        if ( open my $fh, '<', $filename ) {
-#            push @fh, $fh;
-#            next DIR;
-#        }
-#
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
-#        my $msg = ": $!";
-#        $msg = cwd() . $msg;
-#        $msg = "Cannot read file $filename in $msg";
-#        die "$msg\n";
-#    }
-#
-#    my $rc = compare(@fh);
-#
-#    for my $fh ( @fh ) {
-#        close $fh or die "Cannot read file $filename\n";
-#    }
-#
-#    # File::Compare::compare and its sibling functions return 0 if the files
-#    # are equal, 1 if the files are unequal, or -1 if an error was
-#    # encountered.
-#    return 1 if $rc == 0;
-#    return if $rc == 1;
-#    die "Unable to compare file $filename\n";
-#}
+sub _compare_file_fs_fs {
+    my ( $chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+
+    my @fh;
+
+  DIR:
+    for my $f ( $chdir_l, $chdir_r ) {
+        $f->($dirs_ref);
+
+        my $filename_utf8 = encode( 'UTF-8', $filename );
+
+        if ( open my $fh, '<', $filename_utf8 ) {
+            push @fh, $fh;
+            next DIR;
+        }
+
+        # We have to store $! before calling cwd(), otherwise the
+        # non-failed error of cwd() overwrites the error message
+        my $error = $!;
+
+        require Cwd;
+        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+    }
+
+    my $rc = compare(@fh);
+
+    for my $fh (@fh) {
+        close $fh or die encode( 'UTF-8', "Cannot read file $filename\n" );
+    }
+
+    # File::Compare::compare and its sibling functions return 0 if the files
+    # are equal, 1 if the files are unequal, or -1 if an error was
+    # encountered.
+    return 1 if $rc == 0;
+    return   if $rc == 1;
+    die encode( 'UTF-8', "Unable to compare file $filename\n" );
+}
 
 ## $md5_r is not used
 #sub _compare_file_record_fs {
