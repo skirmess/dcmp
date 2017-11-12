@@ -109,7 +109,6 @@ modules = Class::ISA {Found use of Class::ISA. This module is deprecated by the 
 [Subroutines::ProhibitBuiltinHomonyms]
 [Subroutines::ProhibitExcessComplexity]
 [Subroutines::ProhibitExplicitReturnUndef]
-[Subroutines::ProhibitManyArgs]
 [Subroutines::ProhibitNestedSubs]
 [Subroutines::ProhibitReturnSort]
 [Subroutines::RequireArgUnpacking]
