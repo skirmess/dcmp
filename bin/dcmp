@@ -180,32 +180,37 @@ sub _compare_file_fs_fs {
     die encode( 'UTF-8', "Unable to compare file $filename\n" );
 }
 
-## $md5_r is not used
-#sub _compare_file_record_fs {
-#    my ($chdir_r, $dirs_ref, $filename, $md5_l, $md5_r) = @_;
+# $md5_r is not used
+sub _compare_file_record_fs {
+    my ( $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
 
-#    require Digest::MD5;
-#    my $md5 = Digest::MD5->new();
+    require Digest::MD5;
+    my $md5 = Digest::MD5->new();
 
-#    $chdir_r->($dirs_ref);
+    $chdir_r->($dirs_ref);
 
-#    my $fh;
-#    if ( !open $fh, '<', $filename ) {
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
-#        my $msg = ": $!";
-#        $msg = cwd() . $msg;
-#        $msg = "Cannot read file $filename in $msg";
-#        die "$msg\n";
-#    }
+    my $filename_utf8 = encode( 'UTF-8', $filename );
 
-#    binmode $fh;
-#    $md5->addfile($fh);
-#    close $fh or die "Unable to read file $filename: $!";
+    my $fh;
+    if ( !open $fh, '<', $filename_utf8 ) {
 
-#    return 1 if lc $md5_l eq lc $md5->hexdigest();
-#    return;
-#}
+        # We have to store $! before calling cwd(), otherwise the
+        # non-failed error of cwd() overwrites the error message
+        my $error = $!;
+
+        require Cwd;
+        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+    }
+
+    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
+    $md5->addfile($fh);
+    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!" );
+
+    return 1 if lc $md5_l eq lc $md5->hexdigest();
+    return;
+}
 
 ## $dirs_ref and $filename is not used
 #sub _compare_file_record_record {
