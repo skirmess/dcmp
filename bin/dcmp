@@ -212,11 +212,11 @@ sub _compare_file_record_fs {
     return;
 }
 
-## $dirs_ref and $filename is not used
-#sub _compare_file_record_record {
-#    my ($dirs_ref, $filename, $md5_l, $md5_r) = @_;
-#    return lc $md5_l eq lc $md5_r;
-#}
+# $dirs_ref and $filename is not used
+sub _compare_file_record_record {
+    my ( $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+    return lc $md5_l eq lc $md5_r;
+}
 
 #sub _dcmp {
 #    my ($_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer) = @_;
