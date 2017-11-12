@@ -1,6 +1,7 @@
 requires "Cwd" => "0";
 requires "Digest::MD5" => "0";
 requires "Encode" => "0";
+requires "File::Compare" => "0";
 requires "File::Spec" => "0";
 requires "constant" => "1.01";
 requires "perl" => "5.006";
@@ -11,6 +12,7 @@ on 'test' => sub {
   requires "Capture::Tiny" => "0";
   requires "POSIX" => "0";
   requires "Test::Fatal" => "0";
+  requires "Test::MockModule" => "0";
   requires "Test::More" => "0.88";
   requires "Test::TempDir::Tiny" => "0";
   requires "autodie" => "0";
