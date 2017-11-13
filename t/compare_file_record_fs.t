@@ -9,6 +9,7 @@ use Test::Fatal;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
+use Cwd 'cwd';
 use Digest::MD5;
 use Encode;
 
@@ -40,9 +41,19 @@ sub main {
 
         like( exception { App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \QCannot chdir to $tmpdir\E /xsm" ), '_chdir throws an error if basedir does not exist' );
 
-        mkdir encode( 'UTF-8', File::Spec->catdir( $tmpdir, $dir ) );
+        my $basedir = cwd();
 
-        like( exception { App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \QCannot read file $file in $tmpdir\E /xsm" ), '_compare_file_record_fs throws an error if the file cannot be read' );
+        # cwd returns Unix dir separator on Windows but tempdir returns
+        # Windows path separator on Windows. The error message in dcmp is
+        # generated with cwd.
+        my $_tmpdir = File::Spec->catdir( $tmpdir, $dir );
+        mkdir encode( 'UTF-8', $_tmpdir );
+        chdir encode( 'UTF-8', $_tmpdir );
+        $_tmpdir = decode( 'UTF-8', cwd() );
+
+        chdir $basedir;
+
+        like( exception { App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \QCannot read file $file in $_tmpdir\E /xsm" ), '_compare_file_record_fs throws an error if the file cannot be read' );
 
         open my $fh, '>', encode( 'UTF-8', File::Spec->catfile( $tmpdir, $dir, $file ) );
         print {$fh} 'hello world';
