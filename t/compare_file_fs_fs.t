@@ -10,6 +10,7 @@ use Test::MockModule;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
+use Cwd 'cwd';
 use Encode;
 use File::Spec;
 
@@ -64,10 +65,22 @@ sub main {
                 like( exception { App::DCMP::_compare_file_fs_fs( $chdir_l, $chdir_r, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \QCannot chdir to $tmpdir_r\E /xsm" ), 'right _chdir throws an error if basedir does not exist' );
 
                 #
+                my $basedir = cwd();
+
+                # cwd returns Unix dir separator on Windows but tempdir returns
+                # Windows path separator on Windows. The error message in dcmp is
+                # generated with cwd.
                 $tmpdir_l = File::Spec->catdir( tempdir(), $dir_l );
                 mkdir encode( 'UTF-8', $tmpdir_l );
+                chdir encode( 'UTF-8', $tmpdir_l );
+                $tmpdir_l = decode( 'UTF-8', cwd() );
+
                 $tmpdir_r = File::Spec->catdir( tempdir(), $dir_r );
                 mkdir encode( 'UTF-8', $tmpdir_r );
+                chdir encode( 'UTF-8', $tmpdir_r );
+                $tmpdir_r = decode( 'UTF-8', cwd() );
+
+                chdir $basedir;
 
                 $chdir_l = sub { App::DCMP::_chdir( $tmpdir_l, @_ ) };
                 $chdir_r = sub { App::DCMP::_chdir( $tmpdir_r, @_ ) };
