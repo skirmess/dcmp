@@ -387,14 +387,6 @@ sub _iterator_dir_fs {
 
     my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { decode( 'UTF-8', $_ ) } readdir $fh;
 
-
-    use Data::Dumper;
-    for my $d (@stack) {
-        print STDERR "------------------\n";
-        print STDERR Dumper($d);
-        print STDERR "==================\n";
-    }
-
     if ( !closedir $fh ) {
 
         # We have to store $! before calling cwd(), otherwise the

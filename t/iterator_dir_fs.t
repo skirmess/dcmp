@@ -244,9 +244,9 @@ sub main {
             for my $state ( 0 .. 3 ) {
                 my @ignore =
                     $state == 0 ? ()
-                  : $state == 1 ? ($dir_a)
-                  : $state == 2 ? ( $dir_a, $dir_b )
-                  : $state == 3 ? ( $dir_a, $dir_b, $file_d )
+                  : $state == 1 ? ( _normalize_filename($dir_a) )
+                  : $state == 2 ? ( _normalize_filename($dir_a), _normalize_filename($dir_b) )
+                  : $state == 3 ? ( _normalize_filename($dir_a), _normalize_filename($dir_b), _normalize_filename($file_d) )
                   :               BAIL_OUT 'internal error';
 
                 if ( !@ignore ) {
