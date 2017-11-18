@@ -16,6 +16,9 @@
 [-ErrorHandling::RequireCarping]
 
 #
+[-ErrorHandling::RequireCheckingReturnValueOfEval]
+
+#
 [-Freenode::Prototypes]
 
 #

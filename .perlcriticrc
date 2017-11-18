@@ -51,7 +51,6 @@ verbose = [%p] %m at %f line %l, near '%r'\n
 [Documentation::RequirePodLinksIncludeText]
 #[Documentation::RequirePodSections]
 
-[ErrorHandling::RequireCheckingReturnValueOfEval]
 [InputOutput::ProhibitBacktickOperators]
 [InputOutput::ProhibitBarewordFileHandles]
 [InputOutput::ProhibitExplicitStdin]

@@ -30,6 +30,15 @@ sub main {
 
     my $basedir = cwd();
 
+    my $symlink_supported = 0;
+    {
+        no autodie;
+        eval {
+            symlink q{}, q{};
+            $symlink_supported = 1;
+        };
+    }
+
     for my $suffix (@suffixes) {
         note(q{----------------------------------------------------------});
         note( encode( 'UTF-8', "suffix: $suffix" ) );
@@ -58,7 +67,9 @@ sub main {
 
             mkdir $dir_c_utf8;
 
-            symlink $file_a_utf8, $symlink_d_utf8;
+            if ($symlink_supported) {
+                symlink $file_a_utf8, $symlink_d_utf8;
+            }
 
             chdir $basedir;
 
@@ -100,15 +111,17 @@ sub main {
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
 
-            #
-            note('fourth file info');
-            $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3,          '... consisting of three values' );
-            is( ${$file_info}[0],     $symlink_d, '... the file name' );
-            like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
-            is( ${$file_info}[1], App::DCMP::FILE_TYPE_SYMLINK(), '... which is from a symlink' );
-            is( ${$file_info}[2], $file_a, '... the links target' );
+            if ($symlink_supported) {
+                #
+                note('fourth file info');
+                $file_info = $it->();
+                is( ref $file_info, ref [], 'file info is an array ref' );
+                is( scalar @{$file_info}, 3,          '... consisting of three values' );
+                is( ${$file_info}[0],     $symlink_d, '... the file name' );
+                like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                is( ${$file_info}[1], App::DCMP::FILE_TYPE_SYMLINK(), '... which is from a symlink' );
+                is( ${$file_info}[2], $file_a, '... the links target' );
+            }
 
         }
 
@@ -146,7 +159,9 @@ sub main {
 
             mkdir $dir_cc_utf8;
 
-            symlink $file_aa_utf8, $symlink_dd_utf8;
+            if ($symlink_supported) {
+                symlink $file_aa_utf8, $symlink_dd_utf8;
+            }
 
             chdir $basedir;
 
@@ -182,16 +197,17 @@ sub main {
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
 
-            #
-            note('fourth file info');
-            $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3,           '... consisting of three values' );
-            is( ${$file_info}[0],     $symlink_dd, '... the file name' );
-            like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
-            is( ${$file_info}[1], App::DCMP::FILE_TYPE_SYMLINK(), '... which is from a symlink' );
-            is( ${$file_info}[2], $file_aa, '... the links target' );
-
+            if ($symlink_supported) {
+                #
+                note('fourth file info');
+                $file_info = $it->();
+                is( ref $file_info, ref [], 'file info is an array ref' );
+                is( scalar @{$file_info}, 3,           '... consisting of three values' );
+                is( ${$file_info}[0],     $symlink_dd, '... the file name' );
+                like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                is( ${$file_info}[1], App::DCMP::FILE_TYPE_SYMLINK(), '... which is from a symlink' );
+                is( ${$file_info}[2], $file_aa, '... the links target' );
+            }
         }
 
         {
