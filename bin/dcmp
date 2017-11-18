@@ -32,9 +32,13 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO try to fix some more critic exceptions
 # TODO add version to dcmp file
 # TODO allow comments in dcmp file
+# TODO allow empty lines in dcmp file
 # TODO check return of encode/decode?
 # TODO LEAVE_SRC?
 # TODO start all constants with 1!
+# TODO move shared test code to t/lib module
+# TODO -i ignore dir
+# TODO -I ignore/path/x/y
 
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
