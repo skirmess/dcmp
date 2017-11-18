@@ -30,6 +30,11 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO create a function for _cwd
 # TODO create a die/encode/_cwd function
 # TODO try to fix some more critic exceptions
+# TODO add version to dcmp file
+# TODO allow comments in dcmp file
+# TODO check return of encode/decode?
+# TODO LEAVE_SRC?
+# TODO start all constants with 1!
 
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
