@@ -41,9 +41,6 @@ verbose = [%p] %m at %f line %l, near '%r'\n
 [ControlStructures::ProhibitLabelsWithSpecialBlockNames]
 [ControlStructures::ProhibitMutatingListFunctions]
 [ControlStructures::ProhibitNegativeExpressionsInUnlessAndUntilConditions]
-[ControlStructures::ProhibitPostfixControls]
-
-flowcontrol = skip
 [ControlStructures::ProhibitUnlessBlocks]
 [ControlStructures::ProhibitUnreachableCode]
 [ControlStructures::ProhibitUntilBlocks]
@@ -107,7 +104,6 @@ modules = Class::ISA {Found use of Class::ISA. This module is deprecated by the 
 [RegularExpressions::RequireLineBoundaryMatching]
 [Subroutines::ProhibitAmpersandSigils]
 [Subroutines::ProhibitBuiltinHomonyms]
-[Subroutines::ProhibitExcessComplexity]
 [Subroutines::ProhibitExplicitReturnUndef]
 [Subroutines::ProhibitNestedSubs]
 [Subroutines::ProhibitReturnSort]
@@ -146,7 +142,7 @@ forbid_use_version = 1
 [Variables::ProhibitPerl4PackageNames]
 
 [Variables::ProhibitPunctuationVars]
-allow = $@ $! $/ $0 $^O
+allow = $@ $! $/ $0 $^O $.
 
 [Variables::ProhibitReusedNames]
 [Variables::ProhibitUnusedVariables]

@@ -26,6 +26,11 @@ use constant FILE_TYPE_UNKNOWN    => 3;    # ?
 use constant FILE_CONTENT_DIFFERS => 4;    # M
 use constant LINK_TARGET_DIFFERS  => 5;    # L
 
+# TODO put die encode() in it's own function
+# TODO create a function for _cwd
+# TODO create a die/encode/_cwd function
+# TODO try to fix some more critic exceptions
+
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
 
@@ -331,152 +336,195 @@ sub _compare_file_record_record {
 #    return;
 #}
 
-#sub _iterator_dir_fs {
-#    my ($chdir, $collect_file_info, $ignore_ref, $dirs_ref) = @_;
+{
+    my %escapes = map { chr $_ => sprintf '%%%02X', $_ } (
+        0 .. 0x1F,    # unprintable
+        0x20,         # whitespace
+        0x25,         # %
+        0x7F,         # unprintable
+    );
+    my $chars_to_replace = join q{}, map { quotemeta } keys %escapes;
 
-#    $chdir->($dirs_ref);
+    sub _escape_filename {
+        my ($filename) = @_;
 
-#    my %ignore;
-#    if ( defined $ignore_ref ) {
-#        @ignore{@{ $ignore_ref }} = 1;
-#    }
+        $filename =~ s{([$chars_to_replace])}{$escapes{$1}}xsmge;
+        return $filename;
+    }
+}
 
-#    my $fh;
-#    opendir $fh, '.';
-#    my @STACK = map { $collect_file_info->($_) } sort grep { $_ ne '.' && $_ ne '..' && !exists $ignore{$_} } readdir $fh;
-#    closedir $fh;
+sub _iterator_dir_fs {
+    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
 
-#    return sub {
-#        return if !@STACK;
-#        return shift @STACK;
-#    };
-#}
+    $chdir->($dirs_ref);
 
-#sub _load_dcmp_file {
-#    my ($filename, $ignore_ref) = @_;
+    my %ignore;
+    if ( defined $ignore_ref ) {
+        @ignore{ @{$ignore_ref} } = 1;
+    }
 
-#    my %ignore;
-#    if ( defined $ignore_ref ) {
-#        @ignore{@{ $ignore_ref }} = 1;
-#    }
+    my $fh;
+    if ( !opendir $fh, q{.} ) {
 
-#    my %path;
-#    my %file_seen;
-#    my @dirs;
+        # We have to store $! before calling cwd(), otherwise the
+        # non-failed error of cwd() overwrites the error message
+        my $error = $!;
 
-#    open my $fh, '<', $filename or die "Cannot read file $filename: $!\n";
-#    my $last_line_seen = 0;
-#    LINE:
-#    while (my $line = <$fh>) {
-#        if ( $last_line_seen ) {
-#            # The -DIR entry removes an element from @dirs. There is an
-#            # additional -DIR at the end of the dcmp file. If no element
-#            # can be removed from @dirs the $last_line_seen is set. But
-#            # that should only happen at the end of the file. If there
-#            # are more lines the file must be invalid.
-#            my $line_nr = $. - 1;
-#            die "Unbalanced -DIR on line $line_nr in file $filename\n";
-#        }
+        require Cwd;
+        my $cwd = decode( 'UTF-8', Cwd::cwd() );
 
-#        if ( $line =~ m{ ^ - DIR $ }xsm ) {
-#            if ( @dirs ) {
-#                pop @dirs;
-#            }
-#            else {
-#                $last_line_seen = 1;
-#            }
-#            next LINE;
-#        }
+        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
+    }
 
-#        # The current file is under $path
-#        my $path = File::Spec->catdir(@dirs);
+    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { decode( 'UTF-8', $_ ) } readdir $fh;
 
-#        #
-#        chomp $line;
+    if ( !closedir $fh ) {
 
-#        # From here on every line contains at leas an ACTION and a NAME
-#        my @line = split /\s+/, $line;
-#        die "Incorrect number of arguments at line $. in file $filename\n" if @line < 2;
+        # We have to store $! before calling cwd(), otherwise the
+        # non-failed error of cwd() overwrites the error message
+        my $error = $!;
 
-#        my $action = shift @line;
-#        my $name = shift @line;
+        require Cwd;
+        my $cwd = decode( 'UTF-8', Cwd::cwd() );
 
-#        # Every directory must not contain files with the same name
-#        if ( exists $file_seen{$path}{$name} ) {
-#            my $msg = "Duplicate entry for $name";
-#            if ( length $path ) {
-#                $msg .= " under path $path";
-#            }
-#            die "$msg at line $. in file $filename\n";
-#        }
-#        $file_seen{$path}{$name} = 1;
+        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
+    }
 
-#        #
-#        if ( $action eq 'FILE' ) {
-#            die "Incorrect number of arguments for FILE entry at line $. in file $filename\n" if @line != 2;
+    return sub {
+        return if !@stack;
+        return shift @stack;
+    };
+}
 
-#            my ( $size, $md5 ) = @line;
+sub _load_dcmp_file {
+    my ( $filename, $ignore_ref ) = @_;
 
-#            push @{$path{$path}}, [ $name, S_IFREG, $size, $md5 ];
-#            next LINE;
-#        }
+    my %ignore;
+    if ( defined $ignore_ref ) {
+        @ignore{ @{$ignore_ref} } = 1;
+    }
 
-#        #
-#        if ( $action eq 'DIR' ) {
-#            die "Incorrect number of arguments for DIR entry at line $. in file $filename\n" if @line != 0;
+    my %path;
+    my %file_seen;
+    my @dirs;
 
-#            push @{ $path{$path} }, [ $name, S_IFDIR ];
-#            push @dirs, $name;
+    open my $fh, '<:encoding(UTF-8)', encode( 'UTF-8', $filename ) or die encode( 'UTF-8', "Cannot read file $filename: $!\n" );
+    my $last_line_seen = 0;
+  LINE:
+    while ( my $line = <$fh> ) {
+        if ($last_line_seen) {
 
-#            next LINE;
-#        }
+            # The -DIR entry removes an element from @dirs. There is an
+            # additional -DIR at the end of the dcmp file. If no element
+            # can be removed from @dirs the $last_line_seen is set. But
+            # that should only happen at the end of the file. If there
+            # are more lines the file must be invalid.
+            my $line_nr = $. - 1;
+            die encode( 'UTF-8', "Unbalanced -DIR on line $line_nr in file $filename\n" );
+        }
 
-#        #
-#        if ( $action eq 'LINK' ) {
-#            die "Incorrect number of arguments for LINK entry at line $. in file $filename\n" if @line != 1;
-#            my ($target) = @line;
-#            push @{ $path{$path} }, [ $name, S_IFLNK, $target ];
+        if ( $line =~ m{ ^ - DIR $ }xsm ) {
+            if (@dirs) {
+                pop @dirs;
+            }
+            else {
+                $last_line_seen = 1;
+            }
+            next LINE;
+        }
 
-#            next LINE;
-#        }
+        # The current file is under $path
+        my $path = File::Spec->catdir(@dirs);
 
-#        #
-#        die "Invalid entry on line $. in file $filename\n";
-#    }
-#    close $fh or die "Cannot read file $filename: $!";
+        #
+        chomp $line;
 
-#    die "Unbalanced -DIR at end of file $filename\n" if !$last_line_seen;
+        # From here on every line contains at least an ACTION and a NAME
+        my @line = split /\s+/xsm, $line;
+        die encode( 'UTF-8', "Incorrect number of arguments at line $. in file $filename\n" ) if @line < 2;
 
-#    # Remove ignored files from out loaded dcmp file.
-#    #
-#    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
-#    # get out of sync.
-#    PATH:
-#    for my $path ( keys %path ) {
-#        for my $dir ( File::Spec->splitdir($path) ) {
-#            if (exists $ignore{$dir}) {
-#                delete $path{$path};
-#                next PATH;
-#            }
-#        }
+        my $action = shift @line;
+        my $name   = _unescape_filename( shift @line );
 
-#        @{ $path{$path} } = grep { !exists $ignore{${$_}[0]} } @{ $path{$path} };
-#    }
+        # Every directory must not contain files with the same name
+        if ( exists $file_seen{$path}{$name} ) {
+            my $msg = "Duplicate entry for $name";
+            if ( length $path ) {
+                $msg .= " under path $path";
+            }
+            die encode( 'UTF-8', "$msg at line $. in file $filename\n" );
+        }
+        $file_seen{$path}{$name} = 1;
 
-#    # the returned sub is used instead of _iterate_dir_fs if the information
-#    # comes from a dcmp file instead of a directory structure on the disk.
-#    return sub {
-#        my ($dirs_ref) = @_;
-#        my $path = File::Spec->catdir(@{ $dirs_ref });
+        #
+        if ( $action eq 'FILE' ) {
+            die encode( 'UTF-8', "Incorrect number of arguments for FILE entry at line $. in file $filename\n" ) if @line != 2;
 
-#        my @STACK = sort { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} };
+            my ( $size, $md5 ) = @line;
 
-#        return sub {
-#            return if !@STACK;
-#            return shift @STACK;
-#        };
-#    };
-#}
+            push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
+            next LINE;
+        }
+
+        #
+        if ( $action eq 'DIR' ) {
+            die encode( 'UTF-8', "Incorrect number of arguments for DIR entry at line $. in file $filename\n" ) if @line != 0;
+
+            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
+            push @dirs, $name;
+
+            next LINE;
+        }
+
+        #
+        if ( $action eq 'LINK' ) {
+            die encode( 'UTF-8', "Incorrect number of arguments for LINK entry at line $. in file $filename\n" ) if @line != 1;
+            my ($target) = @line;
+            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, $target ];
+
+            next LINE;
+        }
+
+        #        #
+        die encode( 'UTF-8', "Invalid entry on line $. in file $filename\n" );
+    }
+    close $fh or die encode( 'UTF-8', "Cannot read file $filename: $!" );
+
+    die encode( 'UTF-8', "Unbalanced -DIR at end of file $filename\n" ) if !$last_line_seen;
+
+    # Remove ignored files from out loaded dcmp file.
+    #
+    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
+    # get out of sync.
+  PATH:
+    for my $path ( keys %path ) {
+        for my $dir ( File::Spec->splitdir($path) ) {
+            if ( exists $ignore{$dir} ) {
+                delete $path{$path};
+                next PATH;
+            }
+        }
+
+        @{ $path{$path} } = grep { !exists $ignore{ ${$_}[0] } } @{ $path{$path} };
+    }
+
+    # the returned sub is used instead of _iterate_dir_fs if the information
+    # comes from a dcmp file instead of a directory structure on the disk.
+    return sub {
+        my ($dirs_ref) = @_;
+        my $path = File::Spec->catdir( @{$dirs_ref} );
+
+        my @stack =
+          defined $path{$path}
+          ? sort { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} }
+          : ();
+
+        return sub {
+            return if !@stack;
+            return shift @stack;
+        };
+    };
+}
 
 #sub _merge_iterators {
 #    my ($it_l, $it_r) = @_;
@@ -581,6 +629,14 @@ sub _print_changes {
 
 #    return;
 #}
+
+sub _unescape_filename {
+    my ($filename) = @_;
+
+    $filename =~ s{ [%] ([0-9A-Fa-f]{2}) }{chr(hex($1))}xsmeg;
+
+    return $filename;
+}
 
 ## untested
 

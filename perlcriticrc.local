@@ -7,8 +7,10 @@
 # tmp
 [-Bangs::ProhibitFlagComments]
 
-[ControlStructures::ProhibitPostfixControls]
-flowcontrol = skip
+# broken
+[-ControlStructures::ProhibitPostfixControls]
+#[ControlStructures::ProhibitPostfixControls]
+#flowcontrol = skip
 
 #
 [-ErrorHandling::RequireCarping]
@@ -24,6 +26,9 @@ flowcontrol = skip
 
 # \d is stupid because it is not even remotely the same as [0-9]
 [-RegularExpressions::ProhibitEnumeratedClasses]
+
+#
+[-Subroutines::ProhibitExcessComplexity]
 
 #
 [-Subroutines::ProhibitManyArgs]
@@ -59,4 +64,4 @@ flowcontrol = skip
 [-Variables::ProhibitPackageVars]
 
 [Variables::ProhibitPunctuationVars]
-allow = $@ $! $/ $0 $^O
+allow = $@ $! $/ $0 $^O $.
