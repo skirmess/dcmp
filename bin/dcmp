@@ -535,39 +535,39 @@ sub _load_dcmp_file {
     };
 }
 
-#sub _merge_iterators {
-#    my ($it_l, $it_r) = @_;
+sub _merge_iterators {
+    my ( $it_l, $it_r ) = @_;
 
-#    my $next_l = defined $it_l ? $it_l->() : undef;
-#    my $next_r = defined $it_r ? $it_r->() : undef;
+    my $next_l = defined $it_l ? $it_l->() : undef;
+    my $next_r = defined $it_r ? $it_r->() : undef;
 
-#    return sub {
-#        return if !defined $next_l && !defined $next_r;
+    return sub {
+        return if !defined $next_l && !defined $next_r;
 
-#        my $current_l = $next_l;
-#        my $current_r = $next_r;
+        my $current_l = $next_l;
+        my $current_r = $next_r;
 
-#        if ( !defined $next_l ) {
-#            $next_r = $it_r->();
-#            return [ undef , $current_r ];
-#        }
+        if ( !defined $next_l ) {
+            $next_r = $it_r->();
+            return [ undef, $current_r ];
+        }
 
-#        if ((!defined $next_r) || (${$next_l}[0] lt ${$next_r}[0])) {
-#            $next_l = $it_l->();
-#            return [ $current_l , undef ];
-#        }
+        if ( ( !defined $next_r ) || ( ${$next_l}[0] lt ${$next_r}[0] ) ) {
+            $next_l = $it_l->();
+            return [ $current_l, undef ];
+        }
 
-#        if (${$next_l}[0] gt ${$next_r}[0]) {
-#            $next_r = $it_r->();
-#            return [ undef , $current_r ];
-#        }
+        if ( ${$next_l}[0] gt ${$next_r}[0] ) {
+            $next_r = $it_r->();
+            return [ undef, $current_r ];
+        }
 
-#        $next_l = $it_l->();
-#        $next_r = $it_r->();
+        $next_l = $it_l->();
+        $next_r = $it_r->();
 
-#        return [ $current_l, $current_r ];
-#    };
-#}
+        return [ $current_l, $current_r ];
+    };
+}
 
 sub _print_changes {
     my @status_code;
