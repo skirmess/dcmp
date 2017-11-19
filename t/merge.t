@@ -108,15 +108,15 @@ sub main {
                     is( ref ${$merged_file_info}[1], ref [], '... second value is an array ref' );
 
                     my $file_info = ${$merged_file_info}[0];
-                    is( scalar @{$file_info}, 3,       '... first consists of three values' );
-                    is( ${$file_info}[0],     $file_a, '... the file name' );
+                    is( scalar @{$file_info}, 3, '... first consists of three values' );
+                    is( ${$file_info}[0], _normalize_filename($file_a), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
 
                     $file_info = ${$merged_file_info}[1];
-                    is( scalar @{$file_info}, 3,       '... second consists of three values' );
-                    is( ${$file_info}[0],     $file_a, '... the file name' );
+                    is( scalar @{$file_info}, 3, '... second consists of three values' );
+                    is( ${$file_info}[0], _normalize_filename($file_a), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
@@ -131,8 +131,8 @@ sub main {
 
                     $file_info = ${$merged_file_info}[0];
                     is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 3,       '... consisting of three values' );
-                    is( ${$file_info}[0],     $file_b, '... the file name' );
+                    is( scalar @{$file_info}, 3, '... consisting of three values' );
+                    is( ${$file_info}[0], _normalize_filename($file_b), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
@@ -148,8 +148,8 @@ sub main {
 
                     $file_info = ${$merged_file_info}[1];
                     is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 3,       '... consisting of three values' );
-                    is( ${$file_info}[0],     $file_c, '... the file name' );
+                    is( scalar @{$file_info}, 3, '... consisting of three values' );
+                    is( ${$file_info}[0], _normalize_filename($file_c), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
@@ -164,8 +164,8 @@ sub main {
 
                     $file_info = ${$merged_file_info}[0];
                     is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 3,       '... consisting of three values' );
-                    is( ${$file_info}[0],     $file_d, '... the file name' );
+                    is( scalar @{$file_info}, 3, '... consisting of three values' );
+                    is( ${$file_info}[0], _normalize_filename($file_d), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
@@ -182,8 +182,8 @@ sub main {
 
                         $file_info = ${$merged_file_info}[1];
                         is( ref $file_info, ref [], 'file info is an array ref' );
-                        is( scalar @{$file_info}, 3,       '... consisting of three values' );
-                        is( ${$file_info}[0],     $file_e, '... the file name' );
+                        is( scalar @{$file_info}, 3, '... consisting of three values' );
+                        is( ${$file_info}[0], _normalize_filename($file_e), '... the file name' );
                         like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                         is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                         is( ${$file_info}[2], 0, '... the file size' );
@@ -201,6 +201,40 @@ sub main {
     done_testing();
 
     exit 0;
+}
+
+# If the OS/filesystem normalizes the Unicode file name, the file name read
+# with readdir might return a UTF-8 string that differs from the UTF-8 string
+# that was used to create the file. OS/X does that. This function is used to
+# normalize the file name in the same way.
+{
+    my %normalized_filename;
+
+    sub _normalize_filename {
+        my ($filename) = @_;
+
+        if ( !exists $normalized_filename{$filename} ) {
+            my $tmpdir  = tempdir();
+            my $basedir = cwd();
+
+            chdir $tmpdir;
+            open my $fh, '>', encode( 'UTF-8', $filename );
+            close $fh;
+
+            opendir $fh, q{.};
+            my @dents = grep { $_ ne q{.} && $_ ne q{..} } readdir $fh;
+            closedir $fh;
+
+            chdir $basedir;
+
+            die encode( 'UTF-8', "Expected a single file in $tmpdir but got " . scalar(@dents) . " for $filename: " . join( q{ }, @dents ) . "\n" ) if @dents != 1;
+
+            $normalized_filename{$filename} = decode( 'UTF-8', $dents[0] );
+        }
+
+        return $normalized_filename{$filename};
+
+    }
 }
 
 # vim: ts=4 sts=4 sw=4 et: syntax=perl
