@@ -590,54 +590,56 @@ sub _print_changes {
     };
 }
 
-#sub _print_dcmp_file {
-#    my ($_iterate_dir) = @_;
+sub _print_dcmp_file {
+    my ($_iterate_dir) = @_;
 
-#    my @dirs;
+    my @dirs;
 
-#    my $iterate_dir = sub {
-#        return $_iterate_dir->(\@dirs);
-#    };
+    my $iterate_dir = sub {
+        return $_iterate_dir->( \@dirs );
+    };
 
-#    my @iterators;
-#    push @iterators, $iterate_dir->();
+    my @iterators;
+    push @iterators, $iterate_dir->();
 
-#    while (@iterators) {
-#        FILE:
-#        while (defined (my $file_info = $iterators[-1]->())) {
-#            my ($name, $mode) = @{ $file_info };
+    while (@iterators) {
+      FILE:
+        while ( defined( my $file_info = $iterators[-1]->() ) ) {
+            my ( $name, $mode ) = @{$file_info};
+            my $name_escaped = _escape_filename($name);
 
-#            if ( S_ISLNK( $mode ) ) {
-#                my ($link) = ${$file_info}[2];
-#                print "LINK $name $link\n";
-#                next FILE;
-#            }
+            if ( $mode == FILE_TYPE_SYMLINK ) {
+                my ($link) = ${$file_info}[2];
+                my $link_escaped = _escape_filename($link);
+                print encode( 'UTF-8', "LINK $name_escaped $link_escaped\n" );
+                next FILE;
+            }
 
-#            if ( S_ISDIR($mode) ) {
-#                print "DIR $name\n";
+            if ( $mode == FILE_TYPE_DIRECTORY ) {
+                print encode( 'UTF-8', "DIR $name_escaped\n" );
 
-#                push @dirs, $name;
-#                push @iterators, $iterate_dir->();
+                push @dirs,      $name;
+                push @iterators, $iterate_dir->();
 
-#                next FILE;
-#            }
+                next FILE;
+            }
 
-#            if ( S_ISREG($mode) ) {
-#                my ($size, $md5) = @{$file_info}[2,3];
-#                print "FILE $name $size $md5\n";
-#                next FILE;
-#            }
+            if ( $mode == FILE_TYPE_REGULAR ) {
+                my ( $size, $md5 ) = @{$file_info}[ 2, 3 ];
+                print encode( 'UTF-8', "FILE $name_escaped $size $md5\n" );
+                next FILE;
+            }
 
-#            die "Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File " . File::Spec->catfile(@dirs, $name) . " is something else.\n";
-#        }
+            die encode( 'UTF-8', 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n" );
+        }
 
-#        pop @iterators;
-#        pop @dirs;
-#        print "-DIR\n";
-#    }
+        pop @iterators;
+        pop @dirs;
+        print "-DIR\n";
+    }
 
-#    return;
-#}
+    return;
+}
 
 sub _unescape_filename {
     my ($filename) = @_;
