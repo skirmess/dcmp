@@ -36,22 +36,22 @@ sub main {
         $suffix_escaped =~ s{[ ]}{%20}xsmg;
         $suffix_escaped =~ s{\n}{%0A}xsmg;
 
-        my $dir                    = "dir${suffix}";
-        my $dir_escaped            = "dir${suffix_escaped}";
+        my $dir                    = _normalize_filename("dir${suffix}");
+        my $dir_escaped            = _normalize_filename("dir${suffix_escaped}");
         my $dir_utf8               = encode( 'UTF-8', $dir );
-        my $file                   = "file${suffix}.txt";
-        my $file_escaped           = "file${suffix_escaped}.txt";
+        my $file                   = _normalize_filename("file${suffix}.txt");
+        my $file_escaped           = _normalize_filename("file${suffix_escaped}.txt");
         my $file_utf8              = encode( 'UTF-8', $file );
-        my $file2                  = "file2${suffix}.txt";
-        my $file2_escaped          = "file2${suffix_escaped}.txt";
-        my $invalid_link           = "invalid_link${suffix}.txt";
-        my $invalid_link_escaped   = "invalid_link${suffix_escaped}.txt";
+        my $file2                  = _normalize_filename("file2${suffix}.txt");
+        my $file2_escaped          = _normalize_filename("file2${suffix_escaped}.txt");
+        my $invalid_link           = _normalize_filename("invalid_link${suffix}.txt");
+        my $invalid_link_escaped   = _normalize_filename("invalid_link${suffix_escaped}.txt");
         my $invalid_link_utf8      = encode( 'UTF-8', $invalid_link );
-        my $invalid_target         = "invalid_target${suffix}.txt";
-        my $invalid_target_escaped = "invalid_target${suffix_escaped}.txt";
+        my $invalid_target         = _normalize_filename("invalid_target${suffix}.txt");
+        my $invalid_target_escaped = _normalize_filename("invalid_target${suffix_escaped}.txt");
         my $invalid_target_utf8    = encode( 'UTF-8', $invalid_target );
-        my $valid_link             = "valid_link${suffix}.txt";
-        my $valid_link_escaped     = "valid_link${suffix_escaped}.txt";
+        my $valid_link             = _normalize_filename("valid_link${suffix}.txt");
+        my $valid_link_escaped     = _normalize_filename("valid_link${suffix_escaped}.txt");
         my $valid_link_utf8        = encode( 'UTF-8', $valid_link );
 
         my $tmpdir = tempdir();
@@ -99,6 +99,40 @@ sub main {
     done_testing();
 
     exit 0;
+}
+
+# If the OS/filesystem normalizes the Unicode file name, the file name read
+# with readdir might return a UTF-8 string that differs from the UTF-8 string
+# that was used to create the file. OS/X does that. This function is used to
+# normalize the file name in the same way.
+{
+    my %normalized_filename;
+
+    sub _normalize_filename {
+        my ($filename) = @_;
+
+        if ( !exists $normalized_filename{$filename} ) {
+            my $tmpdir  = tempdir();
+            my $basedir = cwd();
+
+            chdir $tmpdir;
+            open my $fh, '>', encode( 'UTF-8', $filename );
+            close $fh;
+
+            opendir $fh, q{.};
+            my @dents = grep { $_ ne q{.} && $_ ne q{..} } readdir $fh;
+            closedir $fh;
+
+            chdir $basedir;
+
+            die encode( 'UTF-8', "Expected a single file in $tmpdir but got " . scalar(@dents) . " for $filename: " . join( q{ }, @dents ) . "\n" ) if @dents != 1;
+
+            $normalized_filename{$filename} = decode( 'UTF-8', $dents[0] );
+        }
+
+        return $normalized_filename{$filename};
+
+    }
 }
 
 # vim: ts=4 sts=4 sw=4 et: syntax=perl
