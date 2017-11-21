@@ -26,9 +26,10 @@ use constant FILE_TYPE_UNKNOWN    => 3;    # ?
 use constant FILE_CONTENT_DIFFERS => 4;    # M
 use constant LINK_TARGET_DIFFERS  => 5;    # L
 
-# test
+# TODO change STDOUT to UTF-8 and remove unneeded encodes
+# TODO dcmp sort -> SORT
+# TODO die -> DIE (encode_and_die, die_utf8
 # TODO put die encode() in it's own function
-# TODO create a function for _cwd
 # TODO create a die/encode/_cwd function
 # TODO try to fix some more critic exceptions
 # TODO add version to dcmp file
@@ -40,6 +41,105 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO move shared test code to t/lib module
 # TODO -i ignore dir
 # TODO -I ignore/path/x/y
+# TODO create a function for _cwd
+# TODO _cwd { local $/; require Cwd; return cwd(); }  ???
+# TODO dcmp -v (wie cat -v)?
+#
+# TODO ** cleanup **
+# TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
+
+##!/usr/bin/env perl
+#
+#use strict;
+#use warnings;
+#
+#use Encode;
+#use Unicode::Normalize;
+#
+#my @x = (
+##    "\x{00C0}c",
+#    "\x{00C0}e",
+#    "\x{00C0}aa",
+#    "\x{0041}\x{0300}a",
+#    "\x{00C0}a",
+#    "\x{00C0}a",
+#    "\x{0041}\x{0300}a",
+##    "\x{0041}\x{0300}d",
+##    "\x{0041}\x{0300}f",
+#);
+#
+#sub _sorter {
+#    my $a_n = NFC($a);
+#    my $b_n = NFC($b);
+#
+#    return $a_n eq $b_n ? $a cmp $b : $a_n cmp $b_n;
+##    return NFC($a) cmp NFC($b);
+#}
+#
+#for my $x (sort _sorter @x ) {
+#    print encode('UTF-8', "$x: ");
+#    for my $c ( split //, $x) {
+#        print ord($c), " ";
+#    }
+#    print "\n";
+#}
+
+##!/usr/bin/env perl
+#
+#use strict;
+#use warnings;
+#
+#use Encode;
+#use Unicode::Collate;
+#
+#my @a = map { chr $_ } 65 .. 90;
+#push @a, map { chr $_ } 97 .. 122;
+#
+#push @a, "\x{20ac}", "\x{00C0}", "\x{0041}\x{0300}", "\x{0061}\x{0300}";
+#
+#
+#my $Collator = Unicode::Collate->new();
+#
+## for my $x (sort @a) {
+#for my $x ($Collator->sort(@a)) {
+#    print encode('UTF-8', "->$x\n");
+#}
+
+#  use ^ and M- notation, except for LFD and TAB
+#
+#1 >^A<$
+#2 >^B<$
+#3 >^C<$
+#4 >^D<$
+#5 >^E<$
+#6 >^F<$
+#7 >^G<$
+#8 >^H<$
+#9 >^I<$
+#10 >$
+#<$
+#11 >^K<$
+#12 >^L<$
+#13 >^M<$
+#14 >^N<$
+#15 >^O<$
+#16 >^P<$
+#17 >^Q<$
+#18 >^R<$
+#19 >^S<$
+#20 >^T<$
+#21 >^U<$
+#22 >^V<$
+#23 >^W<$
+#24 >^X<$
+#25 >^Y<$
+#26 >^Z<$
+#27 >^[<$
+#28 >^\<$
+#29 >^]<$
+#30 >^^<$
+#31 >^_<$
+#32 > <$
 
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
