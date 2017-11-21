@@ -26,6 +26,7 @@ use constant FILE_TYPE_UNKNOWN    => 3;    # ?
 use constant FILE_CONTENT_DIFFERS => 4;    # M
 use constant LINK_TARGET_DIFFERS  => 5;    # L
 
+# test
 # TODO put die encode() in it's own function
 # TODO create a function for _cwd
 # TODO create a die/encode/_cwd function
