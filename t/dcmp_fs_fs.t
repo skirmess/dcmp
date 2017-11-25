@@ -8,6 +8,7 @@ use autodie;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
+use Cwd qw(cwd);
 use Encode;
 use File::Spec;
 
@@ -45,17 +46,17 @@ sub main {
                 note(q{----------------------------------------------------------});
                 note( encode( 'UTF-8', "file suffix: $file_suffix" ) );
 
-                my $dir             = "dir${file_suffix}";
-                my $dir2            = "dir2${file_suffix}";
-                my $dir3            = "dir3${file_suffix}";
-                my $dir4            = "dir4${file_suffix}";
-                my $file            = "file${file_suffix}.txt";
-                my $file2           = "file2${file_suffix}.txt";
-                my $invalid_link    = "invalid_link${file_suffix}.txt";
-                my $invalid_target  = "invalid_target${file_suffix}.txt";
-                my $invalid_target2 = "invalid_target2${file_suffix}.txt";
-                my $valid_link      = "valid_link${file_suffix}.txt";
-                my $valid_link2     = "valid_link2${file_suffix}.txt";
+                my $dir             = _normalize_filename("dir${file_suffix}");
+                my $dir2            = _normalize_filename("dir2${file_suffix}");
+                my $dir3            = _normalize_filename("dir3${file_suffix}");
+                my $dir4            = _normalize_filename("dir4${file_suffix}");
+                my $file            = _normalize_filename("file${file_suffix}.txt");
+                my $file2           = _normalize_filename("file2${file_suffix}.txt");
+                my $invalid_link    = _normalize_filename("invalid_link${file_suffix}.txt");
+                my $invalid_target  = _normalize_filename("invalid_target${file_suffix}.txt");
+                my $invalid_target2 = _normalize_filename("invalid_target2${file_suffix}.txt");
+                my $valid_link      = _normalize_filename("valid_link${file_suffix}.txt");
+                my $valid_link2     = _normalize_filename("valid_link2${file_suffix}.txt");
 
                 my $dir_l = File::Spec->catdir( tempdir(), "dirL${dir_l_suffix}" );
                 mkdir encode( 'UTF-8', $dir_l );
@@ -234,6 +235,39 @@ sub main {
     done_testing();
 
     exit 0;
+}
+
+# If the OS/filesystem normalizes the Unicode file name, the file name read
+# with readdir might return a UTF-8 string that differs from the UTF-8 string
+# that was used to create the file. OS/X does that. This function is used to
+# normalize the file name in the same way.
+{
+    my %normalized_filename;
+
+    sub _normalize_filename {
+        my ($filename) = @_;
+
+        if ( !exists $normalized_filename{$filename} ) {
+            my $tmpdir  = tempdir();
+            my $basedir = cwd();
+
+            chdir $tmpdir;
+            open my $fh, '>', encode( 'UTF-8', $filename );
+            close $fh;
+
+            opendir $fh, q{.};
+            my @dents = grep { $_ ne q{.} && $_ ne q{..} } readdir $fh;
+            closedir $fh;
+
+            chdir $basedir;
+
+            die encode( 'UTF-8', "Expected a single file in $tmpdir but got " . scalar(@dents) . " for $filename: " . join( q{ }, @dents ) . "\n" ) if @dents != 1;
+
+            $normalized_filename{$filename} = decode( 'UTF-8', $dents[0] );
+        }
+
+        return $normalized_filename{$filename};
+    }
 }
 
 # vim: ts=4 sts=4 sw=4 et: syntax=perl

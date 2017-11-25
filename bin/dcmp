@@ -53,6 +53,8 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO create a function for _cwd
 # TODO _cwd { local $/; require Cwd; return cwd(); }  ???
 # TODO dcmp -v (wie cat -v)?
+# TODO add comments
+# TODO add documentation
 #
 # TODO ** cleanup **
 # TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
