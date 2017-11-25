@@ -27,6 +27,11 @@ use constant FILE_CONTENT_DIFFERS => 4;    # M
 use constant LINK_TARGET_DIFFERS  => 5;    # L
 
 #
+# TODO add version to dcmp file
+# TODO allow comments in dcmp file
+# TODO allow empty lines in dcmp file
+#
+#
 # TODO ** unordered **
 #
 # TODO rename left/right with 1/2 or reference/workspace or something
@@ -41,9 +46,6 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO put die encode() in it's own function
 # TODO create a die/encode/_cwd function
 # TODO try to fix some more critic exceptions
-# TODO add version to dcmp file
-# TODO allow comments in dcmp file
-# TODO allow empty lines in dcmp file
 # TODO check return of encode/decode?
 # TODO LEAVE_SRC?
 # TODO start all constants with 1!
