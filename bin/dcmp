@@ -19,12 +19,12 @@ use constant FILE_TYPE_OTHER     => 2;
 use constant FILE_TYPE_REGULAR   => 3;
 use constant FILE_TYPE_SYMLINK   => 4;
 
-use constant FILE_ADDITIONAL      => 0;    # +
-use constant FILE_MISSING         => 1;    # -
-use constant FILE_TYPE_DIFFERS    => 2;    # @
-use constant FILE_TYPE_UNKNOWN    => 3;    # ?
-use constant FILE_CONTENT_DIFFERS => 4;    # M
-use constant LINK_TARGET_DIFFERS  => 5;    # L
+use constant FILE_ADDITIONAL      => 1;    # +
+use constant FILE_MISSING         => 2;    # -
+use constant FILE_TYPE_DIFFERS    => 3;    # @
+use constant FILE_TYPE_UNKNOWN    => 4;    # ?
+use constant FILE_CONTENT_DIFFERS => 5;    # M
+use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
 # TODO ** unordered **
@@ -44,7 +44,6 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO try to fix some more critic exceptions
 # TODO check return of encode/decode?
 # TODO LEAVE_SRC?
-# TODO start all constants with 1!
 # TODO move shared test code to t/lib module
 # TODO -i ignore dir
 # TODO -I ignore/path/x/y
