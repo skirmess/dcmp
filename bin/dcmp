@@ -27,9 +27,6 @@ use constant FILE_CONTENT_DIFFERS => 4;    # M
 use constant LINK_TARGET_DIFFERS  => 5;    # L
 
 #
-# TODO add version to dcmp file
-#
-#
 # TODO ** unordered **
 #
 # TODO rename left/right with 1/2 or reference/workspace or something
@@ -540,6 +537,12 @@ sub _load_dcmp_file {
     my @dirs;
 
     open my $fh, '<:encoding(UTF-8)', encode( 'UTF-8', $filename ) or die encode( 'UTF-8', "Cannot read file $filename: $!\n" );
+
+    my $dcmp_header = <$fh>;
+    chomp $dcmp_header;
+
+    die encode( 'UTF-8', "File $filename is not a valid dcmp file\n" ) if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
+
     my $last_line_seen = 0;
   LINE:
     while ( my $line = <$fh> ) {

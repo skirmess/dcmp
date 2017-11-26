@@ -121,6 +121,7 @@ sub main {
                                 open my $fh, '>:encoding(UTF-8)', encode( 'UTF-8', $dcmp_file_1 );
 
                                 print {$fh} <<"RECORD_FILE";
+dcmp v1
 LINK $invalid_link_escaped $invalid_target_escaped
 DIR $dir_escaped
 FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
@@ -153,6 +154,7 @@ RECORD_FILE
                                 my $dcmp_file_2 = File::Spec->catfile( $dir_r, $dcmp_filename_2 );
                                 open my $fh, '>:encoding(UTF-8)', encode( 'UTF-8', $dcmp_file_2 );
                                 print {$fh} <<'RECORD_FILE';
+dcmp v1
 -DIR
 RECORD_FILE
                                 close $fh;
@@ -230,6 +232,7 @@ RECORD_FILE
                                 my $dcmp_file_2 = File::Spec->catfile( $dir_r, $dcmp_filename_2 );
                                 open my $fh, '>:encoding(UTF-8)', encode( 'UTF-8', $dcmp_file_2 );
                                 print {$fh} <<"RECORD_FILE";
+dcmp v1
 LINK $invalid_link_escaped $invalid_target_escaped
 DIR $dir_escaped
 FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
@@ -281,6 +284,7 @@ RECORD_FILE
                                 my $dcmp_file_1 = File::Spec->catfile( $dir_r, $dcmp_filename_1 );
                                 open my $fh, '>:encoding(UTF-8)', encode( 'UTF-8', $dcmp_file_1 );
                                 print {$fh} <<"RECORD_FILE";
+dcmp v1
 LINK $invalid_link_escaped $invalid_target_escaped
 DIR $dir_escaped
 FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
@@ -345,6 +349,7 @@ RECORD_FILE
                                 my $dcmp_file_2 = File::Spec->catfile( $dir_r, $dcmp_filename_2 );
                                 open my $fh, '>:encoding(UTF-8)', encode( 'UTF-8', $dcmp_file_2 );
                                 print {$fh} <<"RECORD_FILE";
+dcmp v1
 LINK $invalid_link_escaped $invalid_target2_escaped
 LINK $valid_link2_escaped $file_escaped
 DIR $dir2_escaped

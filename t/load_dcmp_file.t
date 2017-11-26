@@ -39,23 +39,35 @@ sub main {
         my $invalid_link   = "invalid_link${suffix}.txt";
         my $invalid_target = "invalid_target${suffix}.txt";
         my $valid_link     = "valid_link${suffix}.txt";
+        #
+        note('no version in dcmp file');
+
+        open my $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
+        print {$fh} <<'RECORD_FILE';
+-DIR
+RECORD_FILE
+        close $fh;
+
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file) }, encode( 'UTF-8', "/ ^ \QFile $dcmp_file is not a valid dcmp file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if the dcmp file contains no version header' );
 
         #
         note('invalid enty in dcmp file');
 
-        open my $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
+        open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<'RECORD_FILE';
+dcmp v1
 INVALID entry
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file) }, encode( 'UTF-8', "/ ^ \QInvalid entry on line 1 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if the dcmp file contains an invalid entry' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file) }, encode( 'UTF-8', "/ ^ \QInvalid entry on line 2 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if the dcmp file contains an invalid entry' );
 
         #
         note('to many -DIR in dcmp file');
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
@@ -67,13 +79,14 @@ LINK $valid_link $file
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QUnbalanced -DIR on line 5 in file $dcmp_file\E \$ /xsm" ), q{_load_dcmp_file() throws an exception if there are to many '-DIR'} );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QUnbalanced -DIR on line 6 in file $dcmp_file\E \$ /xsm" ), q{_load_dcmp_file() throws an exception if there are to many '-DIR'} );
 
         #
         note('missing -DIR at end in dcmp file');
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
@@ -90,6 +103,7 @@ RECORD_FILE
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
@@ -101,37 +115,40 @@ LINK $valid_link $file
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QDuplicate entry for $file at line 5 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there are multiple files with the same name in the same directory' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QDuplicate entry for $file at line 6 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there are multiple files with the same name in the same directory' );
 
         #
         note('invalid dir entry');
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir invalid
 -DIR
 -DIR
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for DIR entry at line 1 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a DIR entry with invalid arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for DIR entry at line 2 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a DIR entry with invalid arguments' );
 
         #
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<'RECORD_FILE';
+dcmp v1
 DIR
 -DIR
 -DIR
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments at line 1 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a DIR entry with no arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments at line 2 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a DIR entry with no arguments' );
 
         #
         note('invalid file entry');
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e invalid
 -DIR
@@ -139,10 +156,11 @@ FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e invalid
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for FILE entry at line 2 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a FILE entry with to many arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a FILE entry with to many arguments' );
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0
 -DIR
@@ -150,10 +168,11 @@ FILE $file2 0
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for FILE entry at line 2 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2
 -DIR
@@ -161,13 +180,14 @@ FILE $file2
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for FILE entry at line 2 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
 
         #
         note('invalid link entry');
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e
 LINK $valid_link $file invalid
@@ -176,10 +196,11 @@ LINK $valid_link $file invalid
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for LINK entry at line 3 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a LINK entry with to many arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for LINK entry at line 4 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a LINK entry with to many arguments' );
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e
 LINK $valid_link
@@ -188,13 +209,14 @@ LINK $valid_link
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for LINK entry at line 3 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a LINK entry with to few arguments' );
+        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, encode( 'UTF-8', "/ ^ \QIncorrect number of arguments for LINK entry at line 4 in file $dcmp_file\E \$ /xsm" ), '_load_dcmp_file() throws an exception if there is a LINK entry with to few arguments' );
 
         #
         note('load valid dcmp file');
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 LINK $invalid_link $invalid_target
 DIR $dir
 FILE $file2 0 d41d8cd98f00b204e9800998ecf8427e
@@ -307,6 +329,7 @@ RECORD_FILE
 
         open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
         print {$fh} <<"RECORD_FILE";
+dcmp v1
 DIR $dir3_escaped
 FILE $file3_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
@@ -347,6 +370,7 @@ RECORD_FILE
 
             open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
             print {$fh} <<"RECORD_FILE";
+dcmp v1
 $line_to_ignore{$line_msg}
 DIR $dir3_escaped
 FILE $file3_escaped 0 d41d8cd98f00b204e9800998ecf8427e
