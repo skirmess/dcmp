@@ -332,6 +332,48 @@ RECORD_FILE
         is( ${$x_ref}[3],     'd41d8cd98f00b204e9800998ecf8427e', '... correct md5' );
 
         is( $it->(), undef, '... calling it again returns undef' );
+
+        my %line_to_ignore = (
+            'empty line'                              => q{},
+            'line with tab'                           => "\t",
+            'line with whitespaces'                   => q{   },
+            'line with comment sign'                  => q{#},
+            'line with comment sign after whitespace' => q{ #},
+            'line with comment'                       => "# comment$suffix",
+        );
+
+        for my $line_msg ( keys %line_to_ignore ) {
+            note( encode( 'UTF-8', "ignore $line_msg at top" ) );
+
+            open $fh, '>:encoding(UTF-8)', $dcmp_file_utf8;
+            print {$fh} <<"RECORD_FILE";
+$line_to_ignore{$line_msg}
+DIR $dir3_escaped
+FILE $file3_escaped 0 d41d8cd98f00b204e9800998ecf8427e
+-DIR
+-DIR
+RECORD_FILE
+            close $fh;
+
+            @ignore = ();
+            $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, \@ignore );
+
+            is( ref $iterator_dir_record, ref sub { }, '_load_records() returns a sub' );
+
+            @dirs = ($dir3);
+            $it   = $iterator_dir_record->( \@dirs );
+            is( ref $it, ref sub { }, '... the returned sub returns a sub' );
+            $x_ref = $it->();
+
+            is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+            is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
+            is( ${$x_ref}[0],     $file3,                             '... correct name' );
+            is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );
+            is( ${$x_ref}[2],     0,                                  '... correct size' );
+            is( ${$x_ref}[3],     'd41d8cd98f00b204e9800998ecf8427e', '... correct md5' );
+
+            is( $it->(), undef, '... calling it again returns undef' );
+        }
     }
     #
     done_testing();

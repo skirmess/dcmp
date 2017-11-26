@@ -28,8 +28,6 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 
 #
 # TODO add version to dcmp file
-# TODO allow comments in dcmp file
-# TODO allow empty lines in dcmp file
 #
 #
 # TODO ** unordered **
@@ -60,6 +58,7 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO add documentation
 # TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
 # TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
+# TODO mock cwd(), test if cwd() returns nothing
 #
 # TODO ** cleanup **
 # TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
@@ -544,6 +543,9 @@ sub _load_dcmp_file {
     my $last_line_seen = 0;
   LINE:
     while ( my $line = <$fh> ) {
+        next if $line =~ m{ ^ \s* $ }xsm;
+        next if $line =~ m{ ^ \s* [#] }xsm;
+
         if ($last_line_seen) {
 
             # The -DIR entry removes an element from @dirs. There is an
