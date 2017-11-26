@@ -58,6 +58,8 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 # TODO dcmp -v (wie cat -v)?
 # TODO add comments
 # TODO add documentation
+# TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
+# TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
 #
 # TODO ** cleanup **
 # TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
