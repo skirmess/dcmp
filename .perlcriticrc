@@ -37,7 +37,6 @@ verbose = [%p] %m at %f line %l, near '%r'\n
 [CodeLayout::RequireTrailingCommas]
 [ControlStructures::ProhibitCStyleForLoops]
 [ControlStructures::ProhibitCascadingIfElse]
-[ControlStructures::ProhibitDeepNests]
 [ControlStructures::ProhibitLabelsWithSpecialBlockNames]
 [ControlStructures::ProhibitMutatingListFunctions]
 [ControlStructures::ProhibitNegativeExpressionsInUnlessAndUntilConditions]

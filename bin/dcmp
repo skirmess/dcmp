@@ -40,6 +40,7 @@ use constant LINK_TARGET_DIFFERS  => 5;    # L
 #       %>     lines from FILE2
 #       %=     lines common to FILE1 and FILE2
 #
+# TODO replace all for loops in tests with one iterator that returns all values?
 # TODO change STDOUT to UTF-8 and remove unneeded encodes
 # TODO dcmp sort -> SORT
 # TODO die -> DIE (encode_and_die, die_utf8
@@ -609,7 +610,7 @@ sub _load_dcmp_file {
         if ( $action eq 'LINK' ) {
             die encode( 'UTF-8', "Incorrect number of arguments for LINK entry at line $. in file $filename\n" ) if @line != 1;
             my ($target) = @line;
-            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, $target ];
+            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
 
             next LINE;
         }

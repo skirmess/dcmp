@@ -7,6 +7,8 @@
 # tmp
 [-Bangs::ProhibitFlagComments]
 
+[-ControlStructures::ProhibitDeepNests]
+
 # broken
 [-ControlStructures::ProhibitPostfixControls]
 #[ControlStructures::ProhibitPostfixControls]
