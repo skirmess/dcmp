@@ -26,7 +26,7 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-
+#
 # TODO put die encode() in it's own function
 # TODO die -> DIE (encode_and_die, die_utf8
 # TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
