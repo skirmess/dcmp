@@ -26,10 +26,7 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-#
-# TODO change STDOUT to UTF-8 and remove unneeded encodes
-# TODO put die encode() in it's own function
-#
+
 #
 # TODO rename left/right with 1/2 or reference/workspace or something
 #   diff calls it file1/file2
@@ -37,6 +34,8 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #       %>     lines from FILE2
 #       %=     lines common to FILE1 and FILE2
 #
+# TODO change STDOUT to UTF-8 and remove unneeded encodes
+# TODO put die encode() in it's own function
 # TODO replace all for loops in tests with one iterator that returns all values?
 # TODO dcmp sort -> SORT
 # TODO die -> DIE (encode_and_die, die_utf8
