@@ -37,6 +37,7 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #       %>     lines from FILE2
 #       %=     lines common to FILE1 and FILE2
 #
+# TODO support - for stdin/stdout for dcmp file
 # TODO change STDOUT to UTF-8 and remove unneeded encodes
 # TODO replace all for loops in tests with one iterator that returns all values?
 # TODO dcmp sort -> SORT
@@ -55,6 +56,15 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
 # TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
 # TODO mock cwd(), test if cwd() returns nothing
+#
+# TODO ** usage **
+#
+# TODO dcmp [-vV] <dir1/file1> <dir2/file2>
+# TODO 	-v  use ^ and M- notation     (including space and tab)
+# TODO 	-V  unicode replacement chars (including space and tab)
+#
+# TODO dcmp -c <file> <dir>
+# TODO 	-c create dcmp file
 #
 # TODO ** cleanup **
 # TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
