@@ -27,6 +27,9 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 
+# TODO put die encode() in it's own function
+# TODO die -> DIE (encode_and_die, die_utf8
+# TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
 #
 # TODO rename left/right with 1/2 or reference/workspace or something
 #   diff calls it file1/file2
@@ -35,10 +38,8 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #       %=     lines common to FILE1 and FILE2
 #
 # TODO change STDOUT to UTF-8 and remove unneeded encodes
-# TODO put die encode() in it's own function
 # TODO replace all for loops in tests with one iterator that returns all values?
 # TODO dcmp sort -> SORT
-# TODO die -> DIE (encode_and_die, die_utf8
 # TODO create a die/encode/_cwd function
 # TODO try to fix some more critic exceptions
 # TODO check return of encode/decode?
