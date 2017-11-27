@@ -27,7 +27,9 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
-# TODO ** unordered **
+# TODO change STDOUT to UTF-8 and remove unneeded encodes
+# TODO put die encode() in it's own function
+#
 #
 # TODO rename left/right with 1/2 or reference/workspace or something
 #   diff calls it file1/file2
@@ -36,10 +38,8 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #       %=     lines common to FILE1 and FILE2
 #
 # TODO replace all for loops in tests with one iterator that returns all values?
-# TODO change STDOUT to UTF-8 and remove unneeded encodes
 # TODO dcmp sort -> SORT
 # TODO die -> DIE (encode_and_die, die_utf8
-# TODO put die encode() in it's own function
 # TODO create a die/encode/_cwd function
 # TODO try to fix some more critic exceptions
 # TODO check return of encode/decode?
@@ -49,7 +49,7 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO -I ignore/path/x/y
 # TODO create a function for _cwd
 # TODO _cwd { local $/; require Cwd; return cwd(); }  ???
-# TODO dcmp -v (wie cat -v)?
+# TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars?
 # TODO add comments
 # TODO add documentation
 # TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
