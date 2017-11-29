@@ -26,16 +26,15 @@ package App::DCMP;
 #use constant FILE_CONTENT_DIFFERS => 5;    # M
 #use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-
-# TODO create a function for _cwd
-# TODO         _cwd { local $/; require Cwd; return cwd(); }  ???
-# TODO         sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
-# TODO         mock cwd(), test if cwd() returns nothing
+#
+# TODO create a function for _CWD
+# TODO         _CWD { local $/; require Cwd; return CWD(); }  ???
+# TODO         sprintf numberd arguments? $1 is CWD, $2 is error http://perldoc.perl.org/functions/sprintf.html
+# TODO         mock CWD(), test if CWD() returns nothing
 # TODO move shared test code to t/lib module
 # TODO replace all for loops in tests with one iterator that returns all values?
-# TODO no encode for die!
-# TODO no decode for readdir, cwd, etc!
-# TODO replace all die, encode, decode, sort, cwd with DIE, ENCODE, DECODE, SORT, CWD!
+# TODO no ENCODE for DIE!
+# TODO no DECODE for readdir, CWD, etc!
 #
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
 # TODO   diff calls it file1/file2
@@ -43,19 +42,21 @@ package App::DCMP;
 # TODO       %>     lines from FILE2
 # TODO       %=     lines common to FILE1 and FILE2
 #
+# TODO ~~~~~~~~~~~~~~~     ~~~~~~~~~~~~~~~
+#
 # TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
 #
 # TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
 #
-# TODO sort with "use locale"?
+# TODO SORT with "use locale"?
 #
-# TODO !!! die UNICODE, then either binmode to utf-8 in script.
+# TODO !!! DIE UNICODE, then either binmode to utf-8 in script.
 #
-# TODO put die encode() in it's own function
-# TODO die -> DIE (encode_and_die, die_utf8
-# TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
-# TODO create a die/encode/_cwd function
-# TODO check encode for print
+# TODO put DIE ENCODE() in it's own function
+# TODO DIE -> DIE (ENCODE_and_DIE, DIE_utf8
+# TODO perl -e 'binmode(STDERR, ":utf8"); DIE "\x{0041}\x{0300}";'
+# TODO create a DIE/ENCODE/_CWD function
+# TODO check ENCODE for print
 #
 # TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
 # TODO check binmode for errors
@@ -68,23 +69,23 @@ package App::DCMP;
 #       %=     lines common to FILE1 and FILE2
 #
 # TODO support - for stdin/stdout for dcmp file
-# TODO change STDOUT to UTF-8 and remove unneeded encodes
+# TODO change STDOUT to UTF-8 and remove unneeded ENCODEs
 # TODO replace all for loops in tests with one iterator that returns all values?
-# TODO dcmp sort -> SORT
+# TODO dcmp SORT -> SORT
 # TODO try to fix some more critic exceptions
-# TODO check return of encode/decode?
+# TODO check return of ENCODE/DECODE?
 # TODO LEAVE_SRC?
 # TODO move shared test code to t/lib module
 # TODO -i ignore dir
 # TODO -I ignore/path/x/y
-# TODO create a function for _cwd
-# TODO _cwd { local $/; require Cwd; return cwd(); }  ???
+# TODO create a function for _CWD
+# TODO _CWD { local $/; require Cwd; return CWD(); }  ???
 # TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
 # TODO add comments
 # TODO add documentation
 # TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
-# TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
-# TODO mock cwd(), test if cwd() returns nothing
+# TODO sprintf numberd arguments? $1 is CWD, $2 is error http://perldoc.perl.org/functions/sprintf.html
+# TODO mock CWD(), test if CWD() returns nothing
 #
 # TODO ** usage **
 #
@@ -96,7 +97,7 @@ package App::DCMP;
 # TODO 	-c create dcmp file
 #
 # TODO ** cleanup **
-# TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
+# TODO s/DIE/DIE/, s/ENCODE/ENCODE/,s/DECODE/DECODE/, s/CWD/CWD/
 
 ###!/usr/bin/env perl
 ##
@@ -118,7 +119,7 @@ package App::DCMP;
 ###    "\x{0041}\x{0300}f",
 ##);
 ##
-##sub _sorter {
+##sub _SORTer {
 ##    my $a_n = NFC($a);
 ##    my $b_n = NFC($b);
 ##
@@ -126,8 +127,8 @@ package App::DCMP;
 ###    return NFC($a) cmp NFC($b);
 ##}
 ##
-##for my $x (sort _sorter @x ) {
-##    print encode('UTF-8', "$x: ");
+##for my $x (SORT _SORTer @x ) {
+##    print ENCODE('UTF-8', "$x: ");
 ##    for my $c ( split //, $x) {
 ##        print ord($c), " ";
 ##    }
@@ -150,9 +151,9 @@ package App::DCMP;
 ##
 ##my $Collator = Unicode::Collate->new();
 ##
-### for my $x (sort @a) {
-##for my $x ($Collator->sort(@a)) {
-##    print encode('UTF-8', "->$x\n");
+### for my $x (SORT @a) {
+##for my $x ($Collator->SORT(@a)) {
+##    print ENCODE('UTF-8', "->$x\n");
 ##}
 
 ##  use ^ and M- notation, except for LFD and TAB
@@ -194,19 +195,19 @@ package App::DCMP;
 #sub _chdir {
 #    my ( $basedir, $dirs_ref ) = @_;
 
-#    chdir encode( 'UTF-8', $basedir ) or die encode( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
+#    chdir ENCODE( 'UTF-8', $basedir ) or DIE ENCODE( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
 
 #    for my $i ( 0 .. $#{$dirs_ref} ) {
-#        if ( !chdir encode( 'UTF-8', ${$dirs_ref}[$i] ) ) {
+#        if ( !chdir ENCODE( 'UTF-8', ${$dirs_ref}[$i] ) ) {
 
-#            # We have to store $! before calling cwd(), otherwise the
-#            # non-failed error of cwd() overwrites the error message
+#            # We have to store $! before calling CWD(), otherwise the
+#            # non-failed error of CWD() overwrites the error message
 #            my $error = $!;
 
 #            require Cwd;
-#            my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#            my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#            die encode( 'UTF-8', "Cannot chdir to ${$dirs_ref}[$i] in $cwd: $error\n" );
+#            DIE ENCODE( 'UTF-8', "Cannot chdir to ${$dirs_ref}[$i] in $CWD: $error\n" );
 #        }
 #    }
 
@@ -216,7 +217,7 @@ package App::DCMP;
 #sub _collect_file_info {
 #    my ($filename) = @_;
 
-#    my $filename_utf8 = encode( 'UTF-8', $filename );
+#    my $filename_utf8 = ENCODE( 'UTF-8', $filename );
 
 #  STAT:
 #    {
@@ -224,17 +225,17 @@ package App::DCMP;
 #        last STAT if !defined $is_link;
 
 #        if ($is_link) {
-#            my $target = decode( 'UTF-8', readlink $filename_utf8 );
+#            my $target = DECODE( 'UTF-8', readlink $filename_utf8 );
 #            if ( !defined $target ) {
 
-#                # We have to store $! before calling cwd(), otherwise the
-#                # non-failed error of cwd() overwrites the error message
+#                # We have to store $! before calling CWD(), otherwise the
+#                # non-failed error of CWD() overwrites the error message
 #                my $error = $!;
 
 #                require Cwd;
-#                my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#                my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#                die encode( 'UTF-8', "readlink failed for $filename in $cwd: $error\n" );
+#                DIE ENCODE( 'UTF-8', "readlink failed for $filename in $CWD: $error\n" );
 #            }
 
 #            return [ $filename, FILE_TYPE_SYMLINK, $target ];
@@ -258,14 +259,14 @@ package App::DCMP;
 #        return [ $filename, FILE_TYPE_OTHER ];
 #    }
 
-#    # We have to store $! before calling cwd(), otherwise the
-#    # non-failed error of cwd() overwrites the error message
+#    # We have to store $! before calling CWD(), otherwise the
+#    # non-failed error of CWD() overwrites the error message
 #    my $error = $!;
 
 #    require Cwd;
-#    my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#    my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#    die encode( 'UTF-8', "Cannot stat file $filename in $cwd: $error\n" );
+#    DIE ENCODE( 'UTF-8', "Cannot stat file $filename in $CWD: $error\n" );
 #}
 
 #sub _collect_file_info_report {
@@ -277,7 +278,7 @@ package App::DCMP;
 
 #    return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
 
-#    my $filename_utf8 = encode( 'UTF-8', $filename );
+#    my $filename_utf8 = ENCODE( 'UTF-8', $filename );
 
 #    require Digest::MD5;
 #    my $md5 = Digest::MD5->new();
@@ -285,19 +286,19 @@ package App::DCMP;
 #    my $fh;
 #    if ( !open $fh, '<', $filename_utf8 ) {
 
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
+#        # We have to store $! before calling CWD(), otherwise the
+#        # non-failed error of CWD() overwrites the error message
 #        my $error = $!;
 
 #        require Cwd;
-#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+#        DIE ENCODE( 'UTF-8', "Cannot read file $filename in $CWD: $error\n" );
 #    }
 
-#    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
+#    binmode $fh or DIE ENCODE( 'UTF-8', "binmode failed for $filename: $!\n" );
 #    $md5->addfile($fh);
-#    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!\n" );
+#    close $fh or DIE ENCODE( 'UTF-8', "Unable to read file $filename: $!\n" );
 
 #    push @{$file_info_ref}, lc $md5->hexdigest();
 
@@ -314,27 +315,27 @@ package App::DCMP;
 #    for my $f ( $chdir_l, $chdir_r ) {
 #        $f->($dirs_ref);
 
-#        my $filename_utf8 = encode( 'UTF-8', $filename );
+#        my $filename_utf8 = ENCODE( 'UTF-8', $filename );
 
 #        if ( open my $fh, '<', $filename_utf8 ) {
 #            push @fh, $fh;
 #            next DIR;
 #        }
 
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
+#        # We have to store $! before calling CWD(), otherwise the
+#        # non-failed error of CWD() overwrites the error message
 #        my $error = $!;
 
 #        require Cwd;
-#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+#        DIE ENCODE( 'UTF-8', "Cannot read file $filename in $CWD: $error\n" );
 #    }
 
 #    my $rc = compare(@fh);
 
 #    for my $fh (@fh) {
-#        close $fh or die encode( 'UTF-8', "Cannot read file $filename\n" );
+#        close $fh or DIE ENCODE( 'UTF-8', "Cannot read file $filename\n" );
 #    }
 
 #    # File::Compare::compare and its sibling functions return 0 if the files
@@ -342,7 +343,7 @@ package App::DCMP;
 #    # encountered.
 #    return 1 if $rc == 0;
 #    return   if $rc == 1;
-#    die encode( 'UTF-8', "Unable to compare file $filename\n" );
+#    DIE ENCODE( 'UTF-8', "Unable to compare file $filename\n" );
 #}
 
 ## $md5_r is not used
@@ -354,24 +355,24 @@ package App::DCMP;
 
 #    $chdir_r->($dirs_ref);
 
-#    my $filename_utf8 = encode( 'UTF-8', $filename );
+#    my $filename_utf8 = ENCODE( 'UTF-8', $filename );
 
 #    my $fh;
 #    if ( !open $fh, '<', $filename_utf8 ) {
 
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
+#        # We have to store $! before calling CWD(), otherwise the
+#        # non-failed error of CWD() overwrites the error message
 #        my $error = $!;
 
 #        require Cwd;
-#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+#        DIE ENCODE( 'UTF-8', "Cannot read file $filename in $CWD: $error\n" );
 #    }
 
-#    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
+#    binmode $fh or DIE ENCODE( 'UTF-8', "binmode failed for $filename: $!\n" );
 #    $md5->addfile($fh);
-#    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!" );
+#    close $fh or DIE ENCODE( 'UTF-8', "Unable to read file $filename: $!" );
 
 #    return 1 if lc $md5_l eq lc $md5->hexdigest();
 #    return;
@@ -532,28 +533,28 @@ package App::DCMP;
 #    my $fh;
 #    if ( !opendir $fh, q{.} ) {
 
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
+#        # We have to store $! before calling CWD(), otherwise the
+#        # non-failed error of CWD() overwrites the error message
 #        my $error = $!;
 
 #        require Cwd;
-#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
+#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
 #    }
 
-#    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { decode( 'UTF-8', $_ ) } readdir $fh;
+#    my @stack = map { $collect_file_info->($_) } SORT grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { DECODE( 'UTF-8', $_ ) } readdir $fh;
 
 #    if ( !closedir $fh ) {
 
-#        # We have to store $! before calling cwd(), otherwise the
-#        # non-failed error of cwd() overwrites the error message
+#        # We have to store $! before calling CWD(), otherwise the
+#        # non-failed error of CWD() overwrites the error message
 #        my $error = $!;
 
 #        require Cwd;
-#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
+#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
 #    }
 
 #    return sub {
@@ -574,12 +575,12 @@ package App::DCMP;
 #    my %file_seen;
 #    my @dirs;
 
-#    open my $fh, '<:encoding(UTF-8)', encode( 'UTF-8', $filename ) or die encode( 'UTF-8', "Cannot read file $filename: $!\n" );
+#    open my $fh, '<:encoding(UTF-8)', ENCODE( 'UTF-8', $filename ) or DIE ENCODE( 'UTF-8', "Cannot read file $filename: $!\n" );
 
 #    my $dcmp_header = <$fh>;
 #    chomp $dcmp_header;
 
-#    die encode( 'UTF-8', "File $filename is not a valid dcmp file\n" ) if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
+#    DIE ENCODE( 'UTF-8', "File $filename is not a valid dcmp file\n" ) if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
 
 #    my $last_line_seen = 0;
 #  LINE:
@@ -595,7 +596,7 @@ package App::DCMP;
 #            # that should only happen at the end of the file. If there
 #            # are more lines the file must be invalid.
 #            my $line_nr = $. - 1;
-#            die encode( 'UTF-8', "Unbalanced -DIR on line $line_nr in file $filename\n" );
+#            DIE ENCODE( 'UTF-8', "Unbalanced -DIR on line $line_nr in file $filename\n" );
 #        }
 
 #        if ( $line =~ m{ ^ - DIR $ }xsm ) {
@@ -616,7 +617,7 @@ package App::DCMP;
 
 #        # From here on every line contains at least an ACTION and a NAME
 #        my @line = split /\s+/xsm, $line;
-#        die encode( 'UTF-8', "Incorrect number of arguments at line $. in file $filename\n" ) if @line < 2;
+#        DIE ENCODE( 'UTF-8', "Incorrect number of arguments at line $. in file $filename\n" ) if @line < 2;
 
 #        my $action = shift @line;
 #        my $name   = _unescape_filename( shift @line );
@@ -627,13 +628,13 @@ package App::DCMP;
 #            if ( length $path ) {
 #                $msg .= " under path $path";
 #            }
-#            die encode( 'UTF-8', "$msg at line $. in file $filename\n" );
+#            DIE ENCODE( 'UTF-8', "$msg at line $. in file $filename\n" );
 #        }
 #        $file_seen{$path}{$name} = 1;
 
 #        #
 #        if ( $action eq 'FILE' ) {
-#            die encode( 'UTF-8', "Incorrect number of arguments for FILE entry at line $. in file $filename\n" ) if @line != 2;
+#            DIE ENCODE( 'UTF-8', "Incorrect number of arguments for FILE entry at line $. in file $filename\n" ) if @line != 2;
 
 #            my ( $size, $md5 ) = @line;
 
@@ -643,7 +644,7 @@ package App::DCMP;
 
 #        #
 #        if ( $action eq 'DIR' ) {
-#            die encode( 'UTF-8', "Incorrect number of arguments for DIR entry at line $. in file $filename\n" ) if @line != 0;
+#            DIE ENCODE( 'UTF-8', "Incorrect number of arguments for DIR entry at line $. in file $filename\n" ) if @line != 0;
 
 #            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
 #            push @dirs, $name;
@@ -653,7 +654,7 @@ package App::DCMP;
 
 #        #
 #        if ( $action eq 'LINK' ) {
-#            die encode( 'UTF-8', "Incorrect number of arguments for LINK entry at line $. in file $filename\n" ) if @line != 1;
+#            DIE ENCODE( 'UTF-8', "Incorrect number of arguments for LINK entry at line $. in file $filename\n" ) if @line != 1;
 #            my ($target) = @line;
 #            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
 
@@ -661,11 +662,11 @@ package App::DCMP;
 #        }
 
 #        #        #
-#        die encode( 'UTF-8', "Invalid entry on line $. in file $filename\n" );
+#        DIE ENCODE( 'UTF-8', "Invalid entry on line $. in file $filename\n" );
 #    }
-#    close $fh or die encode( 'UTF-8', "Cannot read file $filename: $!" );
+#    close $fh or DIE ENCODE( 'UTF-8', "Cannot read file $filename: $!" );
 
-#    die encode( 'UTF-8', "Unbalanced -DIR at end of file $filename\n" ) if !$last_line_seen;
+#    DIE ENCODE( 'UTF-8', "Unbalanced -DIR at end of file $filename\n" ) if !$last_line_seen;
 
 #    # Remove ignored files from out loaded dcmp file.
 #    #
@@ -691,7 +692,7 @@ package App::DCMP;
 
 #        my @stack =
 #          defined $path{$path}
-#          ? sort { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} }
+#          ? SORT { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} }
 #          : ();
 
 #        return sub {
@@ -750,7 +751,7 @@ package App::DCMP;
 
 #        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
 
-#        print encode( 'UTF-8', "$status_code[$action] $path\n" );
+#        print ENCODE( 'UTF-8', "$status_code[$action] $path\n" );
 
 #        return;
 #    };
@@ -777,12 +778,12 @@ package App::DCMP;
 #            if ( $mode == FILE_TYPE_SYMLINK ) {
 #                my ($link) = ${$file_info}[2];
 #                my $link_escaped = _escape_filename($link);
-#                print encode( 'UTF-8', "LINK $name_escaped $link_escaped\n" );
+#                print ENCODE( 'UTF-8', "LINK $name_escaped $link_escaped\n" );
 #                next FILE;
 #            }
 
 #            if ( $mode == FILE_TYPE_DIRECTORY ) {
-#                print encode( 'UTF-8', "DIR $name_escaped\n" );
+#                print ENCODE( 'UTF-8', "DIR $name_escaped\n" );
 
 #                push @dirs,      $name;
 #                push @iterators, $iterate_dir->();
@@ -792,11 +793,11 @@ package App::DCMP;
 
 #            if ( $mode == FILE_TYPE_REGULAR ) {
 #                my ( $size, $md5 ) = @{$file_info}[ 2, 3 ];
-#                print encode( 'UTF-8', "FILE $name_escaped $size $md5\n" );
+#                print ENCODE( 'UTF-8', "FILE $name_escaped $size $md5\n" );
 #                next FILE;
 #            }
 
-#            die encode( 'UTF-8', 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n" );
+#            DIE ENCODE( 'UTF-8', 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n" );
 #        }
 
 #        pop @iterators;
@@ -822,7 +823,7 @@ package App::DCMP;
 ###    GetOptions(
 ###        \%opt,
 ###        'i=s@',
-###    ) or die "\n";
+###    ) or DIE "\n";
 ###
 ###use Data::Dx;
 ###Dx %opt;
@@ -830,7 +831,7 @@ package App::DCMP;
 ###}
 
 ###sub _usage {
-###    die "usage...\n";
+###    DIE "usage...\n";
 ###}
 ###
 ###
@@ -848,7 +849,7 @@ package App::DCMP;
 ##    return _main_print_dcmp_file(@ARGV) if @ARGV == 1;
 ##    return _main_dcmp(@ARGV) if @ARGV == 2;
 
-##    die;
+##    DIE;
 ##}
 
 ##sub _main_dcmp {
@@ -882,14 +883,14 @@ package App::DCMP;
 ##            next FILE;
 ##        }
 
-##        die "$file is neither a file nor a directory";
+##        DIE "$file is neither a file nor a directory";
 ##    }
 
 ##    my $compare_file = $type[0] == S_IFDIR && $type[1] == S_IFDIR ? sub { _compare_file_fs_fs($chdir[0], $chdir[1], @_) }
 ##                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_record_fs($chdir[0], @_) }
 ##                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_record_fs($chdir[1], @_) }
 ##                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_record_record(@_) }
-##                     : die;
+##                     : DIE;
 
 ##    my $printer = _print_changes();
 
@@ -899,7 +900,7 @@ package App::DCMP;
 ##sub _main_print_dcmp_file {
 ##    my ( $basedir) = @_;
 
-##    die if ! -d $basedir;
+##    DIE if ! -d $basedir;
 
 ##    $basedir = abs_path $basedir;
 
