@@ -26,61 +26,77 @@ package App::DCMP;
 #use constant FILE_CONTENT_DIFFERS => 5;    # M
 #use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-##
-## TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
-##
-## TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
-##
-## TODO sort with "use locale"?
-##
-## TODO !!! die UNICODE, then either binmode to utf-8 in script.
-##
-## TODO put die encode() in it's own function
-## TODO die -> DIE (encode_and_die, die_utf8
-## TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
-## TODO create a die/encode/_cwd function
-## TODO check encode for print
-##
-## TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
-## TODO check binmode for errors
-##
-##
-## TODO rename left/right with 1/2 or reference/workspace or something
-##   diff calls it file1/file2
-##       %<     lines from FILE1
-##       %>     lines from FILE2
-##       %=     lines common to FILE1 and FILE2
-##
-## TODO support - for stdin/stdout for dcmp file
-## TODO change STDOUT to UTF-8 and remove unneeded encodes
-## TODO replace all for loops in tests with one iterator that returns all values?
-## TODO dcmp sort -> SORT
-## TODO try to fix some more critic exceptions
-## TODO check return of encode/decode?
-## TODO LEAVE_SRC?
-## TODO move shared test code to t/lib module
-## TODO -i ignore dir
-## TODO -I ignore/path/x/y
-## TODO create a function for _cwd
-## TODO _cwd { local $/; require Cwd; return cwd(); }  ???
-## TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
-## TODO add comments
-## TODO add documentation
-## TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
-## TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
-## TODO mock cwd(), test if cwd() returns nothing
-##
-## TODO ** usage **
-##
-## TODO dcmp [-vV] <dir1/file1> <dir2/file2>
-## TODO 	-v  use ^ and M- notation     (including space and tab)
-## TODO 	-V  unicode replacement chars (including space and tab)
-##
-## TODO dcmp -c <file> <dir>
-## TODO 	-c create dcmp file
-##
-## TODO ** cleanup **
-## TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
+
+# TODO create a function for _cwd
+# TODO         _cwd { local $/; require Cwd; return cwd(); }  ???
+# TODO         sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
+# TODO         mock cwd(), test if cwd() returns nothing
+# TODO move shared test code to t/lib module
+# TODO replace all for loops in tests with one iterator that returns all values?
+# TODO no encode for die!
+# TODO no decode for readdir, cwd, etc!
+# TODO replace all die, encode, decode, sort, cwd with DIE, ENCODE, DECODE, SORT, CWD!
+#
+# TODO TODO rename left/right with 1/2 or reference/workspace or something
+# TODO   diff calls it file1/file2
+# TODO       %<     lines from FILE1
+# TODO       %>     lines from FILE2
+# TODO       %=     lines common to FILE1 and FILE2
+#
+# TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
+#
+# TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
+#
+# TODO sort with "use locale"?
+#
+# TODO !!! die UNICODE, then either binmode to utf-8 in script.
+#
+# TODO put die encode() in it's own function
+# TODO die -> DIE (encode_and_die, die_utf8
+# TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
+# TODO create a die/encode/_cwd function
+# TODO check encode for print
+#
+# TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
+# TODO check binmode for errors
+#
+#
+# TODO rename left/right with 1/2 or reference/workspace or something
+#   diff calls it file1/file2
+#       %<     lines from FILE1
+#       %>     lines from FILE2
+#       %=     lines common to FILE1 and FILE2
+#
+# TODO support - for stdin/stdout for dcmp file
+# TODO change STDOUT to UTF-8 and remove unneeded encodes
+# TODO replace all for loops in tests with one iterator that returns all values?
+# TODO dcmp sort -> SORT
+# TODO try to fix some more critic exceptions
+# TODO check return of encode/decode?
+# TODO LEAVE_SRC?
+# TODO move shared test code to t/lib module
+# TODO -i ignore dir
+# TODO -I ignore/path/x/y
+# TODO create a function for _cwd
+# TODO _cwd { local $/; require Cwd; return cwd(); }  ???
+# TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
+# TODO add comments
+# TODO add documentation
+# TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
+# TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
+# TODO mock cwd(), test if cwd() returns nothing
+#
+# TODO ** usage **
+#
+# TODO dcmp [-vV] <dir1/file1> <dir2/file2>
+# TODO 	-v  use ^ and M- notation     (including space and tab)
+# TODO 	-V  unicode replacement chars (including space and tab)
+#
+# TODO dcmp -c <file> <dir>
+# TODO 	-c create dcmp file
+#
+# TODO ** cleanup **
+# TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
 
 ###!/usr/bin/env perl
 ##
