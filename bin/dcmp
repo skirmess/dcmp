@@ -27,9 +27,23 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
+#
+# TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
+#
+# TODO sort with "use locale"?
+#
+# TODO !!! die UNICODE, then either binmode to utf-8 in script.
+#
 # TODO put die encode() in it's own function
 # TODO die -> DIE (encode_and_die, die_utf8
 # TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
+# TODO create a die/encode/_cwd function
+# TODO check encode for print
+#
+# TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
+# TODO check binmode for errors
+#
 #
 # TODO rename left/right with 1/2 or reference/workspace or something
 #   diff calls it file1/file2
@@ -41,7 +55,6 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO change STDOUT to UTF-8 and remove unneeded encodes
 # TODO replace all for loops in tests with one iterator that returns all values?
 # TODO dcmp sort -> SORT
-# TODO create a die/encode/_cwd function
 # TODO try to fix some more critic exceptions
 # TODO check return of encode/decode?
 # TODO LEAVE_SRC?
