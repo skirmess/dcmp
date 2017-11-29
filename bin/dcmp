@@ -8,892 +8,892 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
-use Encode;
-use File::Compare qw(compare);
-use File::Spec;
-
-#use Getopt::Long;
-
-use constant FILE_TYPE_DIRECTORY => 1;
-use constant FILE_TYPE_OTHER     => 2;
-use constant FILE_TYPE_REGULAR   => 3;
-use constant FILE_TYPE_SYMLINK   => 4;
-
-use constant FILE_ADDITIONAL      => 1;    # +
-use constant FILE_MISSING         => 2;    # -
-use constant FILE_TYPE_DIFFERS    => 3;    # @
-use constant FILE_TYPE_UNKNOWN    => 4;    # ?
-use constant FILE_CONTENT_DIFFERS => 5;    # M
-use constant LINK_TARGET_DIFFERS  => 6;    # L
-
-#
-# TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
-#
-# TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
-#
-# TODO sort with "use locale"?
-#
-# TODO !!! die UNICODE, then either binmode to utf-8 in script.
-#
-# TODO put die encode() in it's own function
-# TODO die -> DIE (encode_and_die, die_utf8
-# TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
-# TODO create a die/encode/_cwd function
-# TODO check encode for print
-#
-# TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
-# TODO check binmode for errors
-#
-#
-# TODO rename left/right with 1/2 or reference/workspace or something
-#   diff calls it file1/file2
-#       %<     lines from FILE1
-#       %>     lines from FILE2
-#       %=     lines common to FILE1 and FILE2
-#
-# TODO support - for stdin/stdout for dcmp file
-# TODO change STDOUT to UTF-8 and remove unneeded encodes
-# TODO replace all for loops in tests with one iterator that returns all values?
-# TODO dcmp sort -> SORT
-# TODO try to fix some more critic exceptions
-# TODO check return of encode/decode?
-# TODO LEAVE_SRC?
-# TODO move shared test code to t/lib module
-# TODO -i ignore dir
-# TODO -I ignore/path/x/y
-# TODO create a function for _cwd
-# TODO _cwd { local $/; require Cwd; return cwd(); }  ???
-# TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
-# TODO add comments
-# TODO add documentation
-# TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
-# TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
-# TODO mock cwd(), test if cwd() returns nothing
-#
-# TODO ** usage **
-#
-# TODO dcmp [-vV] <dir1/file1> <dir2/file2>
-# TODO 	-v  use ^ and M- notation     (including space and tab)
-# TODO 	-V  unicode replacement chars (including space and tab)
-#
-# TODO dcmp -c <file> <dir>
-# TODO 	-c create dcmp file
-#
-# TODO ** cleanup **
-# TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
-
-##!/usr/bin/env perl
-#
-#use strict;
-#use warnings;
-#
 #use Encode;
-#use Unicode::Normalize;
-#
-#my @x = (
-##    "\x{00C0}c",
-#    "\x{00C0}e",
-#    "\x{00C0}aa",
-#    "\x{0041}\x{0300}a",
-#    "\x{00C0}a",
-#    "\x{00C0}a",
-#    "\x{0041}\x{0300}a",
-##    "\x{0041}\x{0300}d",
-##    "\x{0041}\x{0300}f",
-#);
-#
-#sub _sorter {
-#    my $a_n = NFC($a);
-#    my $b_n = NFC($b);
-#
-#    return $a_n eq $b_n ? $a cmp $b : $a_n cmp $b_n;
-##    return NFC($a) cmp NFC($b);
-#}
-#
-#for my $x (sort _sorter @x ) {
-#    print encode('UTF-8', "$x: ");
-#    for my $c ( split //, $x) {
-#        print ord($c), " ";
-#    }
-#    print "\n";
-#}
+#use File::Compare qw(compare);
+#use File::Spec;
+
+##use Getopt::Long;
+
+#use constant FILE_TYPE_DIRECTORY => 1;
+#use constant FILE_TYPE_OTHER     => 2;
+#use constant FILE_TYPE_REGULAR   => 3;
+#use constant FILE_TYPE_SYMLINK   => 4;
+
+#use constant FILE_ADDITIONAL      => 1;    # +
+#use constant FILE_MISSING         => 2;    # -
+#use constant FILE_TYPE_DIFFERS    => 3;    # @
+#use constant FILE_TYPE_UNKNOWN    => 4;    # ?
+#use constant FILE_CONTENT_DIFFERS => 5;    # M
+#use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-##!/usr/bin/env perl
-#
-#use strict;
-#use warnings;
-#
-#use Encode;
-#use Unicode::Collate;
-#
-#my @a = map { chr $_ } 65 .. 90;
-#push @a, map { chr $_ } 97 .. 122;
-#
-#push @a, "\x{20ac}", "\x{00C0}", "\x{0041}\x{0300}", "\x{0061}\x{0300}";
-#
-#
-#my $Collator = Unicode::Collate->new();
-#
-## for my $x (sort @a) {
-#for my $x ($Collator->sort(@a)) {
-#    print encode('UTF-8', "->$x\n");
-#}
-
-#  use ^ and M- notation, except for LFD and TAB
-#
-#1 >^A<$
-#2 >^B<$
-#3 >^C<$
-#4 >^D<$
-#5 >^E<$
-#6 >^F<$
-#7 >^G<$
-#8 >^H<$
-#9 >^I<$
-#10 >$
-#<$
-#11 >^K<$
-#12 >^L<$
-#13 >^M<$
-#14 >^N<$
-#15 >^O<$
-#16 >^P<$
-#17 >^Q<$
-#18 >^R<$
-#19 >^S<$
-#20 >^T<$
-#21 >^U<$
-#22 >^V<$
-#23 >^W<$
-#24 >^X<$
-#25 >^Y<$
-#26 >^Z<$
-#27 >^[<$
-#28 >^\<$
-#29 >^]<$
-#30 >^^<$
-#31 >^_<$
-#32 > <$
-
-sub _chdir {
-    my ( $basedir, $dirs_ref ) = @_;
-
-    chdir encode( 'UTF-8', $basedir ) or die encode( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
-
-    for my $i ( 0 .. $#{$dirs_ref} ) {
-        if ( !chdir encode( 'UTF-8', ${$dirs_ref}[$i] ) ) {
-
-            # We have to store $! before calling cwd(), otherwise the
-            # non-failed error of cwd() overwrites the error message
-            my $error = $!;
-
-            require Cwd;
-            my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-            die encode( 'UTF-8', "Cannot chdir to ${$dirs_ref}[$i] in $cwd: $error\n" );
-        }
-    }
-
-    return;
-}
-
-sub _collect_file_info {
-    my ($filename) = @_;
-
-    my $filename_utf8 = encode( 'UTF-8', $filename );
-
-  STAT:
-    {
-        my $is_link = -l $filename_utf8;
-        last STAT if !defined $is_link;
-
-        if ($is_link) {
-            my $target = decode( 'UTF-8', readlink $filename_utf8 );
-            if ( !defined $target ) {
-
-                # We have to store $! before calling cwd(), otherwise the
-                # non-failed error of cwd() overwrites the error message
-                my $error = $!;
-
-                require Cwd;
-                my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-                die encode( 'UTF-8', "readlink failed for $filename in $cwd: $error\n" );
-            }
-
-            return [ $filename, FILE_TYPE_SYMLINK, $target ];
-        }
-
-        my $is_file = -f _;
-        last STAT if !defined $is_file;
-
-        if ($is_file) {
-            my $size = -s _;
-            last STAT if !defined $size;
-
-            return [ $filename, FILE_TYPE_REGULAR, $size ];
-        }
-
-        my $is_dir = -d _;
-        last STAT if !defined $is_dir;
-
-        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
-
-        return [ $filename, FILE_TYPE_OTHER ];
-    }
-
-    # We have to store $! before calling cwd(), otherwise the
-    # non-failed error of cwd() overwrites the error message
-    my $error = $!;
-
-    require Cwd;
-    my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-    die encode( 'UTF-8', "Cannot stat file $filename in $cwd: $error\n" );
-}
-
-sub _collect_file_info_report {
-    my ($_filename) = @_;
-
-    my $file_info_ref = _collect_file_info($_filename);
-
-    my ( $filename, $filetype ) = @{$file_info_ref};
-
-    return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
-
-    my $filename_utf8 = encode( 'UTF-8', $filename );
-
-    require Digest::MD5;
-    my $md5 = Digest::MD5->new();
-
-    my $fh;
-    if ( !open $fh, '<', $filename_utf8 ) {
-
-        # We have to store $! before calling cwd(), otherwise the
-        # non-failed error of cwd() overwrites the error message
-        my $error = $!;
-
-        require Cwd;
-        my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
-    }
-
-    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
-    $md5->addfile($fh);
-    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!\n" );
-
-    push @{$file_info_ref}, lc $md5->hexdigest();
-
-    return $file_info_ref;
-}
-
-# $md5_l and $md5_r are not used
-sub _compare_file_fs_fs {
-    my ( $chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
-
-    my @fh;
-
-  DIR:
-    for my $f ( $chdir_l, $chdir_r ) {
-        $f->($dirs_ref);
-
-        my $filename_utf8 = encode( 'UTF-8', $filename );
-
-        if ( open my $fh, '<', $filename_utf8 ) {
-            push @fh, $fh;
-            next DIR;
-        }
-
-        # We have to store $! before calling cwd(), otherwise the
-        # non-failed error of cwd() overwrites the error message
-        my $error = $!;
-
-        require Cwd;
-        my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
-    }
-
-    my $rc = compare(@fh);
-
-    for my $fh (@fh) {
-        close $fh or die encode( 'UTF-8', "Cannot read file $filename\n" );
-    }
-
-    # File::Compare::compare and its sibling functions return 0 if the files
-    # are equal, 1 if the files are unequal, or -1 if an error was
-    # encountered.
-    return 1 if $rc == 0;
-    return   if $rc == 1;
-    die encode( 'UTF-8', "Unable to compare file $filename\n" );
-}
-
-# $md5_r is not used
-sub _compare_file_record_fs {
-    my ( $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
-
-    require Digest::MD5;
-    my $md5 = Digest::MD5->new();
-
-    $chdir_r->($dirs_ref);
-
-    my $filename_utf8 = encode( 'UTF-8', $filename );
-
-    my $fh;
-    if ( !open $fh, '<', $filename_utf8 ) {
-
-        # We have to store $! before calling cwd(), otherwise the
-        # non-failed error of cwd() overwrites the error message
-        my $error = $!;
-
-        require Cwd;
-        my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
-    }
-
-    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
-    $md5->addfile($fh);
-    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!" );
-
-    return 1 if lc $md5_l eq lc $md5->hexdigest();
-    return;
-}
-
-# $dirs_ref and $filename is not used
-sub _compare_file_record_record {
-    my ( $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
-    return lc $md5_l eq lc $md5_r;
-}
-
-sub _dcmp {
-    my ( $_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer ) = @_;
-
-    my @dirs;
-
-    my $iterate_dir_l = sub { return $_iterate_dir_l->( \@dirs ); };
-    my $iterate_dir_r = sub { return $_iterate_dir_r->( \@dirs ); };
-    my $compare_file  = sub { return $_compare_file->( \@dirs, @_ ); };
-
-    my $differences = 0;
-    my @iterators;
-    push @iterators, _merge_iterators( $iterate_dir_l->(), $iterate_dir_r->() );
-
-    while (@iterators) {
-      FILE:
-        while ( defined( my $x = $iterators[-1]->() ) ) {
-            my ( $x_l, $x_r ) = @{$x};
-
-            if ( !defined $x_r ) {
-
-                # file is only present in the left tree
-                my ( $name, $mode ) = @{$x_l}[ 0, 1 ];
-                $printer->( FILE_ADDITIONAL, \@dirs, $name );
-                $differences = 1;
-
-                if ( $mode == FILE_TYPE_DIRECTORY ) {
-                    push @dirs, $name;
-                    push @iterators, _merge_iterators( $iterate_dir_l->(), undef );
-                }
-
-                next FILE;
-            }
-
-            if ( !defined $x_l ) {
-
-                # file is only present in the right tree;
-                my ( $name, $mode ) = @{$x_r}[ 0, 1 ];
-                $printer->( FILE_MISSING, \@dirs, $name );
-                $differences = 1;
-
-                if ( $mode == FILE_TYPE_DIRECTORY ) {
-                    push @dirs, $name;
-                    push @iterators, _merge_iterators( undef, $iterate_dir_r->() );
-                }
-
-                next FILE;
-            }
-
-            my ( $name, $mode_l ) = @{$x_l}[ 0, 1 ];
-            my $mode_r = ${$x_r}[1];
-
-            if ( $mode_l != $mode_r ) {
-
-                # file is not the same filetype
-                $printer->( FILE_TYPE_DIFFERS, \@dirs, $name );
-                $differences = 1;
-
-                if ( $mode_l == FILE_TYPE_DIRECTORY ) {
-                    push @dirs, $name;
-                    push @iterators, _merge_iterators( $iterate_dir_l->(), undef );
-                }
-                elsif ( $mode_r == FILE_TYPE_DIRECTORY ) {
-                    push @dirs, $name;
-                    push @iterators, _merge_iterators( undef, $iterate_dir_r->() );
-                }
-
-                next FILE;
-            }
-
-            if ( $mode_l == FILE_TYPE_SYMLINK ) {
-
-                # both are symlinks
-
-                my ($link_l) = ${$x_l}[2];
-                my ($link_r) = ${$x_r}[2];
-
-                if ( $link_l ne $link_r ) {
-                    $printer->( LINK_TARGET_DIFFERS, \@dirs, $name );
-                    $differences = 1;
-                }
-
-                next FILE;
-            }
-
-            if ( $mode_l == FILE_TYPE_DIRECTORY ) {
-
-                # both are directories
-                push @dirs, $name;
-                push @iterators, _merge_iterators( $iterate_dir_l->(), $iterate_dir_r->() );
-
-                next FILE;
-            }
-
-            if ( $mode_l == FILE_TYPE_REGULAR ) {
-
-                # both are regular files
-
-                my ( $size_l, $md5_l ) = @{$x_l}[ 2, 3 ];
-                my ( $size_r, $md5_r ) = @{$x_r}[ 2, 3 ];
-
-                if ( $size_l != $size_r || !$compare_file->( $name, $md5_l, $md5_r ) ) {
-                    $printer->( FILE_CONTENT_DIFFERS, \@dirs, $name );
-                    $differences = 1;
-                }
-
-                next FILE;
-            }
-
-            $printer->( FILE_TYPE_UNKNOWN, \@dirs, $name );
-            $differences = 1;
-        }
-
-        pop @iterators;
-        pop @dirs;
-    }
-
-    return;
-}
-
-{
-    my %escapes = map { chr $_ => sprintf '%%%02X', $_ } (
-        0 .. 0x1F,    # unprintable
-        0x20,         # whitespace
-        0x25,         # %
-        0x7F,         # unprintable
-    );
-    my $chars_to_replace = join q{}, map { quotemeta } keys %escapes;
-
-    sub _escape_filename {
-        my ($filename) = @_;
-
-        $filename =~ s{([$chars_to_replace])}{$escapes{$1}}xsmge;
-        return $filename;
-    }
-}
-
-sub _iterator_dir_fs {
-    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
-
-    $chdir->($dirs_ref);
-
-    my %ignore;
-    if ( defined $ignore_ref ) {
-        @ignore{ @{$ignore_ref} } = 1;
-    }
-
-    my $fh;
-    if ( !opendir $fh, q{.} ) {
-
-        # We have to store $! before calling cwd(), otherwise the
-        # non-failed error of cwd() overwrites the error message
-        my $error = $!;
-
-        require Cwd;
-        my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
-    }
-
-    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { decode( 'UTF-8', $_ ) } readdir $fh;
-
-    if ( !closedir $fh ) {
-
-        # We have to store $! before calling cwd(), otherwise the
-        # non-failed error of cwd() overwrites the error message
-        my $error = $!;
-
-        require Cwd;
-        my $cwd = decode( 'UTF-8', Cwd::cwd() );
-
-        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
-    }
-
-    return sub {
-        return if !@stack;
-        return shift @stack;
-    };
-}
-
-sub _load_dcmp_file {
-    my ( $filename, $ignore_ref ) = @_;
-
-    my %ignore;
-    if ( defined $ignore_ref ) {
-        @ignore{ @{$ignore_ref} } = 1;
-    }
-
-    my %path;
-    my %file_seen;
-    my @dirs;
-
-    open my $fh, '<:encoding(UTF-8)', encode( 'UTF-8', $filename ) or die encode( 'UTF-8', "Cannot read file $filename: $!\n" );
-
-    my $dcmp_header = <$fh>;
-    chomp $dcmp_header;
-
-    die encode( 'UTF-8', "File $filename is not a valid dcmp file\n" ) if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
-
-    my $last_line_seen = 0;
-  LINE:
-    while ( my $line = <$fh> ) {
-        next if $line =~ m{ ^ \s* $ }xsm;
-        next if $line =~ m{ ^ \s* [#] }xsm;
-
-        if ($last_line_seen) {
-
-            # The -DIR entry removes an element from @dirs. There is an
-            # additional -DIR at the end of the dcmp file. If no element
-            # can be removed from @dirs the $last_line_seen is set. But
-            # that should only happen at the end of the file. If there
-            # are more lines the file must be invalid.
-            my $line_nr = $. - 1;
-            die encode( 'UTF-8', "Unbalanced -DIR on line $line_nr in file $filename\n" );
-        }
-
-        if ( $line =~ m{ ^ - DIR $ }xsm ) {
-            if (@dirs) {
-                pop @dirs;
-            }
-            else {
-                $last_line_seen = 1;
-            }
-            next LINE;
-        }
-
-        # The current file is under $path
-        my $path = File::Spec->catdir(@dirs);
-
-        #
-        chomp $line;
-
-        # From here on every line contains at least an ACTION and a NAME
-        my @line = split /\s+/xsm, $line;
-        die encode( 'UTF-8', "Incorrect number of arguments at line $. in file $filename\n" ) if @line < 2;
-
-        my $action = shift @line;
-        my $name   = _unescape_filename( shift @line );
-
-        # Every directory must not contain files with the same name
-        if ( exists $file_seen{$path}{$name} ) {
-            my $msg = "Duplicate entry for $name";
-            if ( length $path ) {
-                $msg .= " under path $path";
-            }
-            die encode( 'UTF-8', "$msg at line $. in file $filename\n" );
-        }
-        $file_seen{$path}{$name} = 1;
-
-        #
-        if ( $action eq 'FILE' ) {
-            die encode( 'UTF-8', "Incorrect number of arguments for FILE entry at line $. in file $filename\n" ) if @line != 2;
-
-            my ( $size, $md5 ) = @line;
-
-            push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
-            next LINE;
-        }
-
-        #
-        if ( $action eq 'DIR' ) {
-            die encode( 'UTF-8', "Incorrect number of arguments for DIR entry at line $. in file $filename\n" ) if @line != 0;
-
-            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
-            push @dirs, $name;
-
-            next LINE;
-        }
-
-        #
-        if ( $action eq 'LINK' ) {
-            die encode( 'UTF-8', "Incorrect number of arguments for LINK entry at line $. in file $filename\n" ) if @line != 1;
-            my ($target) = @line;
-            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
-
-            next LINE;
-        }
-
-        #        #
-        die encode( 'UTF-8', "Invalid entry on line $. in file $filename\n" );
-    }
-    close $fh or die encode( 'UTF-8', "Cannot read file $filename: $!" );
-
-    die encode( 'UTF-8', "Unbalanced -DIR at end of file $filename\n" ) if !$last_line_seen;
-
-    # Remove ignored files from out loaded dcmp file.
-    #
-    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
-    # get out of sync.
-  PATH:
-    for my $path ( keys %path ) {
-        for my $dir ( File::Spec->splitdir($path) ) {
-            if ( exists $ignore{$dir} ) {
-                delete $path{$path};
-                next PATH;
-            }
-        }
-
-        @{ $path{$path} } = grep { !exists $ignore{ ${$_}[0] } } @{ $path{$path} };
-    }
-
-    # the returned sub is used instead of _iterate_dir_fs if the information
-    # comes from a dcmp file instead of a directory structure on the disk.
-    return sub {
-        my ($dirs_ref) = @_;
-        my $path = File::Spec->catdir( @{$dirs_ref} );
-
-        my @stack =
-          defined $path{$path}
-          ? sort { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} }
-          : ();
-
-        return sub {
-            return if !@stack;
-            return shift @stack;
-        };
-    };
-}
-
-sub _merge_iterators {
-    my ( $it_l, $it_r ) = @_;
-
-    my $next_l = defined $it_l ? $it_l->() : undef;
-    my $next_r = defined $it_r ? $it_r->() : undef;
-
-    return sub {
-        return if !defined $next_l && !defined $next_r;
-
-        my $current_l = $next_l;
-        my $current_r = $next_r;
-
-        if ( !defined $next_l ) {
-            $next_r = $it_r->();
-            return [ undef, $current_r ];
-        }
-
-        if ( ( !defined $next_r ) || ( ${$next_l}[0] lt ${$next_r}[0] ) ) {
-            $next_l = $it_l->();
-            return [ $current_l, undef ];
-        }
-
-        if ( ${$next_l}[0] gt ${$next_r}[0] ) {
-            $next_r = $it_r->();
-            return [ undef, $current_r ];
-        }
-
-        $next_l = $it_l->();
-        $next_r = $it_r->();
-
-        return [ $current_l, $current_r ];
-    };
-}
-
-sub _print_changes {
-    my @status_code;
-
-    $status_code[FILE_ADDITIONAL]      = q{+};
-    $status_code[FILE_MISSING]         = q{-};
-    $status_code[FILE_TYPE_DIFFERS]    = q{@};
-    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
-    $status_code[FILE_CONTENT_DIFFERS] = q{M};
-    $status_code[LINK_TARGET_DIFFERS]  = q{L};
-
-    return sub {
-        my ( $action, $dirs_ref, $name ) = @_;
-
-        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
-
-        print encode( 'UTF-8', "$status_code[$action] $path\n" );
-
-        return;
-    };
-}
-
-sub _print_dcmp_file {
-    my ($_iterate_dir) = @_;
-
-    my @dirs;
-
-    my $iterate_dir = sub {
-        return $_iterate_dir->( \@dirs );
-    };
-
-    my @iterators;
-    push @iterators, $iterate_dir->();
-
-    while (@iterators) {
-      FILE:
-        while ( defined( my $file_info = $iterators[-1]->() ) ) {
-            my ( $name, $mode ) = @{$file_info};
-            my $name_escaped = _escape_filename($name);
-
-            if ( $mode == FILE_TYPE_SYMLINK ) {
-                my ($link) = ${$file_info}[2];
-                my $link_escaped = _escape_filename($link);
-                print encode( 'UTF-8', "LINK $name_escaped $link_escaped\n" );
-                next FILE;
-            }
-
-            if ( $mode == FILE_TYPE_DIRECTORY ) {
-                print encode( 'UTF-8', "DIR $name_escaped\n" );
-
-                push @dirs,      $name;
-                push @iterators, $iterate_dir->();
-
-                next FILE;
-            }
-
-            if ( $mode == FILE_TYPE_REGULAR ) {
-                my ( $size, $md5 ) = @{$file_info}[ 2, 3 ];
-                print encode( 'UTF-8', "FILE $name_escaped $size $md5\n" );
-                next FILE;
-            }
-
-            die encode( 'UTF-8', 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n" );
-        }
-
-        pop @iterators;
-        pop @dirs;
-        print "-DIR\n";
-    }
-
-    return;
-}
-
-sub _unescape_filename {
-    my ($filename) = @_;
-
-    $filename =~ s{ [%] ([0-9A-Fa-f]{2}) }{chr(hex($1))}xsmeg;
-
-    return $filename;
-}
-
-## untested
-
-##sub _get_main_options_and_command {
-##    my %opt;
-##    GetOptions(
-##        \%opt,
-##        'i=s@',
-##    ) or die "\n";
 ##
-##use Data::Dx;
-##Dx %opt;
-##    return \%opt, $command;
-##}
+## TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
+##
+## TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
+##
+## TODO sort with "use locale"?
+##
+## TODO !!! die UNICODE, then either binmode to utf-8 in script.
+##
+## TODO put die encode() in it's own function
+## TODO die -> DIE (encode_and_die, die_utf8
+## TODO perl -e 'binmode(STDERR, ":utf8"); die "\x{0041}\x{0300}";'
+## TODO create a die/encode/_cwd function
+## TODO check encode for print
+##
+## TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
+## TODO check binmode for errors
+##
+##
+## TODO rename left/right with 1/2 or reference/workspace or something
+##   diff calls it file1/file2
+##       %<     lines from FILE1
+##       %>     lines from FILE2
+##       %=     lines common to FILE1 and FILE2
+##
+## TODO support - for stdin/stdout for dcmp file
+## TODO change STDOUT to UTF-8 and remove unneeded encodes
+## TODO replace all for loops in tests with one iterator that returns all values?
+## TODO dcmp sort -> SORT
+## TODO try to fix some more critic exceptions
+## TODO check return of encode/decode?
+## TODO LEAVE_SRC?
+## TODO move shared test code to t/lib module
+## TODO -i ignore dir
+## TODO -I ignore/path/x/y
+## TODO create a function for _cwd
+## TODO _cwd { local $/; require Cwd; return cwd(); }  ???
+## TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
+## TODO add comments
+## TODO add documentation
+## TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
+## TODO sprintf numberd arguments? $1 is cwd, $2 is error http://perldoc.perl.org/functions/sprintf.html
+## TODO mock cwd(), test if cwd() returns nothing
+##
+## TODO ** usage **
+##
+## TODO dcmp [-vV] <dir1/file1> <dir2/file2>
+## TODO 	-v  use ^ and M- notation     (including space and tab)
+## TODO 	-V  unicode replacement chars (including space and tab)
+##
+## TODO dcmp -c <file> <dir>
+## TODO 	-c create dcmp file
+##
+## TODO ** cleanup **
+## TODO s/die/DIE/, s/encode/ENCODE/,s/decode/DECODE/, s/cwd/CWD/
 
-##sub _usage {
-##    die "usage...\n";
+###!/usr/bin/env perl
+##
+##use strict;
+##use warnings;
+##
+##use Encode;
+##use Unicode::Normalize;
+##
+##my @x = (
+###    "\x{00C0}c",
+##    "\x{00C0}e",
+##    "\x{00C0}aa",
+##    "\x{0041}\x{0300}a",
+##    "\x{00C0}a",
+##    "\x{00C0}a",
+##    "\x{0041}\x{0300}a",
+###    "\x{0041}\x{0300}d",
+###    "\x{0041}\x{0300}f",
+##);
+##
+##sub _sorter {
+##    my $a_n = NFC($a);
+##    my $b_n = NFC($b);
+##
+##    return $a_n eq $b_n ? $a cmp $b : $a_n cmp $b_n;
+###    return NFC($a) cmp NFC($b);
 ##}
 ##
+##for my $x (sort _sorter @x ) {
+##    print encode('UTF-8', "$x: ");
+##    for my $c ( split //, $x) {
+##        print ord($c), " ";
+##    }
+##    print "\n";
+##}
+
+###!/usr/bin/env perl
 ##
-#if ( !caller ) {
-#    main();
-#    exit 0;
-##    my $rc = eval { main(); };
+##use strict;
+##use warnings;
 ##
-##    exit 2 if !defined $rc;
-##    exit 0 if $rc;
-##    exit 1;
-#}
+##use Encode;
+##use Unicode::Collate;
+##
+##my @a = map { chr $_ } 65 .. 90;
+##push @a, map { chr $_ } 97 .. 122;
+##
+##push @a, "\x{20ac}", "\x{00C0}", "\x{0041}\x{0300}", "\x{0061}\x{0300}";
+##
+##
+##my $Collator = Unicode::Collate->new();
+##
+### for my $x (sort @a) {
+##for my $x ($Collator->sort(@a)) {
+##    print encode('UTF-8', "->$x\n");
+##}
 
-#sub main {
-#    return _main_print_dcmp_file(@ARGV) if @ARGV == 1;
-#    return _main_dcmp(@ARGV) if @ARGV == 2;
+##  use ^ and M- notation, except for LFD and TAB
+##
+##1 >^A<$
+##2 >^B<$
+##3 >^C<$
+##4 >^D<$
+##5 >^E<$
+##6 >^F<$
+##7 >^G<$
+##8 >^H<$
+##9 >^I<$
+##10 >$
+##<$
+##11 >^K<$
+##12 >^L<$
+##13 >^M<$
+##14 >^N<$
+##15 >^O<$
+##16 >^P<$
+##17 >^Q<$
+##18 >^R<$
+##19 >^S<$
+##20 >^T<$
+##21 >^U<$
+##22 >^V<$
+##23 >^W<$
+##24 >^X<$
+##25 >^Y<$
+##26 >^Z<$
+##27 >^[<$
+##28 >^\<$
+##29 >^]<$
+##30 >^^<$
+##31 >^_<$
+##32 > <$
 
-#    die;
-#}
+#sub _chdir {
+#    my ( $basedir, $dirs_ref ) = @_;
 
-#sub _main_dcmp {
-#    my @files = @_;
+#    chdir encode( 'UTF-8', $basedir ) or die encode( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
 
-#    my @chdir;
-#    my @it;
-#    my @type;
+#    for my $i ( 0 .. $#{$dirs_ref} ) {
+#        if ( !chdir encode( 'UTF-8', ${$dirs_ref}[$i] ) ) {
 
-#    FILE:
-#    for my $i (0 .. 1) {
-#        my $file = abs_path $files[$i];
+#            # We have to store $! before calling cwd(), otherwise the
+#            # non-failed error of cwd() overwrites the error message
+#            my $error = $!;
 
-#        if ( -f $file ) {
-#            $type[$i] = S_IFREG;
+#            require Cwd;
+#            my $cwd = decode( 'UTF-8', Cwd::cwd() );
 
-#            $it[$i] = _load_dcmp_file($file);
-
-#            next FILE;
+#            die encode( 'UTF-8', "Cannot chdir to ${$dirs_ref}[$i] in $cwd: $error\n" );
 #        }
-
-#        if ( -d $file ) {
-#            $type[$i] = S_IFDIR;
-
-#            my $chdir = sub { return _chdir($file, @_); };
-#            $chdir[$i] = $chdir;
-
-#            # TODO add ignores (the undef here)
-#            $it[$i] = sub { return _iterator_dir_fs($chdir, sub { return _collect_file_info_report(@_); }, undef, @_); };
-
-#            next FILE;
-#        }
-
-#        die "$file is neither a file nor a directory";
 #    }
 
-#    my $compare_file = $type[0] == S_IFDIR && $type[1] == S_IFDIR ? sub { _compare_file_fs_fs($chdir[0], $chdir[1], @_) }
-#                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_record_fs($chdir[0], @_) }
-#                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_record_fs($chdir[1], @_) }
-#                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_record_record(@_) }
-#                     : die;
-
-#    my $printer = _print_changes();
-
-#    return _dcmp($it[0], $it[1], $compare_file, $printer);
+#    return;
 #}
 
-#sub _main_print_dcmp_file {
-#    my ( $basedir) = @_;
+#sub _collect_file_info {
+#    my ($filename) = @_;
 
-#    die if ! -d $basedir;
+#    my $filename_utf8 = encode( 'UTF-8', $filename );
 
-#    $basedir = abs_path $basedir;
+#  STAT:
+#    {
+#        my $is_link = -l $filename_utf8;
+#        last STAT if !defined $is_link;
 
-#    my $chdir = sub { return _chdir($basedir, @_); };
-#    my $collect_file_info = sub { return _collect_file_info_report(@_); };
-#    # TODO add ignores (the undef here)
-#    my $iterate_dir_fs = sub { return _iterator_dir_fs($chdir, $collect_file_info, undef, @_); };
+#        if ($is_link) {
+#            my $target = decode( 'UTF-8', readlink $filename_utf8 );
+#            if ( !defined $target ) {
 
-#    return _print_dcmp_file($iterate_dir_fs);
+#                # We have to store $! before calling cwd(), otherwise the
+#                # non-failed error of cwd() overwrites the error message
+#                my $error = $!;
+
+#                require Cwd;
+#                my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#                die encode( 'UTF-8', "readlink failed for $filename in $cwd: $error\n" );
+#            }
+
+#            return [ $filename, FILE_TYPE_SYMLINK, $target ];
+#        }
+
+#        my $is_file = -f _;
+#        last STAT if !defined $is_file;
+
+#        if ($is_file) {
+#            my $size = -s _;
+#            last STAT if !defined $size;
+
+#            return [ $filename, FILE_TYPE_REGULAR, $size ];
+#        }
+
+#        my $is_dir = -d _;
+#        last STAT if !defined $is_dir;
+
+#        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
+
+#        return [ $filename, FILE_TYPE_OTHER ];
+#    }
+
+#    # We have to store $! before calling cwd(), otherwise the
+#    # non-failed error of cwd() overwrites the error message
+#    my $error = $!;
+
+#    require Cwd;
+#    my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#    die encode( 'UTF-8', "Cannot stat file $filename in $cwd: $error\n" );
 #}
+
+#sub _collect_file_info_report {
+#    my ($_filename) = @_;
+
+#    my $file_info_ref = _collect_file_info($_filename);
+
+#    my ( $filename, $filetype ) = @{$file_info_ref};
+
+#    return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
+
+#    my $filename_utf8 = encode( 'UTF-8', $filename );
+
+#    require Digest::MD5;
+#    my $md5 = Digest::MD5->new();
+
+#    my $fh;
+#    if ( !open $fh, '<', $filename_utf8 ) {
+
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $error = $!;
+
+#        require Cwd;
+#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+#    }
+
+#    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
+#    $md5->addfile($fh);
+#    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!\n" );
+
+#    push @{$file_info_ref}, lc $md5->hexdigest();
+
+#    return $file_info_ref;
+#}
+
+## $md5_l and $md5_r are not used
+#sub _compare_file_fs_fs {
+#    my ( $chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+
+#    my @fh;
+
+#  DIR:
+#    for my $f ( $chdir_l, $chdir_r ) {
+#        $f->($dirs_ref);
+
+#        my $filename_utf8 = encode( 'UTF-8', $filename );
+
+#        if ( open my $fh, '<', $filename_utf8 ) {
+#            push @fh, $fh;
+#            next DIR;
+#        }
+
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $error = $!;
+
+#        require Cwd;
+#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+#    }
+
+#    my $rc = compare(@fh);
+
+#    for my $fh (@fh) {
+#        close $fh or die encode( 'UTF-8', "Cannot read file $filename\n" );
+#    }
+
+#    # File::Compare::compare and its sibling functions return 0 if the files
+#    # are equal, 1 if the files are unequal, or -1 if an error was
+#    # encountered.
+#    return 1 if $rc == 0;
+#    return   if $rc == 1;
+#    die encode( 'UTF-8', "Unable to compare file $filename\n" );
+#}
+
+## $md5_r is not used
+#sub _compare_file_record_fs {
+#    my ( $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+
+#    require Digest::MD5;
+#    my $md5 = Digest::MD5->new();
+
+#    $chdir_r->($dirs_ref);
+
+#    my $filename_utf8 = encode( 'UTF-8', $filename );
+
+#    my $fh;
+#    if ( !open $fh, '<', $filename_utf8 ) {
+
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $error = $!;
+
+#        require Cwd;
+#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#        die encode( 'UTF-8', "Cannot read file $filename in $cwd: $error\n" );
+#    }
+
+#    binmode $fh or die encode( 'UTF-8', "binmode failed for $filename: $!\n" );
+#    $md5->addfile($fh);
+#    close $fh or die encode( 'UTF-8', "Unable to read file $filename: $!" );
+
+#    return 1 if lc $md5_l eq lc $md5->hexdigest();
+#    return;
+#}
+
+## $dirs_ref and $filename is not used
+#sub _compare_file_record_record {
+#    my ( $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+#    return lc $md5_l eq lc $md5_r;
+#}
+
+#sub _dcmp {
+#    my ( $_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer ) = @_;
+
+#    my @dirs;
+
+#    my $iterate_dir_l = sub { return $_iterate_dir_l->( \@dirs ); };
+#    my $iterate_dir_r = sub { return $_iterate_dir_r->( \@dirs ); };
+#    my $compare_file  = sub { return $_compare_file->( \@dirs, @_ ); };
+
+#    my $differences = 0;
+#    my @iterators;
+#    push @iterators, _merge_iterators( $iterate_dir_l->(), $iterate_dir_r->() );
+
+#    while (@iterators) {
+#      FILE:
+#        while ( defined( my $x = $iterators[-1]->() ) ) {
+#            my ( $x_l, $x_r ) = @{$x};
+
+#            if ( !defined $x_r ) {
+
+#                # file is only present in the left tree
+#                my ( $name, $mode ) = @{$x_l}[ 0, 1 ];
+#                $printer->( FILE_ADDITIONAL, \@dirs, $name );
+#                $differences = 1;
+
+#                if ( $mode == FILE_TYPE_DIRECTORY ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators( $iterate_dir_l->(), undef );
+#                }
+
+#                next FILE;
+#            }
+
+#            if ( !defined $x_l ) {
+
+#                # file is only present in the right tree;
+#                my ( $name, $mode ) = @{$x_r}[ 0, 1 ];
+#                $printer->( FILE_MISSING, \@dirs, $name );
+#                $differences = 1;
+
+#                if ( $mode == FILE_TYPE_DIRECTORY ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators( undef, $iterate_dir_r->() );
+#                }
+
+#                next FILE;
+#            }
+
+#            my ( $name, $mode_l ) = @{$x_l}[ 0, 1 ];
+#            my $mode_r = ${$x_r}[1];
+
+#            if ( $mode_l != $mode_r ) {
+
+#                # file is not the same filetype
+#                $printer->( FILE_TYPE_DIFFERS, \@dirs, $name );
+#                $differences = 1;
+
+#                if ( $mode_l == FILE_TYPE_DIRECTORY ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators( $iterate_dir_l->(), undef );
+#                }
+#                elsif ( $mode_r == FILE_TYPE_DIRECTORY ) {
+#                    push @dirs, $name;
+#                    push @iterators, _merge_iterators( undef, $iterate_dir_r->() );
+#                }
+
+#                next FILE;
+#            }
+
+#            if ( $mode_l == FILE_TYPE_SYMLINK ) {
+
+#                # both are symlinks
+
+#                my ($link_l) = ${$x_l}[2];
+#                my ($link_r) = ${$x_r}[2];
+
+#                if ( $link_l ne $link_r ) {
+#                    $printer->( LINK_TARGET_DIFFERS, \@dirs, $name );
+#                    $differences = 1;
+#                }
+
+#                next FILE;
+#            }
+
+#            if ( $mode_l == FILE_TYPE_DIRECTORY ) {
+
+#                # both are directories
+#                push @dirs, $name;
+#                push @iterators, _merge_iterators( $iterate_dir_l->(), $iterate_dir_r->() );
+
+#                next FILE;
+#            }
+
+#            if ( $mode_l == FILE_TYPE_REGULAR ) {
+
+#                # both are regular files
+
+#                my ( $size_l, $md5_l ) = @{$x_l}[ 2, 3 ];
+#                my ( $size_r, $md5_r ) = @{$x_r}[ 2, 3 ];
+
+#                if ( $size_l != $size_r || !$compare_file->( $name, $md5_l, $md5_r ) ) {
+#                    $printer->( FILE_CONTENT_DIFFERS, \@dirs, $name );
+#                    $differences = 1;
+#                }
+
+#                next FILE;
+#            }
+
+#            $printer->( FILE_TYPE_UNKNOWN, \@dirs, $name );
+#            $differences = 1;
+#        }
+
+#        pop @iterators;
+#        pop @dirs;
+#    }
+
+#    return;
+#}
+
+#{
+#    my %escapes = map { chr $_ => sprintf '%%%02X', $_ } (
+#        0 .. 0x1F,    # unprintable
+#        0x20,         # whitespace
+#        0x25,         # %
+#        0x7F,         # unprintable
+#    );
+#    my $chars_to_replace = join q{}, map { quotemeta } keys %escapes;
+
+#    sub _escape_filename {
+#        my ($filename) = @_;
+
+#        $filename =~ s{([$chars_to_replace])}{$escapes{$1}}xsmge;
+#        return $filename;
+#    }
+#}
+
+#sub _iterator_dir_fs {
+#    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
+
+#    $chdir->($dirs_ref);
+
+#    my %ignore;
+#    if ( defined $ignore_ref ) {
+#        @ignore{ @{$ignore_ref} } = 1;
+#    }
+
+#    my $fh;
+#    if ( !opendir $fh, q{.} ) {
+
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $error = $!;
+
+#        require Cwd;
+#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
+#    }
+
+#    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { decode( 'UTF-8', $_ ) } readdir $fh;
+
+#    if ( !closedir $fh ) {
+
+#        # We have to store $! before calling cwd(), otherwise the
+#        # non-failed error of cwd() overwrites the error message
+#        my $error = $!;
+
+#        require Cwd;
+#        my $cwd = decode( 'UTF-8', Cwd::cwd() );
+
+#        die encode( 'UTF-8', "Cannot read directory $cwd: $error\n" );
+#    }
+
+#    return sub {
+#        return if !@stack;
+#        return shift @stack;
+#    };
+#}
+
+#sub _load_dcmp_file {
+#    my ( $filename, $ignore_ref ) = @_;
+
+#    my %ignore;
+#    if ( defined $ignore_ref ) {
+#        @ignore{ @{$ignore_ref} } = 1;
+#    }
+
+#    my %path;
+#    my %file_seen;
+#    my @dirs;
+
+#    open my $fh, '<:encoding(UTF-8)', encode( 'UTF-8', $filename ) or die encode( 'UTF-8', "Cannot read file $filename: $!\n" );
+
+#    my $dcmp_header = <$fh>;
+#    chomp $dcmp_header;
+
+#    die encode( 'UTF-8', "File $filename is not a valid dcmp file\n" ) if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
+
+#    my $last_line_seen = 0;
+#  LINE:
+#    while ( my $line = <$fh> ) {
+#        next if $line =~ m{ ^ \s* $ }xsm;
+#        next if $line =~ m{ ^ \s* [#] }xsm;
+
+#        if ($last_line_seen) {
+
+#            # The -DIR entry removes an element from @dirs. There is an
+#            # additional -DIR at the end of the dcmp file. If no element
+#            # can be removed from @dirs the $last_line_seen is set. But
+#            # that should only happen at the end of the file. If there
+#            # are more lines the file must be invalid.
+#            my $line_nr = $. - 1;
+#            die encode( 'UTF-8', "Unbalanced -DIR on line $line_nr in file $filename\n" );
+#        }
+
+#        if ( $line =~ m{ ^ - DIR $ }xsm ) {
+#            if (@dirs) {
+#                pop @dirs;
+#            }
+#            else {
+#                $last_line_seen = 1;
+#            }
+#            next LINE;
+#        }
+
+#        # The current file is under $path
+#        my $path = File::Spec->catdir(@dirs);
+
+#        #
+#        chomp $line;
+
+#        # From here on every line contains at least an ACTION and a NAME
+#        my @line = split /\s+/xsm, $line;
+#        die encode( 'UTF-8', "Incorrect number of arguments at line $. in file $filename\n" ) if @line < 2;
+
+#        my $action = shift @line;
+#        my $name   = _unescape_filename( shift @line );
+
+#        # Every directory must not contain files with the same name
+#        if ( exists $file_seen{$path}{$name} ) {
+#            my $msg = "Duplicate entry for $name";
+#            if ( length $path ) {
+#                $msg .= " under path $path";
+#            }
+#            die encode( 'UTF-8', "$msg at line $. in file $filename\n" );
+#        }
+#        $file_seen{$path}{$name} = 1;
+
+#        #
+#        if ( $action eq 'FILE' ) {
+#            die encode( 'UTF-8', "Incorrect number of arguments for FILE entry at line $. in file $filename\n" ) if @line != 2;
+
+#            my ( $size, $md5 ) = @line;
+
+#            push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
+#            next LINE;
+#        }
+
+#        #
+#        if ( $action eq 'DIR' ) {
+#            die encode( 'UTF-8', "Incorrect number of arguments for DIR entry at line $. in file $filename\n" ) if @line != 0;
+
+#            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
+#            push @dirs, $name;
+
+#            next LINE;
+#        }
+
+#        #
+#        if ( $action eq 'LINK' ) {
+#            die encode( 'UTF-8', "Incorrect number of arguments for LINK entry at line $. in file $filename\n" ) if @line != 1;
+#            my ($target) = @line;
+#            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
+
+#            next LINE;
+#        }
+
+#        #        #
+#        die encode( 'UTF-8', "Invalid entry on line $. in file $filename\n" );
+#    }
+#    close $fh or die encode( 'UTF-8', "Cannot read file $filename: $!" );
+
+#    die encode( 'UTF-8', "Unbalanced -DIR at end of file $filename\n" ) if !$last_line_seen;
+
+#    # Remove ignored files from out loaded dcmp file.
+#    #
+#    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
+#    # get out of sync.
+#  PATH:
+#    for my $path ( keys %path ) {
+#        for my $dir ( File::Spec->splitdir($path) ) {
+#            if ( exists $ignore{$dir} ) {
+#                delete $path{$path};
+#                next PATH;
+#            }
+#        }
+
+#        @{ $path{$path} } = grep { !exists $ignore{ ${$_}[0] } } @{ $path{$path} };
+#    }
+
+#    # the returned sub is used instead of _iterate_dir_fs if the information
+#    # comes from a dcmp file instead of a directory structure on the disk.
+#    return sub {
+#        my ($dirs_ref) = @_;
+#        my $path = File::Spec->catdir( @{$dirs_ref} );
+
+#        my @stack =
+#          defined $path{$path}
+#          ? sort { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} }
+#          : ();
+
+#        return sub {
+#            return if !@stack;
+#            return shift @stack;
+#        };
+#    };
+#}
+
+#sub _merge_iterators {
+#    my ( $it_l, $it_r ) = @_;
+
+#    my $next_l = defined $it_l ? $it_l->() : undef;
+#    my $next_r = defined $it_r ? $it_r->() : undef;
+
+#    return sub {
+#        return if !defined $next_l && !defined $next_r;
+
+#        my $current_l = $next_l;
+#        my $current_r = $next_r;
+
+#        if ( !defined $next_l ) {
+#            $next_r = $it_r->();
+#            return [ undef, $current_r ];
+#        }
+
+#        if ( ( !defined $next_r ) || ( ${$next_l}[0] lt ${$next_r}[0] ) ) {
+#            $next_l = $it_l->();
+#            return [ $current_l, undef ];
+#        }
+
+#        if ( ${$next_l}[0] gt ${$next_r}[0] ) {
+#            $next_r = $it_r->();
+#            return [ undef, $current_r ];
+#        }
+
+#        $next_l = $it_l->();
+#        $next_r = $it_r->();
+
+#        return [ $current_l, $current_r ];
+#    };
+#}
+
+#sub _print_changes {
+#    my @status_code;
+
+#    $status_code[FILE_ADDITIONAL]      = q{+};
+#    $status_code[FILE_MISSING]         = q{-};
+#    $status_code[FILE_TYPE_DIFFERS]    = q{@};
+#    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
+#    $status_code[FILE_CONTENT_DIFFERS] = q{M};
+#    $status_code[LINK_TARGET_DIFFERS]  = q{L};
+
+#    return sub {
+#        my ( $action, $dirs_ref, $name ) = @_;
+
+#        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
+
+#        print encode( 'UTF-8', "$status_code[$action] $path\n" );
+
+#        return;
+#    };
+#}
+
+#sub _print_dcmp_file {
+#    my ($_iterate_dir) = @_;
+
+#    my @dirs;
+
+#    my $iterate_dir = sub {
+#        return $_iterate_dir->( \@dirs );
+#    };
+
+#    my @iterators;
+#    push @iterators, $iterate_dir->();
+
+#    while (@iterators) {
+#      FILE:
+#        while ( defined( my $file_info = $iterators[-1]->() ) ) {
+#            my ( $name, $mode ) = @{$file_info};
+#            my $name_escaped = _escape_filename($name);
+
+#            if ( $mode == FILE_TYPE_SYMLINK ) {
+#                my ($link) = ${$file_info}[2];
+#                my $link_escaped = _escape_filename($link);
+#                print encode( 'UTF-8', "LINK $name_escaped $link_escaped\n" );
+#                next FILE;
+#            }
+
+#            if ( $mode == FILE_TYPE_DIRECTORY ) {
+#                print encode( 'UTF-8', "DIR $name_escaped\n" );
+
+#                push @dirs,      $name;
+#                push @iterators, $iterate_dir->();
+
+#                next FILE;
+#            }
+
+#            if ( $mode == FILE_TYPE_REGULAR ) {
+#                my ( $size, $md5 ) = @{$file_info}[ 2, 3 ];
+#                print encode( 'UTF-8', "FILE $name_escaped $size $md5\n" );
+#                next FILE;
+#            }
+
+#            die encode( 'UTF-8', 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n" );
+#        }
+
+#        pop @iterators;
+#        pop @dirs;
+#        print "-DIR\n";
+#    }
+
+#    return;
+#}
+
+#sub _unescape_filename {
+#    my ($filename) = @_;
+
+#    $filename =~ s{ [%] ([0-9A-Fa-f]{2}) }{chr(hex($1))}xsmeg;
+
+#    return $filename;
+#}
+
+### untested
+
+###sub _get_main_options_and_command {
+###    my %opt;
+###    GetOptions(
+###        \%opt,
+###        'i=s@',
+###    ) or die "\n";
+###
+###use Data::Dx;
+###Dx %opt;
+###    return \%opt, $command;
+###}
+
+###sub _usage {
+###    die "usage...\n";
+###}
+###
+###
+##if ( !caller ) {
+##    main();
+##    exit 0;
+###    my $rc = eval { main(); };
+###
+###    exit 2 if !defined $rc;
+###    exit 0 if $rc;
+###    exit 1;
+##}
+
+##sub main {
+##    return _main_print_dcmp_file(@ARGV) if @ARGV == 1;
+##    return _main_dcmp(@ARGV) if @ARGV == 2;
+
+##    die;
+##}
+
+##sub _main_dcmp {
+##    my @files = @_;
+
+##    my @chdir;
+##    my @it;
+##    my @type;
+
+##    FILE:
+##    for my $i (0 .. 1) {
+##        my $file = abs_path $files[$i];
+
+##        if ( -f $file ) {
+##            $type[$i] = S_IFREG;
+
+##            $it[$i] = _load_dcmp_file($file);
+
+##            next FILE;
+##        }
+
+##        if ( -d $file ) {
+##            $type[$i] = S_IFDIR;
+
+##            my $chdir = sub { return _chdir($file, @_); };
+##            $chdir[$i] = $chdir;
+
+##            # TODO add ignores (the undef here)
+##            $it[$i] = sub { return _iterator_dir_fs($chdir, sub { return _collect_file_info_report(@_); }, undef, @_); };
+
+##            next FILE;
+##        }
+
+##        die "$file is neither a file nor a directory";
+##    }
+
+##    my $compare_file = $type[0] == S_IFDIR && $type[1] == S_IFDIR ? sub { _compare_file_fs_fs($chdir[0], $chdir[1], @_) }
+##                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_record_fs($chdir[0], @_) }
+##                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_record_fs($chdir[1], @_) }
+##                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_record_record(@_) }
+##                     : die;
+
+##    my $printer = _print_changes();
+
+##    return _dcmp($it[0], $it[1], $compare_file, $printer);
+##}
+
+##sub _main_print_dcmp_file {
+##    my ( $basedir) = @_;
+
+##    die if ! -d $basedir;
+
+##    $basedir = abs_path $basedir;
+
+##    my $chdir = sub { return _chdir($basedir, @_); };
+##    my $collect_file_info = sub { return _collect_file_info_report(@_); };
+##    # TODO add ignores (the undef here)
+##    my $iterate_dir_fs = sub { return _iterator_dir_fs($chdir, $collect_file_info, undef, @_); };
+
+##    return _print_dcmp_file($iterate_dir_fs);
+##}
 
 1;
 
