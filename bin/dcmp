@@ -192,27 +192,35 @@ package App::DCMP;
 ##31 >^_<$
 ##32 > <$
 
-#sub _chdir {
-#    my ( $basedir, $dirs_ref ) = @_;
+######################################################################
+# Usage      : _chdir($basedir, $dirs_ref)
+# Purpose    : Changes the current working directory
+# Returns    : undef
+# Parameters : $basedir  - change to this directory first
+#              $dirs_ref - an array ref of directories, changed to them
+#                          in order
+# Throws     : if chdir doesn't work
+# Comments   : chdir() has a max path length after which it fails.
+#              This can be worked around by changing to one directory
+#              at a time which allows us to change us into unliimted
+#              deep directory trees on operating systems that support
+#              this.
+#
+#              The directory passed to chdir is a binary string,
+#              not a text string. Please ensure that $basedir and
+#              all dirs in $dirs_ref are binary strings.
+######################################################################
+sub _chdir {
+    my ( $basedir, $dirs_ref ) = @_;
 
-#    chdir ENCODE( 'UTF-8', $basedir ) or DIE ENCODE( 'UTF-8', "Cannot chdir to $basedir: $!\n" );
+    chdir $basedir or die "Cannot chdir to $basedir: $!\n";
 
-#    for my $i ( 0 .. $#{$dirs_ref} ) {
-#        if ( !chdir ENCODE( 'UTF-8', ${$dirs_ref}[$i] ) ) {
+    for my $i ( 0 .. $#{$dirs_ref} ) {
+        chdir ${$dirs_ref}[$i] or _die_with_cwd("Cannot chdir to ${$dirs_ref}[$i] in %s: $!");
+    }
 
-#            # We have to store $! before calling CWD(), otherwise the
-#            # non-failed error of CWD() overwrites the error message
-#            my $error = $!;
-
-#            require Cwd;
-#            my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
-
-#            DIE ENCODE( 'UTF-8', "Cannot chdir to ${$dirs_ref}[$i] in $CWD: $error\n" );
-#        }
-#    }
-
-#    return;
-#}
+    return;
+}
 
 #sub _collect_file_info {
 #    my ($filename) = @_;

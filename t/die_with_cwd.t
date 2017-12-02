@@ -30,16 +30,19 @@ sub main {
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
-        note( encode( 'UTF-8', "suffix = $suffix_text" ) );
+        note(q{----------------------------------------------------------});
+        note( encode( 'UTF-8', "suffix: $suffix_text" ) );
 
         $cwd = "/tmp/dir_$suffix_bin";
         is( exception { App::DCMP::_die_with_cwd('hello >%s< world') }, "hello >$cwd< world\n", '... inserts the correct dir in the string' );
     }
 
+    note(q{----------------------------------------------------------});
     note('cwd = q{}');
     $cwd = q{};
     is( exception { App::DCMP::_die_with_cwd('hello >%s< world') }, "hello ><unknown>< world\n", '... inserts <unknown> if cwd() returns an empty string' );
 
+    note(q{----------------------------------------------------------});
     note('cwd = undef');
     $cwd = undef;
     is( exception { App::DCMP::_die_with_cwd('hello >%s< world') }, "hello ><unknown>< world\n", '... inserts <unknown> if cwd() returns undef' );
