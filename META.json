@@ -132,6 +132,7 @@
       "runtime" : {
          "requires" : {
             "Cwd" : "0",
+            "constant" : "1.01",
             "perl" : "5.006",
             "strict" : "0",
             "warnings" : "0"
@@ -147,6 +148,7 @@
             "Test::More" : "0.88",
             "Test::TempDir::Tiny" : "0",
             "autodie" : "0",
+            "constant" : "1.01",
             "lib" : "0",
             "perl" : "5.006",
             "subs" : "0"
@@ -279,6 +281,7 @@
          "Test::TempDir::Tiny" : "0.016",
          "Test::Version" : "2.05",
          "autodie" : "2.29",
+         "constant" : "1.33",
          "lib" : "0.63",
          "strict" : "1.11",
          "subs" : "1.02",

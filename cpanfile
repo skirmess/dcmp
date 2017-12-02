@@ -1,4 +1,5 @@
 requires "Cwd" => "0";
+requires "constant" => "1.01";
 requires "perl" => "5.006";
 requires "strict" => "0";
 requires "warnings" => "0";
@@ -12,6 +13,7 @@ on 'test' => sub {
   requires "Test::More" => "0.88";
   requires "Test::TempDir::Tiny" => "0";
   requires "autodie" => "0";
+  requires "constant" => "1.01";
   requires "lib" => "0";
   requires "perl" => "5.006";
   requires "subs" => "0";

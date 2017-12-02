@@ -21,6 +21,7 @@ my %WriteMakefileArgs = (
   "NAME" => "App::dcmp",
   "PREREQ_PM" => {
     "Cwd" => 0,
+    "constant" => "1.01",
     "strict" => 0,
     "warnings" => 0
   },
@@ -33,6 +34,7 @@ my %WriteMakefileArgs = (
     "Test::More" => "0.88",
     "Test::TempDir::Tiny" => 0,
     "autodie" => 0,
+    "constant" => "1.01",
     "lib" => 0,
     "subs" => 0
   },
@@ -53,6 +55,7 @@ my %FallbackPrereqs = (
   "Test::More" => "0.88",
   "Test::TempDir::Tiny" => 0,
   "autodie" => 0,
+  "constant" => "1.01",
   "lib" => 0,
   "strict" => 0,
   "subs" => 0,

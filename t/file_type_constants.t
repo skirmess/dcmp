@@ -9,6 +9,11 @@ use Test::More 0.88;
 
 use lib qw(.);
 
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+
+use Local::Declared;
+
 main();
 
 sub main {
@@ -22,8 +27,8 @@ sub main {
     );
 
     for my $const ( keys %const ) {
-        ok( declared($const), "constant $const is defined" );
-        like( $const{$const}, '/ ^ [0-9] + $ /xsm', '... is a number' );
+        ok( Local::Declared::declared($const), "constant $const is defined" );
+        like( $const{$const}, '/ ^ [1-9] [0-9]* $ /xsm', '... is a number' );
       OTHER_CONST:
         for my $other_const ( keys %const ) {
             next OTHER_CONST if $const eq $other_const;
@@ -35,16 +40,6 @@ sub main {
     done_testing();
 
     exit 0;
-}
-
-# copied from 'perldoc constant'
-sub declared ($) {
-    use constant 1.01;    # don't omit this!
-    my $name = shift;
-    $name =~ s/^::/main::/xsm;
-    my $pkg = caller;
-    my $full_name = $name =~ /::/xsm ? $name : "${pkg}::$name";
-    return $constant::declared{$full_name};
 }
 
 # vim: ts=4 sts=4 sw=4 et: syntax=perl
