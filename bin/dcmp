@@ -503,6 +503,49 @@ package App::DCMP;
 #    return;
 #}
 
+######################################################################
+# Usage      : _die_with_cwd($msg)
+# Purpose    : Adds the cwd to the $msg string and calls die with it
+# Returns    : does not return
+# Parameters : A string which is passed to sprintf with cwd as only
+#              other argument
+# Throws     : always
+# Comments   : cwd() returns a binary string, not a text string.
+#
+#              What format the binary string uses is operating
+#              system dependent. On Linux this is just a binary
+#              string because file names are just that, binary
+#              strings. These days file names are often interpreted
+#              as if they were UTF-8, and they often are. But that's
+#              not guaranteed nor enforced. You can easily create
+#              files on Linux with file names that contain bytes
+#              that are invalid in UTF-8.
+#
+#              Because of that we do not decode the directory
+#              returned by cwd(). That means that $msg must be a
+#              non-Unicode text string. If $msg is Unicode text
+#              string cwd() will be automatically decoded as Latin-1
+#              which will most likely be wrong.
+#
+#              die() then just dumps the generated string to STDERR
+#              and if the file name was encoded in UTF-8 this will
+#              probably just do what we expect it to do. And if
+#              not then there's not much we can do, as file names
+#              don't tell us how they are encoded.
+#
+#              We do the same thing as ls(1), which can't be that bad.
+######################################################################
+sub _die_with_cwd {
+    my ($msg) = @_;
+
+    require Cwd;
+    my $cwd = Cwd::cwd() || '<unknown>';
+
+    my $die = sprintf $msg, $cwd;
+
+    die "$die\n";
+}
+
 #{
 #    my %escapes = map { chr $_ => sprintf '%%%02X', $_ } (
 #        0 .. 0x1F,    # unprintable
