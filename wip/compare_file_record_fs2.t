@@ -49,7 +49,7 @@ sub main {
 
         my $chdir = sub { App::DCMP::_chdir( File::Spec->catdir($tmpdir), @_ ) };
 
-        like( exception { App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \Qbinmode failed for $file: \E /xsm" ), '_collect_file_info_report throws an exception if binmode failes' );
+        like( exception { App::DCMP::_compare_file_record_fs( $chdir, \@dirs, $file, undef, undef ) }, encode( 'UTF-8', "/ ^ \Qbinmode failed for $file: \E /xsm" ), '_collect_file_info_dcmp_file throws an exception if binmode failes' );
     }
 
     # ----------------------------------------------------------

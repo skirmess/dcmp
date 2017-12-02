@@ -1,4 +1,5 @@
 requires "Cwd" => "0";
+requires "Digest::MD5" => "0";
 requires "constant" => "1.01";
 requires "perl" => "5.006";
 requires "strict" => "0";

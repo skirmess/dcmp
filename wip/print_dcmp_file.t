@@ -73,7 +73,7 @@ sub main {
         chdir $basedir;
 
         my $chdir             = sub { return App::DCMP::_chdir( $tmpdir, @_ ); };
-        my $collect_file_info = sub { return App::DCMP::_collect_file_info_report(@_); };
+        my $collect_file_info = sub { return App::DCMP::_collect_file_info_dcmp_file(@_); };
         my $iterate_dir_fs    = sub { return App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, undef, @_ ); };
 
         my ( $stdout, $stderr, @result );

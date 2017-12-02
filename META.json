@@ -132,6 +132,7 @@
       "runtime" : {
          "requires" : {
             "Cwd" : "0",
+            "Digest::MD5" : "0",
             "constant" : "1.01",
             "perl" : "5.006",
             "strict" : "0",
@@ -178,6 +179,7 @@
    "x_BuiltWith" : {
       "modules" : {
          "Cwd" : "3.63",
+         "Digest::MD5" : "2.54",
          "Encode" : "2.80",
          "ExtUtils::MakeMaker" : "7.30",
          "File::Spec" : "3.63",
