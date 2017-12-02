@@ -64,7 +64,7 @@ sub main {
         $tmpdir = cwd();
         chdir $basedir;
 
-        note( "\$tmpdir = $tmpdir" );
+        note("\$tmpdir = $tmpdir");
 
         is( App::DCMP::_chdir( $tmpdir, undef ), undef, '_chdir($tmpdir, undef) returns undef' );
         is( cwd(), $tmpdir, '... and the cwd is now $tmpdir' );
@@ -74,9 +74,8 @@ sub main {
 
         chdir $basedir;
 
-
         $fail_chdir_on = $tmpdir;
-        like( exception { App::DCMP::_chdir( $tmpdir, undef ) }, "/ ^ \QCannot chdir to $tmpdir: \E /xsm" , '_chdir($tmpdir, undef) throws am error' );
+        like( exception { App::DCMP::_chdir( $tmpdir, undef ) }, "/ ^ \QCannot chdir to $tmpdir: \E /xsm", '_chdir($tmpdir, undef) throws am error' );
         is( cwd(), $basedir, '... and the cwd is not changed' );
 
         $fail_chdir_on = undef;
@@ -121,7 +120,7 @@ sub main {
             ],
         );
         for my $dirs_ref_text (@dirs) {
-            my $dirs_ref = [ map { encode('UTF-8', $_) } @{$dirs_ref_text} ];
+            my $dirs_ref = [ map { encode( 'UTF-8', $_ ) } @{$dirs_ref_text} ];
 
             #
             note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs' );
@@ -131,7 +130,7 @@ sub main {
             chdir $dir;
 
             $tmpdir = cwd();
-            note( "\$tmpdir = $tmpdir" );
+            note("\$tmpdir = $tmpdir");
 
             for my $d ( @{$dirs_ref} ) {
                 mkdir $d;
@@ -139,11 +138,11 @@ sub main {
             }
 
             my $expected_dir = cwd();
-            note( "\$expected_dir = $expected_dir" );
+            note("\$expected_dir = $expected_dir");
             chdir $basedir;
 
             is( App::DCMP::_chdir( $tmpdir, $dirs_ref ), undef, '_chdir($tmpdir, $dirs_ref) returns undef' );
-            is( cwd() , $expected_dir, '... and the cwd is correct' );
+            is( cwd(), $expected_dir, '... and the cwd is correct' );
 
             #
             note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs, one without permissions' );
@@ -155,9 +154,8 @@ sub main {
             $last_good_dir = cwd();
             chdir $basedir;
 
-
-            like( exception { App::DCMP::_chdir( $tmpdir, $dirs_ref ) }, "/ ^ \QCannot chdir to ${$dirs_ref}[6] in $last_good_dir: \E /xsm" , '_chdir($tmpdir, $dirs_ref) throws an error' );
-            is( cwd() , $last_good_dir, '... and the cwd is changed up to where the error happend' );
+            like( exception { App::DCMP::_chdir( $tmpdir, $dirs_ref ) }, "/ ^ \QCannot chdir to ${$dirs_ref}[6] in $last_good_dir: \E /xsm", '_chdir($tmpdir, $dirs_ref) throws an error' );
+            is( cwd(), $last_good_dir, '... and the cwd is changed up to where the error happend' );
 
             $fail_chdir_on = undef;
         }
