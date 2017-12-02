@@ -15,70 +15,70 @@ use POSIX 'mkfifo';
 
 use lib qw(.);
 
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+
+use Local::Fifo;
+use Local::Suffixes;
+use Local::Symlink;
+
 main();
 
 sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
-    my @suffixes = ( q{}, "_\x{20ac}", "_\x{00C0}", "_\x{0041}\x{0300}" );
+    my $suffix_iterator = Local::Suffixes::suffix_iterator();
 
-    if ( $^O ne 'MSWin32' ) {
-        push @suffixes, "a\nb";
-    }
-
-    for my $suffix (@suffixes) {
+    while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
-        note( encode( 'UTF-8', "suffix: $suffix" ) );
+        note( encode( 'UTF-8', "suffix: $suffix_text" ) );
 
-        my $dir                 = "dir${suffix}";
-        my $dir_utf8            = encode( 'UTF-8', $dir );
-        my $fifo                = "fifo${suffix}";
-        my $fifo_utf8           = encode( 'UTF-8', $fifo );
-        my $file                = "file${suffix}.txt";
-        my $file_utf8           = encode( 'UTF-8', $file );
-        my $invalid_file        = "invalid_file${suffix}";
-        my $invalid_file_utf8   = encode( 'UTF-8', $invalid_file );
-        my $invalid_link        = "invalid_link${suffix}.txt";
-        my $invalid_link_utf8   = encode( 'UTF-8', $invalid_link );
-        my $invalid_target      = "invalid_target${suffix}.txt";
-        my $invalid_target_utf8 = encode( 'UTF-8', $invalid_target );
-        my $valid_link          = "valid_link${suffix}.txt";
-        my $valid_link_utf8     = encode( 'UTF-8', $valid_link );
+        my $dir               = "dir${suffix_bin}";
+        my $dir_text          = "dir${suffix_text}";
+        my $fifo              = "fifo${suffix_bin}";
+        my $fifo_text         = "fifo${suffix_text}";
+        my $file              = "file${suffix_bin}.txt";
+        my $file_text         = "file${suffix_text}.txt";
+        my $invalid_file      = "invalid_file${suffix_bin}.txt";
+        my $invalid_file_text = "invalid_file${suffix_text}.txt";
+        my $invalid_link      = "invalid_link${suffix_bin}.txt";
+        my $invalid_link_text = "invalid_link${suffix_text}.txt";
+        my $invalid_target    = "invalid_target${suffix_bin}.txt";
+        my $valid_link        = "valid_link${suffix_bin}.txt";
+        my $valid_link_text   = "valid_link${suffix_text}.txt";
 
-        for my $dir_suffix (@suffixes) {
+        my $dir_suffix_iterator = Local::Suffixes::suffix_iterator();
+        while ( my ( $dir_suffix_text, $dir_suffix_bin ) = $dir_suffix_iterator->() ) {
             note(q{----------------------------------------------------------});
-            note( encode( 'UTF-8', "dir suffix: $dir_suffix" ) );
+            note( encode( 'UTF-8', "dir suffix: $dir_suffix_text" ) );
 
             my $tmpdir = tempdir();
             chdir $tmpdir;
 
-            if ( $dir_suffix ne q{} ) {
-                my $ws = "ws$dir_suffix";
-                my $ws_utf8 = encode( 'UTF-8', $ws );
+            my $ws = "ws$dir_suffix_bin";
 
-                mkdir $ws_utf8;
-                chdir $ws_utf8;
-            }
+            mkdir $ws;
+            chdir $ws;
 
             # cwd returns Unix dir separator on Windows but tempdir returns
             # Windows path separator on Windows. The error message in dcmp is
             # generated with cwd.
-            $tmpdir = decode( 'UTF-8', cwd() );
+            $tmpdir = cwd();
 
-            open my $fh, '>', $file_utf8;
+            open my $fh, '>', $file;
             print {$fh} "hello world\n";
             close $fh;
-            my $file_size = -s $file_utf8;
+            my $file_size = -s $file;
 
-            mkdir $dir_utf8;
-
-            # ----------------------------------------------------------
-            note($invalid_file_utf8);
-
-            like( exception { App::DCMP::_collect_file_info($invalid_file) }, encode( 'UTF-8', "/ ^ \QCannot stat file $invalid_file in $tmpdir: \E /xsm" ), '_collect_file_info throws an exception if stat failes' );
+            mkdir $dir;
 
             # ----------------------------------------------------------
-            note($dir_utf8);
+            note( encode( 'UTF-8', $invalid_file_text ) );
+
+            like( exception { App::DCMP::_collect_file_info($invalid_file) }, "/ ^ \QCannot stat file $invalid_file in $tmpdir: \E /xsm", '_collect_file_info throws an exception if stat failes' );
+
+            # ----------------------------------------------------------
+            note( encode( 'UTF-8', $dir_text ) );
 
             my $file_info = App::DCMP::_collect_file_info($dir);
             is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
@@ -87,7 +87,7 @@ sub main {
             is( ${$file_info}[1],     App::DCMP::FILE_TYPE_DIRECTORY(), '... the type (directory)' );
 
             # ----------------------------------------------------------
-            note($file_utf8);
+            note( encode( 'UTF-8', $file_text ) );
             $file_info = App::DCMP::_collect_file_info($file);
             is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
             is( scalar @{$file_info}, 3,                              '... consisting of three values' );
@@ -96,16 +96,13 @@ sub main {
             is( ${$file_info}[2],     $file_size,                     '... the file size' );
 
           SKIP: {
-                {
-                    no autodie;
-                    skip 'The symlink function is unimplemented' if !eval { symlink q{}, q{}; 1 };
-                }
+                skip 'The symlink function is unimplemented' if !Local::Symlink::symlink_supported();
 
-                symlink $file_utf8,           $valid_link_utf8;
-                symlink $invalid_target_utf8, $invalid_link_utf8;
+                symlink $file,           $valid_link;
+                symlink $invalid_target, $invalid_link;
 
                 # ----------------------------------------------------------
-                note($valid_link_utf8);
+                note( encode( 'UTF-8', $valid_link_text ) );
                 $file_info = App::DCMP::_collect_file_info($valid_link);
                 is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
                 is( scalar @{$file_info}, 3,                              '... consisting of three values' );
@@ -114,7 +111,7 @@ sub main {
                 is( ${$file_info}[2],     $file,                          '... the links valid target' );
 
                 # ----------------------------------------------------------
-                note($invalid_link_utf8);
+                note( encode( 'UTF-8', $invalid_link_text ) );
                 $file_info = App::DCMP::_collect_file_info($invalid_link);
                 is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
                 is( scalar @{$file_info}, 3,                              '... consisting of three values' );
@@ -124,22 +121,18 @@ sub main {
             }
 
           SKIP: {
-                {
-                    no autodie;
-                    skip 'The mkfifo function is unimplemented' if !eval { mkfifo q{}, 0666; 1 };
-                }
+                skip 'The mkfifo function is unimplemented' if !Local::Fifo::fifo_supported();
 
-                mkfifo $fifo_utf8, 0666;
+                mkfifo $fifo, 0666;
 
                 # ----------------------------------------------------------
-                note($fifo_utf8);
+                note( encode( 'UTF-8', $fifo_text ) );
                 $file_info = App::DCMP::_collect_file_info($fifo);
                 is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
                 is( scalar @{$file_info}, 2,                            '... consisting of two values' );
                 is( ${$file_info}[0],     $fifo,                        '... the file name' );
                 is( ${$file_info}[1],     App::DCMP::FILE_TYPE_OTHER(), '... the type (other)' );
             }
-
         }
     }
 

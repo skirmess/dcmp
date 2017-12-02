@@ -47,6 +47,9 @@
 #
 [-Subroutines::ProhibitSubroutinePrototypes]
 
+[Subroutines::RequireFinalReturn]
+terminal_funcs = _die_with_cwd
+
 # Writing tests without magic numbers is quite painful
 [-ValuesAndExpressions::ProhibitMagicNumbers]
 

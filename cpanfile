@@ -8,6 +8,7 @@ on 'test' => sub {
   requires "Encode" => "0";
   requires "File::Spec" => "0";
   requires "FindBin" => "0";
+  requires "POSIX" => "0";
   requires "Test::Fatal" => "0";
   requires "Test::MockModule" => "0";
   requires "Test::More" => "0.88";

@@ -107,6 +107,8 @@ modules = Class::ISA {Found use of Class::ISA. This module is deprecated by the 
 [Subroutines::ProhibitReturnSort]
 [Subroutines::RequireArgUnpacking]
 [Subroutines::RequireFinalReturn]
+
+terminal_funcs = _die_with_cwd
 [TestingAndDebugging::ProhibitNoStrict]
 [TestingAndDebugging::ProhibitNoWarnings]
 [TestingAndDebugging::ProhibitProlongedStrictureOverride]

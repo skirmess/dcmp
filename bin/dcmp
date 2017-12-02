@@ -222,60 +222,53 @@ sub _chdir {
     return;
 }
 
-#sub _collect_file_info {
-#    my ($filename) = @_;
+######################################################################
+# Usage      : _collect_file_info($filename)
+# Purpose    : Collects the information about $filename
+# Returns    : array reference
+# Parameters : $filename
+# Throws     : if readlink or lstat fails
+# Comments   : The filename passed to lstat/readlink is a binary
+#              string, not a text string. Please ensure that
+#              $filename is a binary strings.
+######################################################################
+sub _collect_file_info {
+    my ($filename) = @_;
 
-#    my $filename_utf8 = ENCODE( 'UTF-8', $filename );
+  STAT:
+    {
+        my $is_link = -l $filename;
+        last STAT if !defined $is_link;
 
-#  STAT:
-#    {
-#        my $is_link = -l $filename_utf8;
-#        last STAT if !defined $is_link;
+        if ($is_link) {
+            my $target = readlink $filename;
+            if ( !defined $target ) {
+                _die_with_cwd("readlink failed for $filename in %s: $!");
+            }
 
-#        if ($is_link) {
-#            my $target = DECODE( 'UTF-8', readlink $filename_utf8 );
-#            if ( !defined $target ) {
+            return [ $filename, FILE_TYPE_SYMLINK, $target ];
+        }
 
-#                # We have to store $! before calling CWD(), otherwise the
-#                # non-failed error of CWD() overwrites the error message
-#                my $error = $!;
+        my $is_file = -f _;
+        last STAT if !defined $is_file;
 
-#                require Cwd;
-#                my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
+        if ($is_file) {
+            my $size = -s _;
+            last STAT if !defined $size;
 
-#                DIE ENCODE( 'UTF-8', "readlink failed for $filename in $CWD: $error\n" );
-#            }
+            return [ $filename, FILE_TYPE_REGULAR, $size ];
+        }
 
-#            return [ $filename, FILE_TYPE_SYMLINK, $target ];
-#        }
+        my $is_dir = -d _;
+        last STAT if !defined $is_dir;
 
-#        my $is_file = -f _;
-#        last STAT if !defined $is_file;
+        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
 
-#        if ($is_file) {
-#            my $size = -s _;
-#            last STAT if !defined $size;
+        return [ $filename, FILE_TYPE_OTHER ];
+    }
 
-#            return [ $filename, FILE_TYPE_REGULAR, $size ];
-#        }
-
-#        my $is_dir = -d _;
-#        last STAT if !defined $is_dir;
-
-#        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
-
-#        return [ $filename, FILE_TYPE_OTHER ];
-#    }
-
-#    # We have to store $! before calling CWD(), otherwise the
-#    # non-failed error of CWD() overwrites the error message
-#    my $error = $!;
-
-#    require Cwd;
-#    my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
-
-#    DIE ENCODE( 'UTF-8', "Cannot stat file $filename in $CWD: $error\n" );
-#}
+    _die_with_cwd("Cannot stat file $filename in %s: $!");
+}
 
 #sub _collect_file_info_report {
 #    my ($_filename) = @_;
