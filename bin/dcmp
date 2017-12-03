@@ -27,19 +27,6 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
-# TODO disable normalited_filename on linux?  (return $filename if $^O == ...
-#
-# TODO ~~~~~~~~~~~~~~~     ~~~~~~~~~~~~~~~
-#
-# TODO create a function for _CWD
-# TODO         _CWD { local $/; require Cwd; return CWD(); }  ???
-# TODO         sprintf numberd arguments? $1 is CWD, $2 is error http://perldoc.perl.org/functions/sprintf.html
-# TODO         mock CWD(), test if CWD() returns nothing
-# TODO move shared test code to t/lib module
-# TODO replace all for loops in tests with one iterator that returns all values?
-# TODO no ENCODE for DIE!
-# TODO no DECODE for readdir, CWD, etc!
-#
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
 # TODO   diff calls it file1/file2
 # TODO       %<     lines from FILE1
@@ -53,43 +40,18 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
 #
 # TODO SORT with "use locale"?
-#
-# TODO !!! DIE UNICODE, then either binmode to utf-8 in script.
-#
-# TODO put DIE ENCODE() in it's own function
-# TODO DIE -> DIE (ENCODE_and_DIE, DIE_utf8
-# TODO perl -e 'binmode(STDERR, ":utf8"); DIE "\x{0041}\x{0300}";'
-# TODO create a DIE/ENCODE/_CWD function
 # TODO check ENCODE for print
-#
 # TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
-# TODO check binmode for errors
-#
-#
-# TODO rename left/right with 1/2 or reference/workspace or something
-#   diff calls it file1/file2
-#       %<     lines from FILE1
-#       %>     lines from FILE2
-#       %=     lines common to FILE1 and FILE2
-#
 # TODO support - for stdin/stdout for dcmp file
-# TODO change STDOUT to UTF-8 and remove unneeded ENCODEs
-# TODO replace all for loops in tests with one iterator that returns all values?
 # TODO dcmp SORT -> SORT
 # TODO try to fix some more critic exceptions
-# TODO check return of ENCODE/DECODE?
 # TODO LEAVE_SRC?
-# TODO move shared test code to t/lib module
 # TODO -i ignore dir
 # TODO -I ignore/path/x/y
 # TODO create a function for _CWD
-# TODO _CWD { local $/; require Cwd; return CWD(); }  ???
 # TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
-# TODO add comments
 # TODO add documentation
 # TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
-# TODO sprintf numberd arguments? $1 is CWD, $2 is error http://perldoc.perl.org/functions/sprintf.html
-# TODO mock CWD(), test if CWD() returns nothing
 #
 # TODO ** usage **
 #
@@ -100,8 +62,6 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO dcmp -c <file> <dir>
 # TODO 	-c create dcmp file
 #
-# TODO ** cleanup **
-# TODO s/DIE/DIE/, s/ENCODE/ENCODE/,s/DECODE/DECODE/, s/CWD/CWD/
 
 ###!/usr/bin/env perl
 ##
