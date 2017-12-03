@@ -39,6 +39,7 @@ provides:
 requires:
   Cwd: '0'
   Digest::MD5: '0'
+  File::Compare: '0'
   File::Spec: '0'
   constant: '1.01'
   perl: '5.006'
@@ -56,6 +57,7 @@ x_BuiltWith:
     Digest::MD5: '2.54'
     Encode: '2.80'
     ExtUtils::MakeMaker: '7.30'
+    File::Compare: '1.1006'
     File::Spec: '3.63'
     FindBin: '1.51'
     POSIX: '1.65'

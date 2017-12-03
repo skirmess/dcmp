@@ -9,7 +9,7 @@ our $VERSION = '0.001';
 package App::DCMP;
 
 #use Encode;
-#use File::Compare qw(compare);
+use File::Compare qw(compare);
 use File::Spec;
 
 ##use Getopt::Long;
@@ -276,7 +276,7 @@ sub _collect_file_info {
 #              compare or create a dcmp file
 # Returns    : array reference
 # Parameters : $filename
-# Throws     : if binmode, close, lstat, open or readlink fails
+# Throws     : If binmode, close, lstat, open or readlink fails
 # Comments   : The filename passed is a binary string, not a text
 #              string.
 ######################################################################
@@ -302,46 +302,55 @@ sub _collect_file_info_dcmp_file {
     return $file_info_ref;
 }
 
-## $md5_l and $md5_r are not used
-#sub _compare_file_fs_fs {
-#    my ( $chdir_l, $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+######################################################################
+# Usage      : _compare_file_fs_fs($chdir_1, $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2)
+# Purpose    : This is used by _dcmp to compare two files if dcmp is
+#              comparing two directory tree on the file system
+# Returns    : 1 if the files are equal
+#              false if they aren't
+# Parameters : $chdir_1  - This is used to change into the first
+#                          directory to find the file to compare on
+#                          the file system
+#              $chdir_2  - This is used to change into the second
+#                          directory to find the file to compare on
+#                          the file system
+#              $dirs_ref - This is feed to the chdir function to
+#                          change to the correct sub directory in
+#                          the tree
+#              $filename - This is the name of the file we are
+#                          comparing
+#              $md5_1    - This is ignored and only present to have
+#                          a uniform interface
+#              $md5_2    - This is ignored and only present to have
+#                          a uniform interface
+# Throws     : on various file system errors
+######################################################################
+sub _compare_file_fs_fs {
+    my ( $chdir_1, $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
 
-#    my @fh;
+    my @fh;
 
-#  DIR:
-#    for my $f ( $chdir_l, $chdir_r ) {
-#        $f->($dirs_ref);
+    for my $f ( $chdir_1, $chdir_2 ) {
+        $f->($dirs_ref);
 
-#        my $filename_utf8 = ENCODE( 'UTF-8', $filename );
+        open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+        binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+        push @fh, $fh;
+    }
 
-#        if ( open my $fh, '<', $filename_utf8 ) {
-#            push @fh, $fh;
-#            next DIR;
-#        }
+    my $rc = compare(@fh);
 
-#        # We have to store $! before calling CWD(), otherwise the
-#        # non-failed error of CWD() overwrites the error message
-#        my $error = $!;
+    for my $fh (@fh) {
+        close $fh or die "Cannot read file $filename: $!";
+    }
 
-#        require Cwd;
-#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
-
-#        DIE ENCODE( 'UTF-8', "Cannot read file $filename in $CWD: $error\n" );
-#    }
-
-#    my $rc = compare(@fh);
-
-#    for my $fh (@fh) {
-#        close $fh or DIE ENCODE( 'UTF-8', "Cannot read file $filename\n" );
-#    }
-
-#    # File::Compare::compare and its sibling functions return 0 if the files
-#    # are equal, 1 if the files are unequal, or -1 if an error was
-#    # encountered.
-#    return 1 if $rc == 0;
-#    return   if $rc == 1;
-#    DIE ENCODE( 'UTF-8', "Unable to compare file $filename\n" );
-#}
+    # File::Compare::compare and its sibling functions return 0 if the files
+    # are equal, 1 if the files are unequal, or -1 if an error was
+    # encountered.
+    return 1 if $rc == 0;
+    return   if $rc == 1;
+    die "Unable to compare file $filename\n";
+}
 
 ######################################################################
 # Usage      : _compare_file_dcmp_file_fs($chdir_2, $dirs_ref, $filename, $md5_1, $md5_2)
@@ -353,12 +362,12 @@ sub _collect_file_info_dcmp_file {
 # Parameters : $chdir_2  - This is used to change into the second
 #                          directory to find the file to compare on
 #                          the file system
-#              $dirs_ref - this is feed to $chdir_2->() to change to
+#              $dirs_ref - This is feed to $chdir_2->() to change to
 #                          the correct sub directory in the tree
-#              $filename - this is the name of the file we are
+#              $filename - This is the name of the file we are
 #                          comparing
 #              $md5_1    - The md5 sum of the first file
-#              $md5_2    - this is ignored and only present to have
+#              $md5_2    - This is ignored and only present to have
 #                          a uniform interface
 # Throws     : on various file system errors
 ######################################################################
@@ -385,9 +394,9 @@ sub _compare_file_dcmp_file_fs {
 # Purpose    : This is used by _dcmp to compare two files if dcmp is
 #              comparing two dcmp files
 # Returns    : Whatever eq returns
-# Parameters : $dirs_ref - this is ignored and only present to have
+# Parameters : $dirs_ref - This is ignored and only present to have
 #                          a uniform interface
-#              $filename - this is ignored and only present to have
+#              $filename - This is ignored and only present to have
 #                          a uniform interface
 #              $md5_1    - The md5 sum of the first file
 #              $md5_2    - The md5 sum of the second file
