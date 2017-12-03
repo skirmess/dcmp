@@ -343,37 +343,42 @@ sub _collect_file_info_dcmp_file {
 #    DIE ENCODE( 'UTF-8', "Unable to compare file $filename\n" );
 #}
 
-## $md5_r is not used
-#sub _compare_file_record_fs {
-#    my ( $chdir_r, $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
+######################################################################
+# Usage      : _compare_file_dcmp_file_fs($chdir_2, $dirs_ref, $filename, $md5_1, $md5_2)
+# Purpose    : This is used by _dcmp to compare two files if dcmp is
+#              comparing a dcmp file with a directory tree on the
+#              file system
+# Returns    : 1 if the files are equal
+#              false if they aren't
+# Parameters : $chdir_2  - This is used to change into the second
+#                          directory to find the file to compare on
+#                          the file system
+#              $dirs_ref - this is feed to $chdir_2->() to change to
+#                          the correct sub directory in the tree
+#              $filename - this is the name of the file we are
+#                          comparing
+#              $md5_1    - The md5 sum of the first file
+#              $md5_2    - this is ignored and only present to have
+#                          a uniform interface
+# Throws     : on various file system errors
+######################################################################
+sub _compare_file_dcmp_file_fs {
+    my ( $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
 
-#    require Digest::MD5;
-#    my $md5 = Digest::MD5->new();
+    require Digest::MD5;
+    my $md5 = Digest::MD5->new();
 
-#    $chdir_r->($dirs_ref);
+    $chdir_2->($dirs_ref);
 
-#    my $filename_utf8 = ENCODE( 'UTF-8', $filename );
+    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#    my $fh;
-#    if ( !open $fh, '<', $filename_utf8 ) {
+    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    $md5->addfile($fh);
+    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#        # We have to store $! before calling CWD(), otherwise the
-#        # non-failed error of CWD() overwrites the error message
-#        my $error = $!;
-
-#        require Cwd;
-#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
-
-#        DIE ENCODE( 'UTF-8', "Cannot read file $filename in $CWD: $error\n" );
-#    }
-
-#    binmode $fh or DIE ENCODE( 'UTF-8', "binmode failed for $filename: $!\n" );
-#    $md5->addfile($fh);
-#    close $fh or DIE ENCODE( 'UTF-8', "Unable to read file $filename: $!" );
-
-#    return 1 if lc $md5_l eq lc $md5->hexdigest();
-#    return;
-#}
+    return 1 if lc $md5_1 eq lc $md5->hexdigest();
+    return;
+}
 
 ######################################################################
 # Usage      : _compare_file_dcmp_file_dcmp_file($dirs_ref, $filename, $md5_1, $md5_2)
@@ -982,8 +987,8 @@ sub _unescape_filename {
 ##    }
 
 ##    my $compare_file = $type[0] == S_IFDIR && $type[1] == S_IFDIR ? sub { _compare_file_fs_fs($chdir[0], $chdir[1], @_) }
-##                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_record_fs($chdir[0], @_) }
-##                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_record_fs($chdir[1], @_) }
+##                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_dcmp_file_fs($chdir[0], @_) }
+##                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_dcmp_file_fs($chdir[1], @_) }
 ##                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_dcmp_file_dcmp_file(@_) }
 ##                     : DIE;
 
