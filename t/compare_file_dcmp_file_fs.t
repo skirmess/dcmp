@@ -20,6 +20,7 @@ use FindBin qw($Bin);
 use lib "$Bin/lib";
 
 use Local::Suffixes;
+use Local::Normalize_Filename;
 
 main();
 
@@ -32,8 +33,8 @@ sub main {
         note(q{----------------------------------------------------------});
         note( encode( 'UTF-8', "suffix: $suffix_text" ) );
 
-        my $dir  = "dir${suffix_bin}";
-        my $file = "file${suffix_bin}.txt";
+        my $dir  = Local::Normalize_Filename::normalize_filename("dir${suffix_bin}");
+        my $file = Local::Normalize_Filename::normalize_filename("file${suffix_bin}.txt");
 
         my $tmpdir = tempdir();
 
