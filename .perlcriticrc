@@ -18,7 +18,6 @@ verbose = [%p] %m at %f line %l, near '%r'\n
 [BuiltinFunctions::ProhibitStringySplit]
 [BuiltinFunctions::ProhibitUniversalCan]
 [BuiltinFunctions::ProhibitUniversalIsa]
-[BuiltinFunctions::ProhibitUselessTopic]
 [BuiltinFunctions::ProhibitVoidGrep]
 [BuiltinFunctions::ProhibitVoidMap]
 [BuiltinFunctions::RequireBlockGrep]
