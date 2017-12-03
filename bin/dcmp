@@ -27,6 +27,10 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO disable normalited_filename on linux?  (return $filename if $^O == ...
+#
+# TODO ~~~~~~~~~~~~~~~     ~~~~~~~~~~~~~~~
+#
 # TODO create a function for _CWD
 # TODO         _CWD { local $/; require Cwd; return CWD(); }  ???
 # TODO         sprintf numberd arguments? $1 is CWD, $2 is error http://perldoc.perl.org/functions/sprintf.html

@@ -19,6 +19,7 @@ use lib qw(.);
 use FindBin qw($Bin);
 use lib "$Bin/lib";
 
+use Local::Normalize_Filename;
 use Local::Suffixes;
 
 main();
@@ -57,13 +58,13 @@ sub _test_compare_file_fs_fs {
     note( encode( 'UTF-8', "dir 1 suffix: $dir_1_suffix_text" ) );
     note( encode( 'UTF-8', "dir 2 suffix: $dir_2_suffix_text" ) );
 
-    my $dir_1 = "dir_1_${dir_1_suffix_bin}";
-    my $dir_2 = "dir_2_${dir_2_suffix_bin}";
+    my $dir_1 = Local::Normalize_Filename::normalize_filename("dir_1_${dir_1_suffix_bin}");
+    my $dir_2 = Local::Normalize_Filename::normalize_filename("dir_2_${dir_2_suffix_bin}");
 
-    my $file    = "file${suffix_bin}.txt";
-    my $file2   = "file2${suffix_bin}.txt";
-    my $file3_1 = "file3_1${suffix_bin}.txt";
-    my $file3_2 = "file3_2${suffix_bin}.txt";
+    my $file    = Local::Normalize_Filename::normalize_filename("file${suffix_bin}.txt");
+    my $file2   = Local::Normalize_Filename::normalize_filename("file2${suffix_bin}.txt");
+    my $file3_1 = Local::Normalize_Filename::normalize_filename("file3_1${suffix_bin}.txt");
+    my $file3_2 = Local::Normalize_Filename::normalize_filename("file3_2${suffix_bin}.txt");
 
     my $tmpdir_1 = tempdir();
     my $tmpdir_2 = tempdir();
