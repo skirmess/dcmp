@@ -375,11 +375,23 @@ sub _collect_file_info_dcmp_file {
 #    return;
 #}
 
-## $dirs_ref and $filename is not used
-#sub _compare_file_record_record {
-#    my ( $dirs_ref, $filename, $md5_l, $md5_r ) = @_;
-#    return lc $md5_l eq lc $md5_r;
-#}
+######################################################################
+# Usage      : _compare_file_dcmp_file_dcmp_file($dirs_ref, $filename, $md5_1, $md5_2)
+# Purpose    : This is used by _dcmp to compare two files if dcmp is
+#              comparing two dcmp files
+# Returns    : Whatever eq returns
+# Parameters : $dirs_ref - this is ignored and only present to have
+#                          a uniform interface
+#              $filename - this is ignored and only present to have
+#                          a uniform interface
+#              $md5_1    - The md5 sum of the first file
+#              $md5_2    - The md5 sum of the second file
+# Throws     : no
+######################################################################
+sub _compare_file_dcmp_file_dcmp_file {
+    my ( $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
+    return lc $md5_1 eq lc $md5_2;
+}
 
 #sub _dcmp {
 #    my ( $_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer ) = @_;
@@ -786,6 +798,38 @@ sub _die_with_cwd {
 #    };
 #}
 
+######################################################################
+# Usage      : _print_changes
+# Purpose    : Generate a function to report changes to screen
+# Returns    : a function
+# Parameters : none
+# Throws     : no
+#
+# Returned function:
+# Usage      : $f->($action, $dirs_ref, $name)
+# Purpose    : Prints a line for the change of file $name
+# Returns    : nothing
+# Parameters : $action   - One of our constants describing the change
+#              $dirs_ref - An array reference of the directories
+#                          building the path to the file $name
+#              $name     - The name of the file
+# Throws     : no
+# Comments   : The names of the directories contained in $dirs_ref
+#              and the name of the file $name must be binary strings
+#              as returned by e.g. readdir(). These binary strings
+#              are concatenated with File::Spec's catfile() and
+#              printed to STDOUT as is.
+#
+#              The $name or the directories in $dirs_ref must not
+#              be Unicode text strings, otherwise catfile() will
+#              autoconvert the non-unicode strings with the Latin-1
+#              default which will produce terrible results. If you
+#              have a Unicode filename, you must encode it with
+#              UTF-8 before passing it to this function.
+#
+#              Please ensure that $name and all dirs in $dirs_ref are
+#              binary strings!
+######################################################################
 sub _print_changes {
     my @status_code;
     $status_code[FILE_ADDITIONAL]      = q{+};
@@ -940,7 +984,7 @@ sub _unescape_filename {
 ##    my $compare_file = $type[0] == S_IFDIR && $type[1] == S_IFDIR ? sub { _compare_file_fs_fs($chdir[0], $chdir[1], @_) }
 ##                     : $type[0] == S_IFDIR && $type[1] == S_IFREG ? sub { @_[-2,-1] = @_[-1,-2];  _compare_file_record_fs($chdir[0], @_) }
 ##                     : $type[0] == S_IFREG && $type[1] == S_IFDIR ? sub { _compare_file_record_fs($chdir[1], @_) }
-##                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_record_record(@_) }
+##                     : $type[0] == S_IFREG && $type[1] == S_IFREG ? sub { _compare_file_dcmp_file_dcmp_file(@_) }
 ##                     : DIE;
 
 ##    my $printer = _print_changes();
