@@ -9,6 +9,7 @@ use Test::Fatal;
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
+use Cwd qw(cwd);
 use Encode;
 use File::Spec;
 
@@ -40,6 +41,11 @@ sub main {
 
         my $tmpdir = tempdir();
         chdir $tmpdir;
+
+        # cwd returns Unix dir separator on Windows but tempdir returns
+        # Windows path separator on Windows. The error message in dcmp is
+        # generated with cwd.
+        $tmpdir = cwd();
 
         open my $fh, '>', $file;
         print {$fh} "hello world\n";
