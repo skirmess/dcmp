@@ -858,13 +858,15 @@ sub _die_with_cwd {
 #    return;
 #}
 
-#sub _unescape_filename {
-#    my ($filename) = @_;
+sub _unescape_filename {
+    my ($filename) = @_;
 
-#    $filename =~ s{ [%] ([0-9A-Fa-f]{2}) }{chr(hex($1))}xsmeg;
+    return if !defined $filename;
 
-#    return $filename;
-#}
+    $filename =~ s{ [%] ([0-9A-Fa-f]{2}) }{chr(hex($1))}xsmeg;
+
+    return $filename;
+}
 
 ### untested
 
