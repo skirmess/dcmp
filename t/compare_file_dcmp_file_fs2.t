@@ -55,7 +55,10 @@ sub main {
 
         my $chdir = sub { App::DCMP::_chdir( File::Spec->catdir($tmpdir), @_ ) };
 
-        like( exception { App::DCMP::_compare_file_dcmp_file_fs( $chdir, \@dirs, $file, undef, undef ) }, "/ ^ \Qbinmode failed for $file in $tmpdir: \E /xsm", '_collect_file_info_dcmp_file throws an exception if binmode failes' );
+        my $compare_file = App::DCMP::_compare_file( $chdir, undef, \@dirs );
+        is( ref $compare_file, ref sub { }, '_compare_file returns a function' );
+
+        like( exception { $compare_file->( $file, undef, undef ) }, "/ ^ \Qbinmode failed for $file in $tmpdir: \E /xsm", '_compare_file function throws an exception if binmode failes' );
     }
 
     # ----------------------------------------------------------

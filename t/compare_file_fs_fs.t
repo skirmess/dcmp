@@ -74,13 +74,16 @@ sub _test_compare_file_fs_fs {
     my $chdir_1 = sub { App::DCMP::_chdir( File::Spec->catdir( $tmpdir_1, $dir_1 ), @_ ) };
     my $chdir_2 = sub { App::DCMP::_chdir( File::Spec->catdir( $tmpdir_2, $dir_2 ), @_ ) };
 
-    like( exception { App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file, undef, undef ) }, "/ ^ \QCannot chdir to $tmpdir_1\E /xsm", 'first _chdir throws an error if basedir does not exist' );
+    my $compare_file = App::DCMP::_compare_file( $chdir_1, $chdir_2, \@dirs );
+    is( ref $compare_file, ref sub { }, '_compare_file returns a function' );
+
+    like( exception { $compare_file->($file) }, "/ ^ \QCannot chdir to $tmpdir_1\E /xsm", 'first _chdir throws an error if basedir does not exist' );
 
     mkdir File::Spec->catdir( $tmpdir_1, $dir_1 );
     open my $fh, '>', File::Spec->catfile( $tmpdir_1, $dir_1, $file );
     close $fh;
 
-    like( exception { App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file, undef, undef ) }, "/ ^ \QCannot chdir to $tmpdir_2\E /xsm", 'second _chdir throws an error if basedir does not exist' );
+    like( exception { $compare_file->($file) }, "/ ^ \QCannot chdir to $tmpdir_2\E /xsm", 'second _chdir throws an error if basedir does not exist' );
 
     #
     my $basedir = cwd();
@@ -102,6 +105,9 @@ sub _test_compare_file_fs_fs {
 
     $chdir_1 = sub { App::DCMP::_chdir( $tmpdir_1, @_ ) };
     $chdir_2 = sub { App::DCMP::_chdir( $tmpdir_2, @_ ) };
+
+    $compare_file = App::DCMP::_compare_file( $chdir_1, $chdir_2, \@dirs );
+    is( ref $compare_file, ref sub { }, '_compare_file returns a function' );
 
     open $fh, '>', File::Spec->catfile( $tmpdir_1, $file );
     print {$fh} "hello world\n";
@@ -127,17 +133,17 @@ sub _test_compare_file_fs_fs {
     print {$fh} "hello world 2\n";
     close $fh;
 
-    like( exception { App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file3_1, undef, undef ) }, "/ ^ \QCannot read file $file3_1 in $tmpdir_2: \E /xsm", '_compare_file_fs_fs throws an error if the first file cannot be read' );
-    like( exception { App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file3_2, undef, undef ) }, "/ ^ \QCannot read file $file3_2 in $tmpdir_1: \E /xsm", '_compare_file_fs_fs throws an error if the second file cannot be read' );
+    like( exception { $compare_file->($file3_1) }, "/ ^ \QCannot read file $file3_1 in $tmpdir_2: \E /xsm", '_compare_file_fs_fs throws an error if the first file cannot be read' );
+    like( exception { $compare_file->($file3_2) }, "/ ^ \QCannot read file $file3_2 in $tmpdir_1: \E /xsm", '_compare_file_fs_fs throws an error if the second file cannot be read' );
 
-    is( App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file,  undef, undef ), 1,     'Identical file compare as identical' );
-    is( App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file2, undef, undef ), undef, 'Not identical file compare as not identical' );
+    is( $compare_file->($file),  1,     'Identical file compare as identical' );
+    is( $compare_file->($file2), undef, 'Not identical file compare as not identical' );
 
     #
     my $compare = Test::MockModule->new( 'App::DCMP', no_auto => 1 );
     $compare->mock( 'compare', sub { return -1; } );
 
-    like( exception { App::DCMP::_compare_file_fs_fs( $chdir_1, $chdir_2, \@dirs, $file2, undef, undef ) }, "/ ^ \QUnable to compare file $file2\E /xsm", '_compare_file_fs_fs throws an error if compare() returns a failure' );
+    like( exception { $compare_file->($file2) }, "/ ^ \QUnable to compare file $file2\E /xsm", '_compare_file_fs_fs throws an error if compare() returns a failure' );
 
     return;
 }

@@ -9,7 +9,7 @@ our $VERSION = '0.001';
 package App::DCMP;
 
 #@#use Encode;
-#@use File::Compare qw(compare);
+use File::Compare qw(compare);
 use File::Spec;
 
 #@##use Getopt::Long;
@@ -260,63 +260,82 @@ sub _collect_file_info_dcmp_file {
     return $file_info_ref;
 }
 
-#@## TODO pass args as hash: _compare_file_fs_fs
-#@## The md5_1 and md5_2 args are ignored.
-#@## The filename arg and all dirs in the dirs_ref arg are binary strings.
-#@#sub _compare_file_fs_fs {
-#@#    my ( $chdir_1, $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
-#@#
-#@#    my @fh;
-#@#
-#@#    for my $f ( $chdir_1, $chdir_2 ) {
-#@#        $f->($dirs_ref);
-#@#
-#@#        open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
-#@#        binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-#@#        push @fh, $fh;
-#@#    }
-#@#
-#@#    my $rc = compare(@fh);
-#@#
-#@#    for my $fh (@fh) {
-#@#        close $fh or die "Cannot read file $filename: $!";
-#@#    }
-#@#
-#@#    # File::Compare::compare and its sibling functions return 0 if the files
-#@#    # are equal, 1 if the files are unequal, or -1 if an error was
-#@#    # encountered.
-#@#    return 1 if $rc == 0;
-#@#    return   if $rc == 1;
-#@#    die "Unable to compare file $filename\n";
-#@#}
+sub _compare_file {
+    my ( $chdir_1, $chdir_2, $dirs_ref ) = @_;
 
-#@## TODO pass args as hash: _compare_file_dcmp_file_fs
-#@## The md5_2 arg is ignored.
-#@## The filename arg and all dirs in the dirs_ref arg are binary strings.
-#@#sub _compare_file_dcmp_file_fs {
-#@#    my ( $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
-#@#
-#@#    require Digest::MD5;
-#@#    my $md5 = Digest::MD5->new();
-#@#
-#@#    $chdir_2->($dirs_ref);
-#@#
-#@#    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
-#@#
-#@#    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-#@#    $md5->addfile($fh);
-#@#    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
-#@#
-#@#    return 1 if lc $md5_1 eq lc $md5->hexdigest();
-#@#    return;
-#@#}
+    if ( defined $chdir_1 ) {
+        if ( defined $chdir_2 ) {
+            return sub {
+                return _compare_file_fs_fs( $chdir_1, $chdir_2, $dirs_ref, @_ );
+            };
+        }
 
-#@## TODO pass args as hash: _compare_file_dcmp_file_dcmp_file
-#@## The dirs_ref and filename arg are ignored.
-#@#sub _compare_file_dcmp_file_dcmp_file {
-#@#    my ( $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
-#@#    return lc $md5_1 eq lc $md5_2;
-#@#}
+        return sub {
+            return _compare_file_dcmp_file_fs( $chdir_1, $dirs_ref, @_ );
+        };
+    }
+
+    if ( defined $chdir_2 ) {
+        return sub {
+            return _compare_file_dcmp_file_fs( $chdir_2, $dirs_ref, @_ );
+        };
+    }
+
+    return sub {
+        return _compare_file_dcmp_file_dcmp_file(@_);
+    };
+}
+
+sub _compare_file_fs_fs {
+    my ( $chdir_1, $chdir_2, $dirs_ref, $filename ) = @_;
+
+    my @fh;
+
+    for my $f ( $chdir_1, $chdir_2 ) {
+        $f->($dirs_ref);
+
+        open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+        binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+        push @fh, $fh;
+    }
+
+    my $rc = compare(@fh);
+
+    for my $fh (@fh) {
+        close $fh or die "Cannot read file $filename: $!";
+    }
+
+    # File::Compare::compare and its sibling functions return 0 if the files
+    # are equal, 1 if the files are unequal, or -1 if an error was
+    # encountered.
+    return 1 if $rc == 0;
+    return   if $rc == 1;
+    die "Unable to compare file $filename\n";
+}
+
+sub _compare_file_dcmp_file_fs {
+    my ( $chdir, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
+
+    require Digest::MD5;
+    my $md5 = Digest::MD5->new();
+
+    $chdir->($dirs_ref);
+
+    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+
+    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    $md5->addfile($fh);
+    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
+
+    return 1 if lc( defined $md5_1 ? $md5_1 : $md5_2 ) eq lc $md5->hexdigest();
+    return;
+}
+
+# The filename arg is ignored.
+sub _compare_file_dcmp_file_dcmp_file {
+    my ( $filename, $md5_1, $md5_2 ) = @_;
+    return lc $md5_1 eq lc $md5_2;
+}
 
 #@#sub _dcmp {
 #@#    my ( $_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer ) = @_;

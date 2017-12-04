@@ -167,18 +167,18 @@ RECORD_FILE
                             my $compare_file;
                             if ( $type1 == TYPE_FS ) {
                                 if ( $type2 == TYPE_FS ) {
-                                    $compare_file = sub { App::DCMP::_compare_file_fs_fs( $chdir_l, $chdir_r, @_ ) };
+                                    $compare_file = sub { App::DCMP::_COMPARE_FILE_fs_fs( $chdir_l, $chdir_r, @_ ) };
                                 }
                                 else {
-                                    $compare_file = sub { @_[ -2, -1 ] = @_[ -1, -2 ]; App::DCMP::_compare_file_record_fs( $chdir_l, @_ ) };
+                                    $compare_file = sub { @_[ -2, -1 ] = @_[ -1, -2 ]; App::DCMP::_COMPARE_FILE_record_fs( $chdir_l, @_ ) };
                                 }
                             }
                             else {
                                 if ( $type2 == TYPE_RECORD ) {
-                                    $compare_file = sub { App::DCMP::_compare_file_record_record(@_) };
+                                    $compare_file = sub { App::DCMP::_COMPARE_FILE_record_record(@_) };
                                 }
                                 else {
-                                    $compare_file = sub { App::DCMP::_compare_file_record_fs( $chdir_r, @_ ) };
+                                    $compare_file = sub { App::DCMP::_COMPARE_FILE_record_fs( $chdir_r, @_ ) };
                                 }
                             }
 
