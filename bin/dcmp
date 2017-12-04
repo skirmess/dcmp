@@ -27,6 +27,14 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO sort in first iterator with custom function
+# TODO by default, sort "like ls" ( f($a) cmd f($b) if same => $a cmd $b)
+# TODO -u (unicode sort)
+# TODO --> decode, (normalize (needed or done by collate?),) collate sort
+# TODO --> require collate and normalize module in "getopt" function
+# TODO --> change sort function
+# TODO check sorting "a€, ?b, C?, ?d, e?, ..."
+#
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
 # TODO   diff calls it file1/file2
 # TODO       %<     lines from FILE1
