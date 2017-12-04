@@ -26,6 +26,21 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
+#
+# TODO pass \@dirs to _dcmp, which allows us to correctly create all out functions from _main_dcmp
+# TODO pass args as hash: _compare_file_fs_fs
+# TODO pass args as hash: _compare_file_dcmp_file_fs
+# TODO pass args as hash: _compare_file_dcmp_file_dcmp_file
+#        my %x = 
+#        	md5_1 => ...,
+#        	md5_2 => ...,
+#        	filename => ...,
+#        	chdir_1 => ...,		<- keep
+#        	chdir_2 => ...,		<- keep
+#        	dirs_ref => ...		<- keep
+#
+#
+#
 # TODO use named arguments for compare functions
 # TODO remove silly comments
 #
