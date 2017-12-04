@@ -164,24 +164,12 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 ##31 >^_<$
 ##32 > <$
 
-######################################################################
-# Usage      : _chdir($basedir, $dirs_ref)
-# Purpose    : Changes the current working directory
-# Returns    : undef
-# Parameters : $basedir  - change to this directory first
-#              $dirs_ref - an array ref of directories, changed to them
-#                          in order
-# Throws     : if chdir doesn't work
-# Comments   : chdir() has a max path length after which it fails.
-#              This can be worked around by changing to one directory
-#              at a time which allows us to change us into unliimted
-#              deep directory trees on operating systems that support
-#              this.
+# chdir() allows for a maximum path length after which it fails. This can be
+# worked around by changing to one directory at a time which allows us to
+# change us into unliimted deep directory trees on operating systems that
+# support unlimited wide directory trees.
 #
-#              The directory passed to chdir is a binary string,
-#              not a text string. Please ensure that $basedir and
-#              all dirs in $dirs_ref are binary strings.
-######################################################################
+# The basedir arg and all dirs in the dirs_ref arg are binary strings.
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
 
@@ -194,16 +182,7 @@ sub _chdir {
     return;
 }
 
-######################################################################
-# Usage      : _collect_file_info($filename)
-# Purpose    : Collects the information about $filename
-# Returns    : array reference
-# Parameters : $filename
-# Throws     : if lstat or readlink fails
-# Comments   : The filename passed to lstat/readlink is a binary
-#              string, not a text string. Please ensure that
-#              $filename is a binary strings.
-######################################################################
+# The filename arg  is a binary string, not a text string.
 sub _collect_file_info {
     my ($filename) = @_;
 
@@ -242,16 +221,7 @@ sub _collect_file_info {
     _die_with_cwd("Cannot stat file $filename in %s: $!");
 }
 
-######################################################################
-# Usage      : _collect_file_info_dcmp_file($filename)
-# Purpose    : Collects the information about $filename required to
-#              compare or create a dcmp file
-# Returns    : array reference
-# Parameters : $filename
-# Throws     : If binmode, close, lstat, open or readlink fails
-# Comments   : The filename passed is a binary string, not a text
-#              string.
-######################################################################
+# The filename argument is a binary string, not a text string.
 sub _collect_file_info_dcmp_file {
     my ($_filename) = @_;
 
@@ -274,29 +244,8 @@ sub _collect_file_info_dcmp_file {
     return $file_info_ref;
 }
 
-######################################################################
-# Usage      : _compare_file_fs_fs($chdir_1, $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2)
-# Purpose    : This is used by _dcmp to compare two files if dcmp is
-#              comparing two directory tree on the file system
-# Returns    : 1 if the files are equal
-#              false if they aren't
-# Parameters : $chdir_1  - This is used to change into the first
-#                          directory to find the file to compare on
-#                          the file system
-#              $chdir_2  - This is used to change into the second
-#                          directory to find the file to compare on
-#                          the file system
-#              $dirs_ref - This is feed to the chdir function to
-#                          change to the correct sub directory in
-#                          the tree
-#              $filename - This is the name of the file we are
-#                          comparing
-#              $md5_1    - This is ignored and only present to have
-#                          a uniform interface
-#              $md5_2    - This is ignored and only present to have
-#                          a uniform interface
-# Throws     : on various file system errors
-######################################################################
+# The md5_1 and md5_2 args are ignored.
+# The filename arg and all dirs in the dirs_ref arg are binary strings.
 sub _compare_file_fs_fs {
     my ( $chdir_1, $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
 
@@ -324,25 +273,8 @@ sub _compare_file_fs_fs {
     die "Unable to compare file $filename\n";
 }
 
-######################################################################
-# Usage      : _compare_file_dcmp_file_fs($chdir_2, $dirs_ref, $filename, $md5_1, $md5_2)
-# Purpose    : This is used by _dcmp to compare two files if dcmp is
-#              comparing a dcmp file with a directory tree on the
-#              file system
-# Returns    : 1 if the files are equal
-#              false if they aren't
-# Parameters : $chdir_2  - This is used to change into the second
-#                          directory to find the file to compare on
-#                          the file system
-#              $dirs_ref - This is feed to $chdir_2->() to change to
-#                          the correct sub directory in the tree
-#              $filename - This is the name of the file we are
-#                          comparing
-#              $md5_1    - The md5 sum of the first file
-#              $md5_2    - This is ignored and only present to have
-#                          a uniform interface
-# Throws     : on various file system errors
-######################################################################
+# The md5_2 arg is ignored.
+# The filename arg and all dirs in the dirs_ref arg are binary strings.
 sub _compare_file_dcmp_file_fs {
     my ( $chdir_2, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
 
@@ -361,19 +293,7 @@ sub _compare_file_dcmp_file_fs {
     return;
 }
 
-######################################################################
-# Usage      : _compare_file_dcmp_file_dcmp_file($dirs_ref, $filename, $md5_1, $md5_2)
-# Purpose    : This is used by _dcmp to compare two files if dcmp is
-#              comparing two dcmp files
-# Returns    : Whatever eq returns
-# Parameters : $dirs_ref - This is ignored and only present to have
-#                          a uniform interface
-#              $filename - This is ignored and only present to have
-#                          a uniform interface
-#              $md5_1    - The md5 sum of the first file
-#              $md5_2    - The md5 sum of the second file
-# Throws     : no
-######################################################################
+# The dirs_ref and filename are are ignored.
 sub _compare_file_dcmp_file_dcmp_file {
     my ( $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
     return lc $md5_1 eq lc $md5_2;
