@@ -36,11 +36,6 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #        	chdir_2 => ...,		<- keep
 #        	dirs_ref => ...		<- keep
 #
-#
-#
-# TODO use named arguments for compare functions
-# TODO remove silly comments
-#
 # TODO sort in first iterator with custom function
 # TODO by default, sort "like ls" ( f($a) cmd f($b) if same => $a cmd $b)
 # TODO -u (unicode sort)
