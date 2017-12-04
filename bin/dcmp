@@ -293,7 +293,7 @@ sub _compare_file_dcmp_file_fs {
     return;
 }
 
-# The dirs_ref and filename are are ignored.
+# The dirs_ref and filename arg are ignored.
 sub _compare_file_dcmp_file_dcmp_file {
     my ( $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
     return lc $md5_1 eq lc $md5_2;
