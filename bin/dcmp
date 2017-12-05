@@ -26,6 +26,11 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
+# TODO _iterator_dir_fs check opendir
+# TODO _iterator_dir_fs check closedir
+# TODO _iterator_dir_fs use sort function!
+#
+# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #
 # TODO pass \@dirs to _dcmp, which allows us to correctly create all out functions from _main_dcmp
 #        my %x =
