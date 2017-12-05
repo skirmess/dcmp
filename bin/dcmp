@@ -504,48 +504,51 @@ sub _die_with_cwd {
     }
 }
 
-#@#sub _iterator_dir_fs {
-#@#    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
+sub _iterator_dir_fs {
+    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
 
-#@#    $chdir->($dirs_ref);
+    $chdir->($dirs_ref);
 
-#@#    my %ignore;
-#@#    if ( defined $ignore_ref ) {
-#@#        @ignore{ @{$ignore_ref} } = 1;
-#@#    }
+    my %ignore;
+    if ( defined $ignore_ref ) {
+        @ignore{ @{$ignore_ref} } = ();
+    }
 
-#@#    my $fh;
-#@#    if ( !opendir $fh, q{.} ) {
+    #    my $fh;
+    # TODO
+    opendir my $fh, q{.} or die '...';
 
-#@#        # We have to store $! before calling CWD(), otherwise the
-#@#        # non-failed error of CWD() overwrites the error message
-#@#        my $error = $!;
+    #@#        # We have to store $! before calling CWD(), otherwise the
+    #@#        # non-failed error of CWD() overwrites the error message
+    #@#        my $error = $!;
 
-#@#        require Cwd;
-#@#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
+    #@#        require Cwd;
+    #@#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#@#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
-#@#    }
+    #@#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
+    #@#    }
 
-#@#    my @stack = map { $collect_file_info->($_) } SORT grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } map { DECODE( 'UTF-8', $_ ) } readdir $fh;
+    # TODO sort f()
+    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh;
 
-#@#    if ( !closedir $fh ) {
+    # TODO
+    closedir $fh or die '...';
 
-#@#        # We have to store $! before calling CWD(), otherwise the
-#@#        # non-failed error of CWD() overwrites the error message
-#@#        my $error = $!;
+    #@#        # We have to store $! before calling CWD(), otherwise the
+    #@#        # non-failed error of CWD() overwrites the error message
+    #@#        my $error = $!;
 
-#@#        require Cwd;
-#@#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
+    #@#        require Cwd;
+    #@#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
 
-#@#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
-#@#    }
+    #@#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
+    #@#    }
 
-#@#    return sub {
-#@#        return if !@stack;
-#@#        return shift @stack;
-#@#    };
-#@#}
+    return sub {
+        return if !@stack;
+        return shift @stack;
+    };
+}
 
 #@#sub _load_dcmp_file {
 #@#    my ( $filename, $ignore_ref ) = @_;
