@@ -74,14 +74,16 @@ sub main {
             $md5->add('hello world');
             my $md5_sum = $md5->hexdigest();
 
-            is( $compare_file->( $file, lc $md5_sum, undef ),       1, '_compare_file function returns 1 if the file matches the lowercase md5 sum' );
-            is( $compare_file->( $file, undef,       lc $md5_sum ), 1, '_compare_file function returns 1 if the file matches the lowercase md5 sum (reverse)' );
-
-            is( $compare_file->( $file, uc $md5_sum, undef ),        1, '_compare_file function returns 1 if the file matches the uppercase md5 sum' );
-            is( $compare_file->( $file, undef,       uc $md5_sum, ), 1, '_compare_file function returns 1 if the file matches the uppercase md5 sum (reverse)' );
-
-            is( $compare_file->( $file, undef,           'not a md5 sum' ), undef, '_compare_file function returns undef if the file does not match the md5 sum' );
-            is( $compare_file->( $file, 'not a md5 sum', undef ),           undef, '_compare_file function returns undef if the file does not match the md5 sum (reverse)' );
+            if ( $it == 0 ) {
+                is( $compare_file->( $file, lc $md5_sum,     undef ), 1,     '_compare_file function returns 1 if the file matches the lowercase md5 sum' );
+                is( $compare_file->( $file, uc $md5_sum,     undef ), 1,     '_compare_file function returns 1 if the file matches the uppercase md5 sum' );
+                is( $compare_file->( $file, 'not a md5 sum', undef ), undef, '_compare_file function returns undef if the file does not match the md5 sum (reverse)' );
+            }
+            else {
+                is( $compare_file->( $file, undef, lc $md5_sum ),     1,     '_compare_file function returns 1 if the file matches the lowercase md5 sum (reverse)' );
+                is( $compare_file->( $file, undef, uc $md5_sum ),     1,     '_compare_file function returns 1 if the file matches the uppercase md5 sum (reverse)' );
+                is( $compare_file->( $file, undef, 'not a md5 sum' ), undef, '_compare_file function returns undef if the file does not match the md5 sum' );
+            }
         }
     }
 

@@ -261,23 +261,27 @@ sub _compare_file {
     if ( defined $chdir_1 ) {
         if ( defined $chdir_2 ) {
             return sub {
-                return _compare_file_fs_fs( $chdir_1, $chdir_2, $dirs_ref, @_ );
+                my ( $filename, $md5_1, $md5_2 ) = @_;
+                return _compare_file_fs_fs( $chdir_1, $chdir_2, $dirs_ref, $filename );
             };
         }
 
         return sub {
-            return _compare_file_dcmp_file_fs( $chdir_1, $dirs_ref, @_ );
+            my ( $filename, $md5_1, $md5_2 ) = @_;
+            return _compare_file_dcmp_file_fs( $chdir_1, $dirs_ref, $filename, $md5_2 );
         };
     }
 
     if ( defined $chdir_2 ) {
         return sub {
-            return _compare_file_dcmp_file_fs( $chdir_2, $dirs_ref, @_ );
+            my ( $filename, $md5_1, $md5_2 ) = @_;
+            return _compare_file_dcmp_file_fs( $chdir_2, $dirs_ref, $filename, $md5_1 );
         };
     }
 
     return sub {
-        return _compare_file_dcmp_file_dcmp_file(@_);
+        my ( $filename, $md5_1, $md5_2 ) = @_;
+        return _compare_file_dcmp_file_dcmp_file( $md5_1, $md5_2 );
     };
 }
 
@@ -309,26 +313,25 @@ sub _compare_file_fs_fs {
 }
 
 sub _compare_file_dcmp_file_fs {
-    my ( $chdir, $dirs_ref, $filename, $md5_1, $md5_2 ) = @_;
+    my ( $chdir, $dirs_ref, $filename, $md5 ) = @_;
 
     require Digest::MD5;
-    my $md5 = Digest::MD5->new();
+    my $digest_md5 = Digest::MD5->new();
 
     $chdir->($dirs_ref);
 
     open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
 
     binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-    $md5->addfile($fh);
+    $digest_md5->addfile($fh);
     close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
 
-    return 1 if lc( defined $md5_1 ? $md5_1 : $md5_2 ) eq lc $md5->hexdigest();
+    return 1 if lc $md5 eq lc $digest_md5->hexdigest();
     return;
 }
 
-# The filename arg is ignored.
 sub _compare_file_dcmp_file_dcmp_file {
-    my ( $filename, $md5_1, $md5_2 ) = @_;
+    my ( $md5_1, $md5_2 ) = @_;
     return lc $md5_1 eq lc $md5_2;
 }
 
