@@ -26,11 +26,8 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-# TODO _iterator_dir_fs check opendir
-# TODO _iterator_dir_fs check closedir
-# TODO _iterator_dir_fs use sort function!
 #
-# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO pass \@dirs to _dcmp, which allows us to correctly create all out functions from _main_dcmp
 #        my %x =
@@ -40,14 +37,6 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #        	chdir_1 => ...,		<- keep
 #        	chdir_2 => ...,		<- keep
 #        	dirs_ref => ...		<- keep
-#
-# TODO sort in first iterator with custom function
-# TODO by default, sort "like ls" ( f($a) cmd f($b) if same => $a cmd $b)
-# TODO -u (unicode sort)
-# TODO --> decode, (normalize (needed or done by collate?),) collate sort
-# TODO --> require collate and normalize module in "getopt" function
-# TODO --> change sort function
-# TODO check sorting "a€, ?b, C?, ?d, e?, ..."
 #
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
 # TODO   diff calls it file1/file2
@@ -61,11 +50,9 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #
 # TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
 #
-# TODO SORT with "use locale"?
 # TODO check ENCODE for print
 # TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
 # TODO support - for stdin/stdout for dcmp file
-# TODO dcmp SORT -> SORT
 # TODO try to fix some more critic exceptions
 # TODO LEAVE_SRC?
 # TODO -i ignore dir
@@ -87,7 +74,12 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO << general comment that all filename are always binary strings >>
 # TODO The names of the directories contained in $dirs_ref and the name of the file $name must be binary strings as returned by e.g. readdir(). These binary strings are concatenated with File::Spec's catfile() and printed to stdout as is.
 # TODO The $name or the directories in $dirs_ref must not be Unicode text strings, otherwise catfile() will autoconvert the non-unicode strings with the Latin-1 default which will produce terrible results. If you have a Unicode filename, you must encode it with UTF-8 before passing it to this function.
-
+#
+# TODO -u (unicode sort)
+# TODO --> decode, (normalize (needed or done by collate?),) collate sort
+# TODO --> require collate and normalize module in "getopt" function
+# TODO --> change sort function
+#
 ###!/usr/bin/env perl
 ##
 ##use strict;
@@ -519,35 +511,11 @@ sub _iterator_dir_fs {
         @ignore{ @{$ignore_ref} } = ();
     }
 
-    #    my $fh;
-    # TODO
-    opendir my $fh, q{.} or die '...';
+    opendir my $fh, q{.} or _die_with_cwd("Cannot read directory %s: $!");
 
-    #@#        # We have to store $! before calling CWD(), otherwise the
-    #@#        # non-failed error of CWD() overwrites the error message
-    #@#        my $error = $!;
+    my @stack = map { $collect_file_info->($_) } _sort( grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh );
 
-    #@#        require Cwd;
-    #@#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
-
-    #@#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
-    #@#    }
-
-    # TODO sort f()
-    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh;
-
-    # TODO
-    closedir $fh or die '...';
-
-    #@#        # We have to store $! before calling CWD(), otherwise the
-    #@#        # non-failed error of CWD() overwrites the error message
-    #@#        my $error = $!;
-
-    #@#        require Cwd;
-    #@#        my $CWD = DECODE( 'UTF-8', Cwd::CWD() );
-
-    #@#        DIE ENCODE( 'UTF-8', "Cannot read directory $CWD: $error\n" );
-    #@#    }
+    closedir $fh or _die_with_cwd("Cannot read directory %s: $!");
 
     return sub {
         return if !@stack;
@@ -798,6 +766,17 @@ sub _print_changes {
 
 #@#    return;
 #@#}
+
+# Alphanumeric sorting Inspired by Dir::ls from Dan Book
+sub _sort {
+    my @entries = @_;
+
+    # pre-sort by alphanumeric then full name
+    use locale;
+    return map { $_->[1] }
+      sort { $a->[0] cmp $b->[0] or $a->[1] cmp $b->[1] }
+      map { [ tr/a-zA-Z0-9 \t//cdr, $_ ] } @entries;
+}
 
 sub _unescape_filename {
     my ($filename) = @_;
