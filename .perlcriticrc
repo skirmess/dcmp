@@ -10,7 +10,6 @@ verbose = [%p] %m at %f line %l, near '%r'\n
 # ----------------------------------------------------------
 
 [BuiltinFunctions::ProhibitBooleanGrep]
-[BuiltinFunctions::ProhibitComplexMappings]
 [BuiltinFunctions::ProhibitLvalueSubstr]
 [BuiltinFunctions::ProhibitReverseSortBlock]
 [BuiltinFunctions::ProhibitSleepViaSelect]
