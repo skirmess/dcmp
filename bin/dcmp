@@ -650,6 +650,7 @@ sub _iterator_dir_fs {
 #@#        my ($dirs_ref) = @_;
 #@#        my $path = File::Spec->catdir( @{$dirs_ref} );
 
+#@#        # TODO _sort
 #@#        my @stack =
 #@#          defined $path{$path}
 #@#          ? SORT { ${$a}[0] cmp ${$b}[0] } @{ $path{$path} }
