@@ -86,9 +86,13 @@ sub main {
         is( $stdout[ $i++ ], "FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e",         encode( 'UTF-8', "... FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e" ) );
         is( $stdout[ $i++ ], '-DIR',                                                           '... -DIR' );
         is( $stdout[ $i++ ], "FILE $file_escaped $file_size 5eb63bbbe01eeed093cb22bb8f5acdc3", encode( 'UTF-8', "... FILE $file_escaped $file_size 5eb63bbbe01eeed093cb22bb8f5acdc3" ) );
-        is( $stdout[ $i++ ], "LINK $invalid_link_escaped $invalid_target_escaped",             encode( 'UTF-8', "... LINK $invalid_link_escaped $invalid_target_escaped" ) );
-        is( $stdout[ $i++ ], "LINK $valid_link_escaped $file_escaped",                         encode( 'UTF-8', "... LINK $valid_link_escaped $file_escaped" ) );
-        is( $stdout[ $i++ ], '-DIR',                                                           '... -DIR' );
+
+        if ( Local::Symlink::symlink_supported() ) {
+            is( $stdout[ $i++ ], "LINK $invalid_link_escaped $invalid_target_escaped", encode( 'UTF-8', "... LINK $invalid_link_escaped $invalid_target_escaped" ) );
+            is( $stdout[ $i++ ], "LINK $valid_link_escaped $file_escaped",             encode( 'UTF-8', "... LINK $valid_link_escaped $file_escaped" ) );
+        }
+
+        is( $stdout[ $i++ ], '-DIR', '... -DIR' );
 
         is( $stderr, q{}, '... prints nothing to stderr' );
 
