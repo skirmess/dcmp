@@ -51,6 +51,8 @@
 #
 [-Subroutines::ProhibitSubroutinePrototypes]
 
+[-Subroutines::RequireArgUnpacking]
+
 [Subroutines::RequireFinalReturn]
 terminal_funcs = _die_with_cwd
 

@@ -27,6 +27,14 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO special curry: $cf = curry($f, $a1, $a2) =>
+# TODO      curried func:  $fu = $cf->($a3, $a4)
+# TODO      created func: $fu->($a5, $a6) == $f->($a1, $a2, $a3, $a4, $a5, $a6)
+#
+# TODO pass curied function of iterator to _dcmp, then _dcmp can create the iterator
+# TODO _dcmp(_curry($it1), _curry($it2), ...)
+# TODO   my $it1 = $it1->(\@dirs);
+#
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO pass \@dirs to _dcmp, which allows us to correctly create all out functions from _main_dcmp
@@ -330,6 +338,19 @@ sub _compare_file_dcmp_file_fs {
 sub _compare_file_dcmp_file_dcmp_file {
     my ( $md5_1, $md5_2 ) = @_;
     return lc $md5_1 eq lc $md5_2;
+}
+
+sub _curry {
+    my $f          = shift;
+    my @first_args = @_;
+
+    return sub {
+        my @second_args = @_;
+
+        return sub {
+            return $f->( @first_args, @second_args, @_ );
+        };
+    };
 }
 
 #@#sub _dcmp {
