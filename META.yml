@@ -3,7 +3,6 @@ abstract: 'dcmp - Compare directories and produce CVS-like output'
 author:
   - 'Sven Kirmess <sven.kirmess@kzone.ch>'
 build_requires:
-  Capture::Tiny: '0'
   Encode: '0'
   FindBin: '0'
   POSIX: '0'
@@ -53,7 +52,6 @@ resources:
 version: '0.001'
 x_BuiltWith:
   modules:
-    Capture::Tiny: '0.46'
     Cwd: '3.63'
     Digest::MD5: '2.54'
     Encode: '2.80'

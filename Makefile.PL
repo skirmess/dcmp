@@ -30,7 +30,6 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
-    "Capture::Tiny" => 0,
     "Encode" => 0,
     "FindBin" => 0,
     "POSIX" => 0,
@@ -51,7 +50,6 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "Capture::Tiny" => 0,
   "Cwd" => 0,
   "Digest::MD5" => 0,
   "Encode" => 0,

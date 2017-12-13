@@ -143,7 +143,6 @@
       },
       "test" : {
          "requires" : {
-            "Capture::Tiny" : "0",
             "Encode" : "0",
             "FindBin" : "0",
             "POSIX" : "0",
@@ -180,7 +179,6 @@
    "version" : "0.001",
    "x_BuiltWith" : {
       "modules" : {
-         "Capture::Tiny" : "0.46",
          "Cwd" : "3.63",
          "Digest::MD5" : "2.54",
          "Encode" : "2.80",
