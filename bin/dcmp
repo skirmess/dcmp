@@ -26,6 +26,8 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
+# TODO Pass @dirs to _dcmp, allows us to encapsulate complete chdir in iterator!
+# TODO create hash {chdir_1} = sub {}, {chdir_2} = ..., {dirs_ref} = ...,
 #
 # TODO special curry: $cf = curry($f, $a1, $a2) =>
 # TODO      curried func:  $fu = $cf->($a3, $a4)
@@ -717,6 +719,15 @@ sub _die_with_cwd {
 #        return [ $current_1, $current_2 ];
 #    };
 #}
+
+sub _partial {
+    my $f          = shift;
+    my @first_args = @_;
+
+    return sub {
+        return $f->( @first_args, @_ );
+    };
+}
 
 #sub _print_changes {
 #    my @status_code;
