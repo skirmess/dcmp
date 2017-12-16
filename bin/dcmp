@@ -9,8 +9,8 @@ our $VERSION = '0.001';
 package App::DCMP;
 
 #use Encode;
-#use File::Compare qw(compare);
-#use File::Spec;
+use File::Compare qw(compare);
+use File::Spec;
 
 ##use Getopt::Long;
 
@@ -19,12 +19,12 @@ use constant FILE_TYPE_OTHER     => 2;
 use constant FILE_TYPE_REGULAR   => 3;
 use constant FILE_TYPE_SYMLINK   => 4;
 
-#use constant FILE_ADDITIONAL      => 1;    # +
-#use constant FILE_MISSING         => 2;    # -
-#use constant FILE_TYPE_DIFFERS    => 3;    # @
-#use constant FILE_TYPE_UNKNOWN    => 4;    # ?
-#use constant FILE_CONTENT_DIFFERS => 5;    # M
-#use constant LINK_TARGET_DIFFERS  => 6;    # L
+use constant FILE_ADDITIONAL      => 1;    # +
+use constant FILE_MISSING         => 2;    # -
+use constant FILE_TYPE_DIFFERS    => 3;    # @
+use constant FILE_TYPE_UNKNOWN    => 4;    # ?
+use constant FILE_CONTENT_DIFFERS => 5;    # M
+use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 # TODO Pass @dirs to _dcmp, allows us to encapsulate complete chdir in iterator!
 # TODO create hash {chdir_1} = sub {}, {chdir_2} = ..., {dirs_ref} = ...,
@@ -262,85 +262,85 @@ sub _collect_file_info_dcmp_file {
     return $file_info_ref;
 }
 
-#sub _compare_file {
-#    my ( $chdir_1, $chdir_2, $dirs_ref ) = @_;
+sub _compare_file {
+    my ( $chdir_1, $chdir_2, $dirs_ref ) = @_;
 
-#    if ( defined $chdir_1 ) {
-#        if ( defined $chdir_2 ) {
-#            return sub {
-#                my ( $filename, $md5_1, $md5_2 ) = @_;
-#                return _compare_file_fs_fs( $chdir_1, $chdir_2, $dirs_ref, $filename );
-#            };
-#        }
+    if ( defined $chdir_1 ) {
+        if ( defined $chdir_2 ) {
+            return sub {
+                my ( $filename, $md5_1, $md5_2 ) = @_;
+                return _compare_file_fs_fs( $chdir_1, $chdir_2, $dirs_ref, $filename );
+            };
+        }
 
-#        return sub {
-#            my ( $filename, $md5_1, $md5_2 ) = @_;
-#            return _compare_file_dcmp_file_fs( $chdir_1, $dirs_ref, $filename, $md5_2 );
-#        };
-#    }
+        return sub {
+            my ( $filename, $md5_1, $md5_2 ) = @_;
+            return _compare_file_dcmp_file_fs( $chdir_1, $dirs_ref, $filename, $md5_2 );
+        };
+    }
 
-#    if ( defined $chdir_2 ) {
-#        return sub {
-#            my ( $filename, $md5_1, $md5_2 ) = @_;
-#            return _compare_file_dcmp_file_fs( $chdir_2, $dirs_ref, $filename, $md5_1 );
-#        };
-#    }
+    if ( defined $chdir_2 ) {
+        return sub {
+            my ( $filename, $md5_1, $md5_2 ) = @_;
+            return _compare_file_dcmp_file_fs( $chdir_2, $dirs_ref, $filename, $md5_1 );
+        };
+    }
 
-#    return sub {
-#        my ( $filename, $md5_1, $md5_2 ) = @_;
-#        return _compare_file_dcmp_file_dcmp_file( $md5_1, $md5_2 );
-#    };
-#}
+    return sub {
+        my ( $filename, $md5_1, $md5_2 ) = @_;
+        return _compare_file_dcmp_file_dcmp_file( $md5_1, $md5_2 );
+    };
+}
 
-#sub _compare_file_fs_fs {
-#    my ( $chdir_1, $chdir_2, $dirs_ref, $filename ) = @_;
+sub _compare_file_fs_fs {
+    my ( $chdir_1, $chdir_2, $dirs_ref, $filename ) = @_;
 
-#    my @fh;
+    my @fh;
 
-#    for my $f ( $chdir_1, $chdir_2 ) {
-#        $f->($dirs_ref);
+    for my $f ( $chdir_1, $chdir_2 ) {
+        $f->($dirs_ref);
 
-#        open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
-#        binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-#        push @fh, $fh;
-#    }
+        open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+        binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+        push @fh, $fh;
+    }
 
-#    my $rc = compare(@fh);
+    my $rc = compare(@fh);
 
-#    for my $fh (@fh) {
-#        close $fh or die "Cannot read file $filename: $!";
-#    }
+    for my $fh (@fh) {
+        close $fh or die "Cannot read file $filename: $!";
+    }
 
-#    # File::Compare::compare and its sibling functions return 0 if the files
-#    # are equal, 1 if the files are unequal, or -1 if an error was
-#    # encountered.
-#    return 1 if $rc == 0;
-#    return   if $rc == 1;
-#    die "Unable to compare file $filename\n";
-#}
+    # File::Compare::compare and its sibling functions return 0 if the files
+    # are equal, 1 if the files are unequal, or -1 if an error was
+    # encountered.
+    return 1 if $rc == 0;
+    return   if $rc == 1;
+    die "Unable to compare file $filename\n";
+}
 
-#sub _compare_file_dcmp_file_fs {
-#    my ( $chdir, $dirs_ref, $filename, $md5 ) = @_;
+sub _compare_file_dcmp_file_fs {
+    my ( $chdir, $dirs_ref, $filename, $md5 ) = @_;
 
-#    require Digest::MD5;
-#    my $digest_md5 = Digest::MD5->new();
+    require Digest::MD5;
+    my $digest_md5 = Digest::MD5->new();
 
-#    $chdir->($dirs_ref);
+    $chdir->($dirs_ref);
 
-#    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-#    $digest_md5->addfile($fh);
-#    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
+    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    $digest_md5->addfile($fh);
+    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#    return 1 if lc $md5 eq lc $digest_md5->hexdigest();
-#    return;
-#}
+    return 1 if lc $md5 eq lc $digest_md5->hexdigest();
+    return;
+}
 
-#sub _compare_file_dcmp_file_dcmp_file {
-#    my ( $md5_1, $md5_2 ) = @_;
-#    return lc $md5_1 eq lc $md5_2;
-#}
+sub _compare_file_dcmp_file_dcmp_file {
+    my ( $md5_1, $md5_2 ) = @_;
+    return lc $md5_1 eq lc $md5_2;
+}
 
 #sub _curry {
 #    my $f          = shift;
@@ -524,27 +524,27 @@ sub _die_with_cwd {
     }
 }
 
-#sub _iterator_dir_fs {
-#    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
+sub _iterator_dir_fs {
+    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
 
-#    $chdir->($dirs_ref);
+    $chdir->($dirs_ref);
 
-#    my %ignore;
-#    if ( defined $ignore_ref ) {
-#        @ignore{ @{$ignore_ref} } = ();
-#    }
+    my %ignore;
+    if ( defined $ignore_ref ) {
+        @ignore{ @{$ignore_ref} } = ();
+    }
 
-#    opendir my $fh, q{.} or _die_with_cwd("Cannot read directory %s: $!");
+    opendir my $fh, q{.} or _die_with_cwd("Cannot read directory %s: $!");
 
-#    my @stack = map { $collect_file_info->($_) } _sort( grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh );
+    my @stack = map { $collect_file_info->($_) } _sort( grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh );
 
-#    closedir $fh or _die_with_cwd("Cannot read directory %s: $!");
+    closedir $fh or _die_with_cwd("Cannot read directory %s: $!");
 
-#    return sub {
-#        return if !@stack;
-#        return shift @stack;
-#    };
-#}
+    return sub {
+        return if !@stack;
+        return shift @stack;
+    };
+}
 
 #@#sub _load_dcmp_file {
 #@#    my ( $filename, $ignore_ref ) = @_;
@@ -686,117 +686,115 @@ sub _die_with_cwd {
 #@#    };
 #@#}
 
-#sub _merge_iterators {
-#    my ( $it_1, $it_2 ) = @_;
+sub _merge_iterators {
+    my ( $it_1, $it_2 ) = @_;
 
-#    my $next_1 = defined $it_1 ? $it_1->() : undef;
-#    my $next_2 = defined $it_2 ? $it_2->() : undef;
+    my $next_1 = defined $it_1 ? $it_1->() : undef;
+    my $next_2 = defined $it_2 ? $it_2->() : undef;
 
-#    return sub {
-#        return if !defined $next_1 && !defined $next_2;
+    return sub {
+        return if !defined $next_1 && !defined $next_2;
 
-#        my $current_1 = $next_1;
-#        my $current_2 = $next_2;
+        my $current_1 = $next_1;
+        my $current_2 = $next_2;
 
-#        if ( !defined $next_1 ) {
-#            $next_2 = $it_2->();
-#            return [ undef, $current_2 ];
-#        }
+        if ( !defined $next_1 ) {
+            $next_2 = $it_2->();
+            return [ undef, $current_2 ];
+        }
 
-#        if ( ( !defined $next_2 ) || ( ${$next_1}[0] lt ${$next_2}[0] ) ) {
-#            $next_1 = $it_1->();
-#            return [ $current_1, undef ];
-#        }
+        if ( ( !defined $next_2 ) || ( ${$next_1}[0] lt ${$next_2}[0] ) ) {
+            $next_1 = $it_1->();
+            return [ $current_1, undef ];
+        }
 
-#        if ( ${$next_1}[0] gt ${$next_2}[0] ) {
-#            $next_2 = $it_2->();
-#            return [ undef, $current_2 ];
-#        }
+        if ( ${$next_1}[0] gt ${$next_2}[0] ) {
+            $next_2 = $it_2->();
+            return [ undef, $current_2 ];
+        }
 
-#        $next_1 = $it_1->();
-#        $next_2 = $it_2->();
+        $next_1 = $it_1->();
+        $next_2 = $it_2->();
 
-#        return [ $current_1, $current_2 ];
-#    };
-#}
+        return [ $current_1, $current_2 ];
+    };
+}
 
-#sub _partial {
-#    my $f          = shift;
-#    my @first_args = @_;
+sub _partial {
+    my $f          = shift;
+    my @first_args = @_;
 
-#    return sub {
-#        return $f->( @first_args, @_ );
-#    };
-#}
+    return sub {
+        return $f->( @first_args, @_ );
+    };
+}
 
-#sub _print_changes {
-#    my @status_code;
-#    $status_code[FILE_ADDITIONAL]      = q{+};
-#    $status_code[FILE_MISSING]         = q{-};
-#    $status_code[FILE_TYPE_DIFFERS]    = q{@};
-#    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
-#    $status_code[FILE_CONTENT_DIFFERS] = q{M};
-#    $status_code[LINK_TARGET_DIFFERS]  = q{L};
+sub _print_changes {
+    my @status_code;
+    $status_code[FILE_ADDITIONAL]      = q{+};
+    $status_code[FILE_MISSING]         = q{-};
+    $status_code[FILE_TYPE_DIFFERS]    = q{@};
+    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
+    $status_code[FILE_CONTENT_DIFFERS] = q{M};
+    $status_code[LINK_TARGET_DIFFERS]  = q{L};
 
-#    return sub {
-#        my ( $action, $dirs_ref, $name ) = @_;
+    return sub {
+        my ( $dirs_ref, $action, $name ) = @_;
 
-#        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
+        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
 
-#        print "$status_code[$action] $path\n";
+        print "$status_code[$action] $path\n";
 
-#        return;
-#    };
-#}
+        return;
+    };
+}
 
-#sub _print_dcmp_file {
-#    my ($_iterate_dir) = @_;
+sub _print_dcmp_file {
+    my ($iterate_dir) = @_;
 
-#    my @dirs;
-#    my $iterate_dir = sub {
-#        return $_iterate_dir->( \@dirs );
-#    };
+    my @dirs;
+    $iterate_dir = _partial( $iterate_dir, \@dirs );
 
-#    my @iterators;
-#    push @iterators, $iterate_dir->();
+    my @iterators;
+    push @iterators, $iterate_dir->();
 
-#    while (@iterators) {
-#      FILE:
-#        while ( defined( my $file_info = $iterators[-1]->() ) ) {
-#            my ( $name, $mode ) = @{$file_info};
-#            my $name_escaped = _escape_filename($name);
+    while (@iterators) {
+      FILE:
+        while ( defined( my $file_info = $iterators[-1]->() ) ) {
+            my ( $name, $mode ) = @{$file_info};
+            my $name_escaped = _escape_filename($name);
 
-#            if ( $mode == FILE_TYPE_SYMLINK ) {
-#                my ($link) = ${$file_info}[2];
-#                my $link_escaped = _escape_filename($link);
-#                print "LINK $name_escaped $link_escaped\n";
-#                next FILE;
-#            }
+            if ( $mode == FILE_TYPE_SYMLINK ) {
+                my ($link) = ${$file_info}[2];
+                my $link_escaped = _escape_filename($link);
+                print "LINK $name_escaped $link_escaped\n";
+                next FILE;
+            }
 
-#            if ( $mode == FILE_TYPE_DIRECTORY ) {
-#                print "DIR $name_escaped\n";
-#                push @dirs,      $name;
-#                push @iterators, $iterate_dir->();
-#                next FILE;
-#            }
+            if ( $mode == FILE_TYPE_DIRECTORY ) {
+                print "DIR $name_escaped\n";
+                push @dirs,      $name;
+                push @iterators, $iterate_dir->();
+                next FILE;
+            }
 
-#            if ( $mode == FILE_TYPE_REGULAR ) {
-#                my ( $size, $md5 ) = @{$file_info}[ 2, 3 ];
-#                print "FILE $name_escaped $size $md5\n";
-#                next FILE;
-#            }
+            if ( $mode == FILE_TYPE_REGULAR ) {
+                my ( $size, $md5 ) = @{$file_info}[ 2, 3 ];
+                print "FILE $name_escaped $size $md5\n";
+                next FILE;
+            }
 
-#            # TODO test with mockign iterator
-#            die 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n";
-#        }
+            # TODO test with mocking iterator
+            die 'Only regular files, directories and symlinks must exist inside a directory to create a dcmp file. File ' . File::Spec->catfile( @dirs, $name ) . " is something else.\n";
+        }
 
-#        pop @iterators;
-#        pop @dirs;
-#        print "-DIR\n";
-#    }
+        pop @iterators;
+        pop @dirs;
+        print "-DIR\n";
+    }
 
-#    return;
-#}
+    return;
+}
 
 # Alphanumeric sorting inspired by Dir::ls from Dan Book
 sub _sort {

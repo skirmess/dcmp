@@ -69,7 +69,7 @@ sub main {
 
             note('printer with empty path / FILE_ADDITIONAL');
             @dirs = ();
-            ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_ADDITIONAL(), \@dirs, $file ); };
+            ( $stdout, $stderr, @result ) = capture { $printer->( \@dirs, App::DCMP::FILE_ADDITIONAL(), $file ); };
             is( scalar @result, 0, '... which returns nothing' );
             $expected_stdout = "+ $file\n";
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
@@ -77,7 +77,7 @@ sub main {
 
             note('printer with one path element / FILE_MISSING');
             @dirs = ($dir);
-            ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_MISSING(), \@dirs, $file ); };
+            ( $stdout, $stderr, @result ) = capture { $printer->( \@dirs, App::DCMP::FILE_MISSING(), $file ); };
             is( scalar @result, 0, '... which returns nothing' );
             $expected_stdout = q{- } . File::Spec->catdir( $dir, $file ) . "\n";
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
@@ -85,7 +85,7 @@ sub main {
 
             note('printer with two path element / FILE_TYPE_DIFFERS');
             @dirs = ( $dir, 'dir2' );
-            ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_TYPE_DIFFERS(), \@dirs, $file ); };
+            ( $stdout, $stderr, @result ) = capture { $printer->( \@dirs, App::DCMP::FILE_TYPE_DIFFERS(), $file ); };
             is( scalar @result, 0, '... which returns nothing' );
             $expected_stdout = q{@ } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
@@ -93,7 +93,7 @@ sub main {
 
             note('printer with two path element / FILE_TYPE_UNKNOWN');
             @dirs = ( $dir, 'dir2' );
-            ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_TYPE_UNKNOWN(), \@dirs, $file ); };
+            ( $stdout, $stderr, @result ) = capture { $printer->( \@dirs, App::DCMP::FILE_TYPE_UNKNOWN(), $file ); };
             is( scalar @result, 0, '... which returns nothing' );
             $expected_stdout = q{? } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
@@ -101,7 +101,7 @@ sub main {
 
             note('printer with two path element / FILE_CONTENT_DIFFERS');
             @dirs = ( $dir, 'dir2' );
-            ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::FILE_CONTENT_DIFFERS(), \@dirs, $file ); };
+            ( $stdout, $stderr, @result ) = capture { $printer->( \@dirs, App::DCMP::FILE_CONTENT_DIFFERS(), $file ); };
             is( scalar @result, 0, '... which returns nothing' );
             $expected_stdout = q{M } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
@@ -109,7 +109,7 @@ sub main {
 
             note('printer with two path element / LINK_TARGET_DIFFERS');
             @dirs = ( $dir, 'dir2' );
-            ( $stdout, $stderr, @result ) = capture { $printer->( App::DCMP::LINK_TARGET_DIFFERS(), \@dirs, $file ); };
+            ( $stdout, $stderr, @result ) = capture { $printer->( \@dirs, App::DCMP::LINK_TARGET_DIFFERS(), $file ); };
             is( scalar @result, 0, '... which returns nothing' );
             $expected_stdout = q{L } . File::Spec->catdir( $dir, 'dir2', $file ) . "\n";
             is( $stdout, $expected_stdout, '... prints the correct message to stdout' );
