@@ -41,14 +41,11 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #
 # TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
 #
-# TODO check ENCODE for print
-# TODO :encoding(UTF-8) or :utf8_strict (requires installing PerlIO::utf8_strict) would be better
 # TODO support - for stdin/stdout for dcmp file
 # TODO try to fix some more critic exceptions
 # TODO LEAVE_SRC?
 # TODO -i ignore dir
 # TODO -I ignore/path/x/y
-# TODO create a function for _CWD
 # TODO dcmp -v (wie cat -v)? / -V für unicode C0 replacement chars instead of cat chars? https://en.wikipedia.org/wiki/Control_Pictures
 # TODO add documentation
 # TODO https://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows
