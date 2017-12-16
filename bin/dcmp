@@ -26,27 +26,8 @@ use constant FILE_TYPE_UNKNOWN    => 4;    # ?
 use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
-# TODO Pass @dirs to _dcmp, allows us to encapsulate complete chdir in iterator!
-# TODO create hash {chdir_1} = sub {}, {chdir_2} = ..., {dirs_ref} = ...,
-#
-# TODO special curry: $cf = curry($f, $a1, $a2) =>
-# TODO      curried func:  $fu = $cf->($a3, $a4)
-# TODO      created func: $fu->($a5, $a6) == $f->($a1, $a2, $a3, $a4, $a5, $a6)
-#
-# TODO pass curied function of iterator to _dcmp, then _dcmp can create the iterator
-# TODO _dcmp(_curry($it1), _curry($it2), ...)
-# TODO   my $it1 = $it1->(\@dirs);
 #
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-# TODO pass \@dirs to _dcmp, which allows us to correctly create all out functions from _main_dcmp
-#        my %x =
-#        	md5_1 => ...,
-#        	md5_2 => ...,
-#        	filename => ...,
-#        	chdir_1 => ...,		<- keep
-#        	chdir_2 => ...,		<- keep
-#        	dirs_ref => ...		<- keep
 #
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
 # TODO   diff calls it file1/file2
@@ -647,7 +628,7 @@ sub _load_dcmp_file {
         die "Invalid entry on line $. in file $filename\n";
     }
 
-    #@#    close $fh or DIE ENCODE( 'UTF-8', "Cannot read file $filename: $!" );
+    close $fh or die "Cannot read file $filename: $!\n";
 
     die "Unbalanced -DIR at end of file $filename\n" if !$last_line_seen;
 
