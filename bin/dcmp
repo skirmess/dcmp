@@ -9,8 +9,8 @@ our $VERSION = '0.001';
 package App::DCMP;
 
 #use Encode;
-use File::Compare qw(compare);
-use File::Spec;
+#use File::Compare qw(compare);
+#use File::Spec;
 
 ##use Getopt::Long;
 
@@ -19,12 +19,12 @@ use constant FILE_TYPE_OTHER     => 2;
 use constant FILE_TYPE_REGULAR   => 3;
 use constant FILE_TYPE_SYMLINK   => 4;
 
-use constant FILE_ADDITIONAL      => 1;    # +
-use constant FILE_MISSING         => 2;    # -
-use constant FILE_TYPE_DIFFERS    => 3;    # @
-use constant FILE_TYPE_UNKNOWN    => 4;    # ?
-use constant FILE_CONTENT_DIFFERS => 5;    # M
-use constant LINK_TARGET_DIFFERS  => 6;    # L
+#use constant FILE_ADDITIONAL      => 1;    # +
+#use constant FILE_MISSING         => 2;    # -
+#use constant FILE_TYPE_DIFFERS    => 3;    # @
+#use constant FILE_TYPE_UNKNOWN    => 4;    # ?
+#use constant FILE_CONTENT_DIFFERS => 5;    # M
+#use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 # TODO Pass @dirs to _dcmp, allows us to encapsulate complete chdir in iterator!
 # TODO create hash {chdir_1} = sub {}, {chdir_2} = ..., {dirs_ref} = ...,
@@ -337,23 +337,23 @@ sub _collect_file_info_dcmp_file {
 #    return;
 #}
 
-sub _compare_file_dcmp_file_dcmp_file {
-    my ( $md5_1, $md5_2 ) = @_;
-    return lc $md5_1 eq lc $md5_2;
-}
+#sub _compare_file_dcmp_file_dcmp_file {
+#    my ( $md5_1, $md5_2 ) = @_;
+#    return lc $md5_1 eq lc $md5_2;
+#}
 
-sub _curry {
-    my $f          = shift;
-    my @first_args = @_;
+#sub _curry {
+#    my $f          = shift;
+#    my @first_args = @_;
 
-    return sub {
-        my @second_args = @_;
+#    return sub {
+#        my @second_args = @_;
 
-        return sub {
-            return $f->( @first_args, @second_args, @_ );
-        };
-    };
-}
+#        return sub {
+#            return $f->( @first_args, @second_args, @_ );
+#        };
+#    };
+#}
 
 #@#sub _dcmp {
 #@#    my ( $_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer ) = @_;
@@ -720,14 +720,14 @@ sub _die_with_cwd {
 #    };
 #}
 
-sub _partial {
-    my $f          = shift;
-    my @first_args = @_;
+#sub _partial {
+#    my $f          = shift;
+#    my @first_args = @_;
 
-    return sub {
-        return $f->( @first_args, @_ );
-    };
-}
+#    return sub {
+#        return $f->( @first_args, @_ );
+#    };
+#}
 
 #sub _print_changes {
 #    my @status_code;
