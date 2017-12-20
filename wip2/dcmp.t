@@ -427,7 +427,7 @@ RECORD_FILE
 #                            @output_expected = sort { $a->[1] cmp $b->[1] } @output_expected;
 
                             is_deeply( \@output, \@output_expected, '... and prints the correct output' ) or do {
-                               
+
                             use Data::Dx; Dx @output; Dx @output_expected;
                             die;
                         };
