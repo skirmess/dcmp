@@ -25,7 +25,7 @@ sub main {
     note('locale');
     print STDERR `locale`;
 
-    my @names = ("e", "E", 'f', 'F',  "1", "2", "10", encode( "UTF-8", "\x{20ac}"), encode( "UTF-8", "\x{00C0}" ), encode( "UTF-8", "\x{0041}\x{0300}"));
+    my @names = ( "e", "E", 'f', 'F', "1", "2", "10", encode( "UTF-8", "\x{20ac}" ), encode( "UTF-8", "\x{00C0}" ), encode( "UTF-8", "\x{0041}\x{0300}" ) );
 
     # create files
     for my $name (@names) {
@@ -45,12 +45,12 @@ sub main {
     my @names_sorted = sort map { "$_.txt" } @names;
 
     note('@names_sorted');
-    print STDERR Dumper(\@names_sorted);
+    print STDERR Dumper( \@names_sorted );
 
     note('@ls');
-    print STDERR Dumper(\@ls);
+    print STDERR Dumper( \@ls );
 
-    is_deeply(\@names_sorted, \@ls, 'sort sorts the same way as ls');
+    is_deeply( \@names_sorted, \@ls, 'sort sorts the same way as ls' );
 
     done_testing();
 

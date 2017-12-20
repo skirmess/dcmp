@@ -340,9 +340,9 @@ sub _dcmp {
 
     my @dirs;
 
-    $iterate_dir_1 = _partial($iterate_dir_1, \@dirs );
-    $iterate_dir_2 = _partial($iterate_dir_2, \@dirs );
-    $compare_file  = _partial($compare_file, \@dirs );
+    $iterate_dir_1 = _partial( $iterate_dir_1, \@dirs );
+    $iterate_dir_2 = _partial( $iterate_dir_2, \@dirs );
+    $compare_file  = _partial( $compare_file,  \@dirs );
 
     my $differences = 0;
     my @iterators;
@@ -445,8 +445,8 @@ sub _dcmp {
 
             ...;
 
-#@#            $printer->( FILE_TYPE_UNKNOWN, \@dirs, $name );
-#@#            $differences = 1;
+            #@#            $printer->( FILE_TYPE_UNKNOWN, \@dirs, $name );
+            #@#            $differences = 1;
         }
 
         pop @iterators;
@@ -707,8 +707,9 @@ sub _merge_iterators {
             return [ $current_1, $current_2 ];
         }
 
-        my @sorted = _sort($next_1_name, $next_2_name);
-        use Data::Dx; Dx @sorted;
+        my @sorted = _sort( $next_1_name, $next_2_name );
+        use Data::Dx;
+        Dx @sorted;
 
         # The first iterators file name comes first
         if ( $next_1_name eq $sorted[0] ) {
