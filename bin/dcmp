@@ -27,6 +27,8 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO sort uses tr// - merge iterator must use gt/lt with same logic
+#
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
@@ -333,124 +335,126 @@ sub _compare_file_dcmp_file_dcmp_file {
 #    };
 #}
 
-#@#sub _dcmp {
-#@#    my ( $_iterate_dir_l, $_iterate_dir_r, $_compare_file, $printer ) = @_;
+sub _dcmp {
+    my ( $iterate_dir_1, $iterate_dir_2, $compare_file, $printer ) = @_;
 
-#@#    my @dirs;
+    my @dirs;
 
-#@#    my $iterate_dir_l = sub { return $_iterate_dir_l->( \@dirs ); };
-#@#    my $iterate_dir_r = sub { return $_iterate_dir_r->( \@dirs ); };
-#@#    my $compare_file  = sub { return $_compare_file->( \@dirs, @_ ); };
+    $iterate_dir_1 = _partial($iterate_dir_1, \@dirs );
+    $iterate_dir_2 = _partial($iterate_dir_2, \@dirs );
+    $compare_file  = _partial($compare_file, \@dirs );
 
-#@#    my $differences = 0;
-#@#    my @iterators;
-#@#    push @iterators, _merge_iterators( $iterate_dir_l->(), $iterate_dir_r->() );
+    my $differences = 0;
+    my @iterators;
+    push @iterators, _merge_iterators( $iterate_dir_1->(), $iterate_dir_2->() );
 
-#@#    while (@iterators) {
-#@#      FILE:
-#@#        while ( defined( my $x = $iterators[-1]->() ) ) {
-#@#            my ( $x_l, $x_r ) = @{$x};
+    while (@iterators) {
+      FILE:
+        while ( defined( my $x = $iterators[-1]->() ) ) {
+            my ( $x_1, $x_2 ) = @{$x};
 
-#@#            if ( !defined $x_r ) {
+            if ( !defined $x_2 ) {
 
-#@#                # file is only present in the left tree
-#@#                my ( $name, $mode ) = @{$x_l}[ 0, 1 ];
-#@#                $printer->( FILE_ADDITIONAL, \@dirs, $name );
-#@#                $differences = 1;
+                # file is only present in the first tree
+                my ( $name, $mode ) = @{$x_1}[ 0, 1 ];
+                $printer->( \@dirs, FILE_ADDITIONAL, $name );
+                $differences = 1;
 
-#@#                if ( $mode == FILE_TYPE_DIRECTORY ) {
-#@#                    push @dirs, $name;
-#@#                    push @iterators, _merge_iterators( $iterate_dir_l->(), undef );
-#@#                }
+                if ( $mode == FILE_TYPE_DIRECTORY ) {
+                    push @dirs, $name;
+                    push @iterators, _merge_iterators( $iterate_dir_1->(), undef );
+                }
 
-#@#                next FILE;
-#@#            }
+                next FILE;
+            }
 
-#@#            if ( !defined $x_l ) {
+            if ( !defined $x_1 ) {
 
-#@#                # file is only present in the right tree;
-#@#                my ( $name, $mode ) = @{$x_r}[ 0, 1 ];
-#@#                $printer->( FILE_MISSING, \@dirs, $name );
-#@#                $differences = 1;
+                # file is only present in the right tree;
+                my ( $name, $mode ) = @{$x_2}[ 0, 1 ];
+                $printer->( \@dirs, FILE_MISSING, $name );
+                $differences = 1;
 
-#@#                if ( $mode == FILE_TYPE_DIRECTORY ) {
-#@#                    push @dirs, $name;
-#@#                    push @iterators, _merge_iterators( undef, $iterate_dir_r->() );
-#@#                }
+                if ( $mode == FILE_TYPE_DIRECTORY ) {
+                    push @dirs, $name;
+                    push @iterators, _merge_iterators( undef, $iterate_dir_2->() );
+                }
 
-#@#                next FILE;
-#@#            }
+                next FILE;
+            }
 
-#@#            my ( $name, $mode_l ) = @{$x_l}[ 0, 1 ];
-#@#            my $mode_r = ${$x_r}[1];
+            my ( $name, $mode_1 ) = @{$x_1}[ 0, 1 ];
+            my $mode_2 = ${$x_2}[1];
 
-#@#            if ( $mode_l != $mode_r ) {
+            if ( $mode_1 != $mode_2 ) {
 
-#@#                # file is not the same filetype
-#@#                $printer->( FILE_TYPE_DIFFERS, \@dirs, $name );
-#@#                $differences = 1;
+                # file is not the same filetype
+                $printer->( \@dirs, FILE_TYPE_DIFFERS, $name );
+                $differences = 1;
 
-#@#                if ( $mode_l == FILE_TYPE_DIRECTORY ) {
-#@#                    push @dirs, $name;
-#@#                    push @iterators, _merge_iterators( $iterate_dir_l->(), undef );
-#@#                }
-#@#                elsif ( $mode_r == FILE_TYPE_DIRECTORY ) {
-#@#                    push @dirs, $name;
-#@#                    push @iterators, _merge_iterators( undef, $iterate_dir_r->() );
-#@#                }
+                if ( $mode_1 == FILE_TYPE_DIRECTORY ) {
+                    push @dirs, $name;
+                    push @iterators, _merge_iterators( $iterate_dir_1->(), undef );
+                }
+                elsif ( $mode_2 == FILE_TYPE_DIRECTORY ) {
+                    push @dirs, $name;
+                    push @iterators, _merge_iterators( undef, $iterate_dir_2->() );
+                }
 
-#@#                next FILE;
-#@#            }
+                next FILE;
+            }
 
-#@#            if ( $mode_l == FILE_TYPE_SYMLINK ) {
+            if ( $mode_1 == FILE_TYPE_SYMLINK ) {
 
-#@#                # both are symlinks
+                # both are symlinks
 
-#@#                my ($link_l) = ${$x_l}[2];
-#@#                my ($link_r) = ${$x_r}[2];
+                my ($link_1) = ${$x_1}[2];
+                my ($link_2) = ${$x_2}[2];
 
-#@#                if ( $link_l ne $link_r ) {
-#@#                    $printer->( LINK_TARGET_DIFFERS, \@dirs, $name );
-#@#                    $differences = 1;
-#@#                }
+                if ( $link_1 ne $link_2 ) {
+                    $printer->( \@dirs, LINK_TARGET_DIFFERS, $name );
+                    $differences = 1;
+                }
 
-#@#                next FILE;
-#@#            }
+                next FILE;
+            }
 
-#@#            if ( $mode_l == FILE_TYPE_DIRECTORY ) {
+            if ( $mode_1 == FILE_TYPE_DIRECTORY ) {
 
-#@#                # both are directories
-#@#                push @dirs, $name;
-#@#                push @iterators, _merge_iterators( $iterate_dir_l->(), $iterate_dir_r->() );
+                # both are directories
+                push @dirs, $name;
+                push @iterators, _merge_iterators( $iterate_dir_1->(), $iterate_dir_2->() );
 
-#@#                next FILE;
-#@#            }
+                next FILE;
+            }
 
-#@#            if ( $mode_l == FILE_TYPE_REGULAR ) {
+            if ( $mode_1 == FILE_TYPE_REGULAR ) {
 
-#@#                # both are regular files
+                # both are regular files
 
-#@#                my ( $size_l, $md5_l ) = @{$x_l}[ 2, 3 ];
-#@#                my ( $size_r, $md5_r ) = @{$x_r}[ 2, 3 ];
+                my ( $size_1, $md5_1 ) = @{$x_1}[ 2, 3 ];
+                my ( $size_2, $md5_2 ) = @{$x_2}[ 2, 3 ];
 
-#@#                if ( $size_l != $size_r || !$compare_file->( $name, $md5_l, $md5_r ) ) {
-#@#                    $printer->( FILE_CONTENT_DIFFERS, \@dirs, $name );
-#@#                    $differences = 1;
-#@#                }
+                if ( $size_1 != $size_2 || !$compare_file->( $name, $md5_1, $md5_2 ) ) {
+                    $printer->( \@dirs, FILE_CONTENT_DIFFERS, $name );
+                    $differences = 1;
+                }
 
-#@#                next FILE;
-#@#            }
+                next FILE;
+            }
+
+            ...;
 
 #@#            $printer->( FILE_TYPE_UNKNOWN, \@dirs, $name );
 #@#            $differences = 1;
-#@#        }
+        }
 
-#@#        pop @iterators;
-#@#        pop @dirs;
-#@#    }
+        pop @iterators;
+        pop @dirs;
+    }
 
-#@#    return;
-#@#}
+    return;
+}
 
 # Adds the cwd to the $msg string at the %s location and calls die with it.
 #
@@ -675,28 +679,46 @@ sub _merge_iterators {
     return sub {
         return if !defined $next_1 && !defined $next_2;
 
+        # TODO adjust tests
+
         my $current_1 = $next_1;
         my $current_2 = $next_2;
 
+        # iterator 1 is empty
         if ( !defined $next_1 ) {
             $next_2 = $it_2->();
             return [ undef, $current_2 ];
         }
 
-        if ( ( !defined $next_2 ) || ( ${$next_1}[0] lt ${$next_2}[0] ) ) {
+        # iterator 2 is empty
+        if ( !defined $next_2 ) {
             $next_1 = $it_1->();
             return [ $current_1, undef ];
         }
 
-        if ( ${$next_1}[0] gt ${$next_2}[0] ) {
+        my $next_1_name = ${$next_1}[0];
+        my $next_2_name = ${$next_2}[0];
+
+        # both files have the same name
+        if ( $next_1_name eq $next_2_name ) {
+            $next_1 = $it_1->();
             $next_2 = $it_2->();
-            return [ undef, $current_2 ];
+
+            return [ $current_1, $current_2 ];
         }
 
-        $next_1 = $it_1->();
-        $next_2 = $it_2->();
+        my @sorted = _sort($next_1_name, $next_2_name);
+        use Data::Dx; Dx @sorted;
 
-        return [ $current_1, $current_2 ];
+        # The first iterators file name comes first
+        if ( $next_1_name eq $sorted[0] ) {
+            $next_1 = $it_1->();
+            return [ $current_1, undef ];
+        }
+
+        # The second iterators file name comes first
+        $next_2 = $it_2->();
+        return [ undef, $current_2 ];
     };
 }
 
