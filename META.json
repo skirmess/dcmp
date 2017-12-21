@@ -132,6 +132,7 @@
       "runtime" : {
          "requires" : {
             "Cwd" : "0",
+            "constant" : "1.01",
             "perl" : "5.006",
             "strict" : "0",
             "warnings" : "0"

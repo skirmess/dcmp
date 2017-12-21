@@ -14,10 +14,10 @@ package App::DCMP;
 
 ##use Getopt::Long;
 
-#@use constant FILE_TYPE_DIRECTORY => 1;
-#@use constant FILE_TYPE_OTHER     => 2;
-#@use constant FILE_TYPE_REGULAR   => 3;
-#@use constant FILE_TYPE_SYMLINK   => 4;
+use constant FILE_TYPE_DIRECTORY => 1;
+use constant FILE_TYPE_OTHER     => 2;
+use constant FILE_TYPE_REGULAR   => 3;
+use constant FILE_TYPE_SYMLINK   => 4;
 
 #@use constant FILE_ADDITIONAL      => 1;    # +
 #@use constant FILE_MISSING         => 2;    # -

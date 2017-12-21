@@ -21,6 +21,7 @@ my %WriteMakefileArgs = (
   "NAME" => "App::dcmp",
   "PREREQ_PM" => {
     "Cwd" => 0,
+    "constant" => "1.01",
     "strict" => 0,
     "warnings" => 0
   },
