@@ -23,6 +23,7 @@ on 'configure' => sub {
 };
 
 on 'develop' => sub {
+  requires "File::Spec" => "0";
   requires "Perl::Critic" => "1.130";
   requires "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" => "1.12";
   requires "Perl::Critic::Policy::Bangs::ProhibitRefProtoOrProto" => "1.12";
@@ -100,6 +101,7 @@ on 'develop' => sub {
   requires "Perl::Critic::Policy::ValuesAndExpressions::UnexpandedSpecialLiteral" => "95";
   requires "Perl::Critic::Policy::Variables::ProhibitUnusedVarsStricter" => "0.100";
   requires "Perl::Critic::Policy::Variables::ProhibitUselessInitialization" => "0.02";
+  requires "Perl::Critic::Utils" => "0";
   requires "Pod::Wordlist" => "0";
   requires "Test::CPAN::Changes" => "0";
   requires "Test::CPAN::Meta" => "0.12";
@@ -108,9 +110,11 @@ on 'develop' => sub {
   requires "Test::DistManifest" => "1.003";
   requires "Test::EOL" => "0";
   requires "Test::Kwalitee" => "0";
+  requires "Test::MinimumVersion" => "0.008";
   requires "Test::Mojibake" => "0";
   requires "Test::More" => "0.88";
   requires "Test::NoTabs" => "0";
+  requires "Test::Perl::Critic" => "0";
   requires "Test::Pod" => "1.26";
   requires "Test::Pod::No404s" => "0";
   requires "Test::Portability::Files" => "0";
