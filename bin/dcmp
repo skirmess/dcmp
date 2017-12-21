@@ -530,147 +530,147 @@ sub _iterator_dir_fs {
     };
 }
 
-#@sub _load_dcmp_file {
-#@    my ( $filename, $ignore_ref ) = @_;
+sub _load_dcmp_file {
+    my ( $filename, $ignore_ref ) = @_;
 
-#@    my %ignore;
-#@    if ( defined $ignore_ref ) {
-#@        @ignore{ @{$ignore_ref} } = ();
-#@    }
+    my %ignore;
+    if ( defined $ignore_ref ) {
+        @ignore{ @{$ignore_ref} } = ();
+    }
 
-#@    my %path;
-#@    my %file_seen;
-#@    my @dirs;
+    my %path;
+    my %file_seen;
+    my @dirs;
 
-#@    open my $fh, '<', $filename or die "Cannot read file $filename: $!\n";
+    open my $fh, '<', $filename or die "Cannot read file $filename: $!\n";
 
-#@    my $dcmp_header = <$fh>;
-#@    chomp $dcmp_header;
+    my $dcmp_header = <$fh>;
+    chomp $dcmp_header;
 
-#@    die "File $filename is not a valid dcmp file\n" if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
+    die "File $filename is not a valid dcmp file\n" if $dcmp_header !~ m { ^ dcmp \s v1 $ }xsm;
 
-#@    my $last_line_seen = 0;
-#@  LINE:
-#@    while ( my $line = <$fh> ) {
-#@        next if $line =~ m{ ^ \s* $ }xsm;
-#@        next if $line =~ m{ ^ \s* [#] }xsm;
+    my $last_line_seen = 0;
+  LINE:
+    while ( my $line = <$fh> ) {
+        next if $line =~ m{ ^ \s* $ }xsm;
+        next if $line =~ m{ ^ \s* [#] }xsm;
 
-#@        if ($last_line_seen) {
+        if ($last_line_seen) {
 
-#@            # The -DIR entry removes an element from @dirs. There is an
-#@            # additional -DIR at the end of the dcmp file. If no element
-#@            # can be removed from @dirs the $last_line_seen is set. But
-#@            # that should only happen at the end of the file. If there
-#@            # are more lines the file must be invalid.
-#@            my $line_nr = $. - 1;
-#@            die "Unbalanced -DIR on line $line_nr in file $filename\n";
-#@        }
+            # The -DIR entry removes an element from @dirs. There is an
+            # additional -DIR at the end of the dcmp file. If no element
+            # can be removed from @dirs the $last_line_seen is set. But
+            # that should only happen at the end of the file. If there
+            # are more lines the file must be invalid.
+            my $line_nr = $. - 1;
+            die "Unbalanced -DIR on line $line_nr in file $filename\n";
+        }
 
-#@        if ( $line =~ m{ ^ - DIR $ }xsm ) {
-#@            if (@dirs) {
-#@                pop @dirs;
-#@            }
-#@            else {
-#@                $last_line_seen = 1;
-#@            }
-#@            next LINE;
-#@        }
+        if ( $line =~ m{ ^ - DIR $ }xsm ) {
+            if (@dirs) {
+                pop @dirs;
+            }
+            else {
+                $last_line_seen = 1;
+            }
+            next LINE;
+        }
 
-#@        # The current file is under $path
-#@        my $path = File::Spec->catdir(@dirs);
+        # The current file is under $path
+        my $path = File::Spec->catdir(@dirs);
 
-#@        #
-#@        chomp $line;
+        #
+        chomp $line;
 
-#@        # From here on every line contains at least an ACTION and a NAME
-#@        my @line = split /\s+/xsm, $line;
-#@        die "Incorrect number of arguments at line $. in file $filename\n" if @line < 2;
+        # From here on every line contains at least an ACTION and a NAME
+        my @line = split /\s+/xsm, $line;
+        die "Incorrect number of arguments at line $. in file $filename\n" if @line < 2;
 
-#@        my $action = shift @line;
-#@        my $name   = _unescape_filename( shift @line );
+        my $action = shift @line;
+        my $name   = _unescape_filename( shift @line );
 
-#@        # Every directory must not contain files with the same name
-#@        if ( exists $file_seen{$path}{$name} ) {
-#@            my $msg = "Duplicate entry for $name";
-#@            if ( length $path ) {
-#@                $msg .= " under path $path";
-#@            }
-#@            die "$msg at line $. in file $filename\n";
-#@        }
-#@        $file_seen{$path}{$name} = 1;
+        # Every directory must not contain files with the same name
+        if ( exists $file_seen{$path}{$name} ) {
+            my $msg = "Duplicate entry for $name";
+            if ( length $path ) {
+                $msg .= " under path $path";
+            }
+            die "$msg at line $. in file $filename\n";
+        }
+        $file_seen{$path}{$name} = 1;
 
-#@        #
-#@        if ( $action eq 'FILE' ) {
-#@            die "Incorrect number of arguments for FILE entry at line $. in file $filename\n" if @line != 2;
+        #
+        if ( $action eq 'FILE' ) {
+            die "Incorrect number of arguments for FILE entry at line $. in file $filename\n" if @line != 2;
 
-#@            my ( $size, $md5 ) = @line;
+            my ( $size, $md5 ) = @line;
 
-#@            push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
-#@            next LINE;
-#@        }
+            push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
+            next LINE;
+        }
 
-#@        #
-#@        if ( $action eq 'DIR' ) {
-#@            die "Incorrect number of arguments for DIR entry at line $. in file $filename\n" if @line != 0;
+        #
+        if ( $action eq 'DIR' ) {
+            die "Incorrect number of arguments for DIR entry at line $. in file $filename\n" if @line != 0;
 
-#@            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
-#@            push @dirs, $name;
+            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
+            push @dirs, $name;
 
-#@            next LINE;
-#@        }
+            next LINE;
+        }
 
-#@        #
-#@        if ( $action eq 'LINK' ) {
-#@            die "Incorrect number of arguments for LINK entry at line $. in file $filename\n" if @line != 1;
-#@            my ($target) = @line;
-#@            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
+        #
+        if ( $action eq 'LINK' ) {
+            die "Incorrect number of arguments for LINK entry at line $. in file $filename\n" if @line != 1;
+            my ($target) = @line;
+            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
 
-#@            next LINE;
-#@        }
+            next LINE;
+        }
 
-#@        die "Invalid entry on line $. in file $filename\n";
-#@    }
+        die "Invalid entry on line $. in file $filename\n";
+    }
 
-#@    close $fh or die "Cannot read file $filename: $!\n";
+    close $fh or die "Cannot read file $filename: $!\n";
 
-#@    die "Unbalanced -DIR at end of file $filename\n" if !$last_line_seen;
+    die "Unbalanced -DIR at end of file $filename\n" if !$last_line_seen;
 
-#@    # Remove ignored files from out loaded dcmp file.
-#@    #
-#@    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
-#@    # get out of sync.
-#@  PATH:
-#@    for my $path ( keys %path ) {
-#@        for my $dir ( File::Spec->splitdir($path) ) {
-#@            if ( exists $ignore{$dir} ) {
-#@                delete $path{$path};
-#@                next PATH;
-#@            }
-#@        }
+    # Remove ignored files from out loaded dcmp file.
+    #
+    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
+    # get out of sync.
+  PATH:
+    for my $path ( keys %path ) {
+        for my $dir ( File::Spec->splitdir($path) ) {
+            if ( exists $ignore{$dir} ) {
+                delete $path{$path};
+                next PATH;
+            }
+        }
 
-#@        @{ $path{$path} } = grep { !exists $ignore{ ${$_}[0] } } @{ $path{$path} };
-#@    }
+        @{ $path{$path} } = grep { !exists $ignore{ ${$_}[0] } } @{ $path{$path} };
+    }
 
-#@    # the returned sub is used instead of _iterate_dir_fs if the information
-#@    # comes from a dcmp file instead of a directory structure on the disk.
-#@    return sub {
-#@        my ($dirs_ref) = @_;
-#@        my $path = File::Spec->catdir( @{$dirs_ref} );
+    # the returned sub is used instead of _iterate_dir_fs if the information
+    # comes from a dcmp file instead of a directory structure on the disk.
+    return sub {
+        my ($dirs_ref) = @_;
+        my $path = File::Spec->catdir( @{$dirs_ref} );
 
-#@        my @stack;
-#@        if ( defined $path{$path} ) {
-#@            my %stack = map { $_->[0] => $_ } @{ $path{$path} };
-#@            for my $name ( _sort( keys %stack ) ) {
-#@                push @stack, $stack{$name};
-#@            }
-#@        }
+        my @stack;
+        if ( defined $path{$path} ) {
+            my %stack = map { $_->[0] => $_ } @{ $path{$path} };
+            for my $name ( sort keys %stack ) {
+                push @stack, $stack{$name};
+            }
+        }
 
-#@        return sub {
-#@            return if !@stack;
-#@            return shift @stack;
-#@        };
-#@    };
-#@}
+        return sub {
+            return if !@stack;
+            return shift @stack;
+        };
+    };
+}
 
 #@sub _merge_iterators {
 #@    my ( $it_1, $it_2 ) = @_;
