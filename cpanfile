@@ -1,4 +1,5 @@
 requires "Cwd" => "0";
+requires "File::Spec" => "0";
 requires "constant" => "1.01";
 requires "perl" => "5.006";
 requires "strict" => "0";
@@ -7,7 +8,6 @@ requires "warnings" => "0";
 on 'test' => sub {
   requires "Capture::Tiny" => "0";
   requires "Encode" => "0";
-  requires "File::Spec" => "0";
   requires "FindBin" => "0";
   requires "POSIX" => "0";
   requires "Test::Fatal" => "0";
@@ -18,6 +18,7 @@ on 'test' => sub {
   requires "constant" => "1.01";
   requires "lib" => "0";
   requires "perl" => "5.006";
+  requires "subs" => "0";
 };
 
 on 'configure' => sub {
@@ -26,7 +27,6 @@ on 'configure' => sub {
 };
 
 on 'develop' => sub {
-  requires "File::Spec" => "0";
   requires "Perl::Critic" => "1.130";
   requires "Perl::Critic::Policy::Bangs::ProhibitDebuggingModules" => "1.12";
   requires "Perl::Critic::Policy::Bangs::ProhibitRefProtoOrProto" => "1.12";
