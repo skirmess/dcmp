@@ -26,7 +26,9 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
+    "Capture::Tiny" => 0,
     "Encode" => 0,
+    "File::Spec" => 0,
     "FindBin" => 0,
     "POSIX" => 0,
     "Test::Fatal" => 0,
@@ -45,8 +47,10 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
+  "Capture::Tiny" => 0,
   "Cwd" => 0,
   "Encode" => 0,
+  "File::Spec" => 0,
   "FindBin" => 0,
   "POSIX" => 0,
   "Test::Fatal" => 0,

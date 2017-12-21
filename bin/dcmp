@@ -19,12 +19,12 @@ use constant FILE_TYPE_OTHER     => 2;
 use constant FILE_TYPE_REGULAR   => 3;
 use constant FILE_TYPE_SYMLINK   => 4;
 
-#@use constant FILE_ADDITIONAL      => 1;    # +
-#@use constant FILE_MISSING         => 2;    # -
-#@use constant FILE_TYPE_DIFFERS    => 3;    # @
-#@use constant FILE_TYPE_UNKNOWN    => 4;    # ?
-#@use constant FILE_CONTENT_DIFFERS => 5;    # M
-#@use constant LINK_TARGET_DIFFERS  => 6;    # L
+use constant FILE_ADDITIONAL      => 1;    # +
+use constant FILE_MISSING         => 2;    # -
+use constant FILE_TYPE_DIFFERS    => 3;    # @
+use constant FILE_TYPE_UNKNOWN    => 4;    # ?
+use constant FILE_CONTENT_DIFFERS => 5;    # M
+use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
 # TODO sort uses tr// - merge iterator must use gt/lt with same logic
@@ -732,25 +732,25 @@ sub _die_with_cwd {
 #@    };
 #@}
 
-#@sub _print_changes {
-#@    my @status_code;
-#@    $status_code[FILE_ADDITIONAL]      = q{+};
-#@    $status_code[FILE_MISSING]         = q{-};
-#@    $status_code[FILE_TYPE_DIFFERS]    = q{@};
-#@    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
-#@    $status_code[FILE_CONTENT_DIFFERS] = q{M};
-#@    $status_code[LINK_TARGET_DIFFERS]  = q{L};
+sub _print_changes {
+    my @status_code;
+    $status_code[FILE_ADDITIONAL]      = q{+};
+    $status_code[FILE_MISSING]         = q{-};
+    $status_code[FILE_TYPE_DIFFERS]    = q{@};
+    $status_code[FILE_TYPE_UNKNOWN]    = q{?};
+    $status_code[FILE_CONTENT_DIFFERS] = q{M};
+    $status_code[LINK_TARGET_DIFFERS]  = q{L};
 
-#@    return sub {
-#@        my ( $dirs_ref, $action, $name ) = @_;
+    return sub {
+        my ( $dirs_ref, $action, $name ) = @_;
 
-#@        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
+        my $path = File::Spec->catfile( @{$dirs_ref}, $name );
 
-#@        print "$status_code[$action] $path\n";
+        print "$status_code[$action] $path\n";
 
-#@        return;
-#@    };
-#@}
+        return;
+    };
+}
 
 #@sub _print_dcmp_file {
 #@    my ($iterate_dir) = @_;

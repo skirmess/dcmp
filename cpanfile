@@ -5,7 +5,9 @@ requires "strict" => "0";
 requires "warnings" => "0";
 
 on 'test' => sub {
+  requires "Capture::Tiny" => "0";
   requires "Encode" => "0";
+  requires "File::Spec" => "0";
   requires "FindBin" => "0";
   requires "POSIX" => "0";
   requires "Test::Fatal" => "0";

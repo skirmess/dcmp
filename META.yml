@@ -3,7 +3,9 @@ abstract: 'dcmp - Compare directories and produce CVS-like output'
 author:
   - 'Sven Kirmess <sven.kirmess@kzone.ch>'
 build_requires:
+  Capture::Tiny: '0'
   Encode: '0'
+  File::Spec: '0'
   FindBin: '0'
   POSIX: '0'
   Test::Fatal: '0'
@@ -47,6 +49,7 @@ resources:
 version: '0.001'
 x_BuiltWith:
   modules:
+    Capture::Tiny: '0.46'
     Cwd: '3.63'
     Encode: '2.80'
     ExtUtils::MakeMaker: '7.30'
