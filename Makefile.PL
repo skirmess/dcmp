@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
     "File::Compare" => 0,
     "File::Spec" => 0,
     "constant" => "1.01",
+    "locale" => 0,
     "strict" => 0,
     "warnings" => 0
   },
@@ -65,6 +66,7 @@ my %FallbackPrereqs = (
   "autodie" => 0,
   "constant" => "1.01",
   "lib" => 0,
+  "locale" => 0,
   "strict" => 0,
   "subs" => 0,
   "warnings" => 0

@@ -18,7 +18,7 @@ sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
     like( exception { App::DCMP::_escape_filename("\x{20ac}") }, "/\Qinternal error: _escape_filename cannot encode Unicode text strings\E/xsm", '_escape_filename() throws an error if you try to encode a Unicode text string' );
-    is( App::DCMP::_escape_filename(undef), undef, '_escape_filename() returns under if the arfument is undef' );
+    is( App::DCMP::_escape_filename(undef), undef, '_escape_filename() returns under if the argument is undef' );
     is( App::DCMP::_escape_filename(),      undef, '... or not given' );
 
     my %test = (

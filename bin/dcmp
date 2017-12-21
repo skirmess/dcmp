@@ -8,6 +8,8 @@ our $VERSION = '0.001';
 
 package App::DCMP;
 
+use locale;
+
 #use Encode;
 use File::Compare qw(compare);
 use File::Spec;
@@ -506,27 +508,27 @@ sub _die_with_cwd {
     }
 }
 
-#@sub _iterator_dir_fs {
-#@    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
+sub _iterator_dir_fs {
+    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
 
-#@    $chdir->($dirs_ref);
+    $chdir->($dirs_ref);
 
-#@    my %ignore;
-#@    if ( defined $ignore_ref ) {
-#@        @ignore{ @{$ignore_ref} } = ();
-#@    }
+    my %ignore;
+    if ( defined $ignore_ref ) {
+        @ignore{ @{$ignore_ref} } = ();
+    }
 
-#@    opendir my $fh, q{.} or _die_with_cwd("Cannot read directory %s: $!");
+    opendir my $fh, q{.} or _die_with_cwd("Cannot read directory %s: $!");
 
-#@    my @stack = map { $collect_file_info->($_) } _sort( grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh );
+    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh;
 
-#@    closedir $fh or _die_with_cwd("Cannot read directory %s: $!");
+    closedir $fh or _die_with_cwd("Cannot read directory %s: $!");
 
-#@    return sub {
-#@        return if !@stack;
-#@        return shift @stack;
-#@    };
-#@}
+    return sub {
+        return if !@stack;
+        return shift @stack;
+    };
+}
 
 #@sub _load_dcmp_file {
 #@    my ( $filename, $ignore_ref ) = @_;
