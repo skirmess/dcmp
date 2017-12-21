@@ -299,23 +299,23 @@ sub _compare_file_fs_fs {
     die "Unable to compare file $filename\n";
 }
 
-#@sub _compare_file_dcmp_file_fs {
-#@    my ( $chdir, $dirs_ref, $filename, $md5 ) = @_;
+sub _compare_file_dcmp_file_fs {
+    my ( $chdir, $dirs_ref, $filename, $md5 ) = @_;
 
-#@    require Digest::MD5;
-#@    my $digest_md5 = Digest::MD5->new();
+    require Digest::MD5;
+    my $digest_md5 = Digest::MD5->new();
 
-#@    $chdir->($dirs_ref);
+    $chdir->($dirs_ref);
 
-#@    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#@    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-#@    $digest_md5->addfile($fh);
-#@    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
+    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    $digest_md5->addfile($fh);
+    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#@    return 1 if lc $md5 eq lc $digest_md5->hexdigest();
-#@    return;
-#@}
+    return 1 if lc $md5 eq lc $digest_md5->hexdigest();
+    return;
+}
 
 sub _compare_file_dcmp_file_dcmp_file {
     my ( $md5_1, $md5_2 ) = @_;
