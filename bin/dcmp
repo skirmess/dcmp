@@ -220,27 +220,27 @@ sub _collect_file_info {
     _die_with_cwd("Cannot stat file $filename in %s: $!");
 }
 
-#@sub _collect_file_info_dcmp_file {
-#@    my ($_filename) = @_;
+sub _collect_file_info_dcmp_file {
+    my ($_filename) = @_;
 
-#@    my $file_info_ref = _collect_file_info($_filename);
+    my $file_info_ref = _collect_file_info($_filename);
 
-#@    my ( $filename, $filetype ) = @{$file_info_ref};
+    my ( $filename, $filetype ) = @{$file_info_ref};
 
-#@    return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
+    return $file_info_ref if $filetype != FILE_TYPE_REGULAR;
 
-#@    require Digest::MD5;
-#@    my $md5 = Digest::MD5->new();
+    require Digest::MD5;
+    my $md5 = Digest::MD5->new();
 
-#@    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
-#@    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
-#@    $md5->addfile($fh);
-#@    close $fh or _die_with_cwd("Cannot read file $filename in %s: $!");
+    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    $md5->addfile($fh);
+    close $fh or _die_with_cwd("Cannot read file $filename in %s: $!");
 
-#@    push @{$file_info_ref}, lc $md5->hexdigest();
+    push @{$file_info_ref}, lc $md5->hexdigest();
 
-#@    return $file_info_ref;
-#@}
+    return $file_info_ref;
+}
 
 #@sub _compare_file {
 #@    my ( $chdir_1, $chdir_2, $dirs_ref ) = @_;
