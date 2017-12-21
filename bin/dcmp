@@ -182,43 +182,43 @@ sub _chdir {
     return;
 }
 
-#@sub _collect_file_info {
-#@    my ($filename) = @_;
+sub _collect_file_info {
+    my ($filename) = @_;
 
-#@  STAT:
-#@    {
-#@        my $is_link = -l $filename;
-#@        last STAT if !defined $is_link;
+  STAT:
+    {
+        my $is_link = -l $filename;
+        last STAT if !defined $is_link;
 
-#@        if ($is_link) {
-#@            my $target = readlink $filename;
-#@            if ( !defined $target ) {
-#@                _die_with_cwd("readlink failed for $filename in %s: $!");
-#@            }
+        if ($is_link) {
+            my $target = readlink $filename;
+            if ( !defined $target ) {
+                _die_with_cwd("readlink failed for $filename in %s: $!");
+            }
 
-#@            return [ $filename, FILE_TYPE_SYMLINK, $target ];
-#@        }
+            return [ $filename, FILE_TYPE_SYMLINK, $target ];
+        }
 
-#@        my $is_file = -f _;
-#@        last STAT if !defined $is_file;
+        my $is_file = -f _;
+        last STAT if !defined $is_file;
 
-#@        if ($is_file) {
-#@            my $size = -s _;
-#@            last STAT if !defined $size;
+        if ($is_file) {
+            my $size = -s _;
+            last STAT if !defined $size;
 
-#@            return [ $filename, FILE_TYPE_REGULAR, $size ];
-#@        }
+            return [ $filename, FILE_TYPE_REGULAR, $size ];
+        }
 
-#@        my $is_dir = -d _;
-#@        last STAT if !defined $is_dir;
+        my $is_dir = -d _;
+        last STAT if !defined $is_dir;
 
-#@        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
+        return [ $filename, FILE_TYPE_DIRECTORY ] if $is_dir;
 
-#@        return [ $filename, FILE_TYPE_OTHER ];
-#@    }
+        return [ $filename, FILE_TYPE_OTHER ];
+    }
 
-#@    _die_with_cwd("Cannot stat file $filename in %s: $!");
-#@}
+    _die_with_cwd("Cannot stat file $filename in %s: $!");
+}
 
 #@sub _collect_file_info_dcmp_file {
 #@    my ($_filename) = @_;
