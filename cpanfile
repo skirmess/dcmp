@@ -1,15 +1,9 @@
 requires "Cwd" => "0";
-requires "Digest::MD5" => "0";
-requires "File::Compare" => "0";
-requires "File::Spec" => "0";
-requires "constant" => "1.01";
-requires "locale" => "0";
 requires "perl" => "5.006";
 requires "strict" => "0";
 requires "warnings" => "0";
 
 on 'test' => sub {
-  requires "Capture::Tiny" => "0";
   requires "Encode" => "0";
   requires "FindBin" => "0";
   requires "POSIX" => "0";
@@ -21,7 +15,6 @@ on 'test' => sub {
   requires "constant" => "1.01";
   requires "lib" => "0";
   requires "perl" => "5.006";
-  requires "subs" => "0";
 };
 
 on 'configure' => sub {
@@ -107,7 +100,6 @@ on 'develop' => sub {
   requires "Perl::Critic::Policy::ValuesAndExpressions::UnexpandedSpecialLiteral" => "95";
   requires "Perl::Critic::Policy::Variables::ProhibitUnusedVarsStricter" => "0.100";
   requires "Perl::Critic::Policy::Variables::ProhibitUselessInitialization" => "0.02";
-  requires "Perl::Critic::Utils" => "0";
   requires "Pod::Wordlist" => "0";
   requires "Test::CPAN::Changes" => "0";
   requires "Test::CPAN::Meta" => "0.12";
@@ -116,11 +108,9 @@ on 'develop' => sub {
   requires "Test::DistManifest" => "1.003";
   requires "Test::EOL" => "0";
   requires "Test::Kwalitee" => "0";
-  requires "Test::MinimumVersion" => "0.008";
   requires "Test::Mojibake" => "0";
   requires "Test::More" => "0.88";
   requires "Test::NoTabs" => "0";
-  requires "Test::Perl::Critic" => "0";
   requires "Test::Pod" => "1.26";
   requires "Test::Pod::No404s" => "0";
   requires "Test::Portability::Files" => "0";

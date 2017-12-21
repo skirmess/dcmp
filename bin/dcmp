@@ -474,16 +474,16 @@ package App::DCMP;
 # was encoded in UTF-8 this will probably just do what we expect it to do.
 # And if not then there's not much we can do, as file names don't tell us
 # how they are encoded.
-#@sub _die_with_cwd {
-#@    my ($msg) = @_;
+sub _die_with_cwd {
+    my ($msg) = @_;
 
-#@    require Cwd;
-#@    my $cwd = Cwd::cwd() || '<unknown>';
+    require Cwd;
+    my $cwd = Cwd::cwd() || '<unknown>';
 
-#@    my $die = sprintf $msg, $cwd;
+    my $die = sprintf $msg, $cwd;
 
-#@    die "$die\n";
-#@}
+    die "$die\n";
+}
 
 # Escapes unsafe characters in $filename to write them to a dcmp file. This
 # uses the same mechanism as the RFC 3986 implementation of URI::Escape
