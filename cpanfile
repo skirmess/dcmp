@@ -1,5 +1,6 @@
 requires "Cwd" => "0";
 requires "Digest::MD5" => "0";
+requires "File::Compare" => "0";
 requires "File::Spec" => "0";
 requires "constant" => "1.01";
 requires "perl" => "5.006";
