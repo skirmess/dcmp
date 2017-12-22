@@ -29,8 +29,6 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
-# TODO sort uses tr// - merge iterator must use gt/lt with same logic
-#
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO TODO rename left/right with 1/2 or reference/workspace or something
@@ -805,17 +803,6 @@ sub _print_dcmp_file {
 
     return;
 }
-
-# Alphanumeric sorting inspired by Dir::ls from Dan Book
-#@sub _sort {
-#@    my @entries = @_;
-
-#@    # pre-sort by alphanumeric then full name
-#@    use locale;
-#@    return map { $_->[1] }
-#@      sort { $a->[0] cmp $b->[0] or $a->[1] cmp $b->[1] }
-#@      map { my $x = $_; $x =~ tr/a-zA-Z0-9 \t//cd; [ $x, $_ ] } @entries;
-#@}
 
 sub _unescape_filename {
     my ($filename) = @_;
