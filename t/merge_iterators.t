@@ -204,7 +204,6 @@ sub _test_merge {
         #
         note('undef');
         is( $it->(), undef, 'merged file info is undef - iterator is exhausted.' );
-
     }
 
     #

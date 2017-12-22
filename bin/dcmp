@@ -672,58 +672,63 @@ sub _load_dcmp_file {
     };
 }
 
-#@sub _merge_iterators {
-#@    my ( $it_1, $it_2 ) = @_;
+sub _merge_iterators {
+    my ( $it_1, $it_2 ) = @_;
 
-#@    my $next_1 = defined $it_1 ? $it_1->() : undef;
-#@    my $next_2 = defined $it_2 ? $it_2->() : undef;
+    my $next_1 = defined $it_1 ? $it_1->() : undef;
+    my $next_2 = defined $it_2 ? $it_2->() : undef;
 
-#@    return sub {
-#@        return if !defined $next_1 && !defined $next_2;
+    return sub {
+        if ( !defined $next_1 ) {
 
-#@        # TODO adjust tests
+            # iterator 1 is empty
+            if ( !defined $next_2 ) {
 
-#@        my $current_1 = $next_1;
-#@        my $current_2 = $next_2;
+                # iterator 1 and 2 are both empty
+                return;
+            }
 
-#@        # iterator 1 is empty
-#@        if ( !defined $next_1 ) {
-#@            $next_2 = $it_2->();
-#@            return [ undef, $current_2 ];
-#@        }
+            my $result = [ undef, $next_2 ];
+            $next_2 = $it_2->();
+            return $result;
+        }
 
-#@        # iterator 2 is empty
-#@        if ( !defined $next_2 ) {
-#@            $next_1 = $it_1->();
-#@            return [ $current_1, undef ];
-#@        }
+        if ( !defined $next_2 ) {
 
-#@        my $next_1_name = ${$next_1}[0];
-#@        my $next_2_name = ${$next_2}[0];
+            # iterator 2 is empty
+            my $result = [ $next_1, undef ];
+            $next_1 = $it_1->();
+            return $result;
+        }
 
-#@        # both files have the same name
-#@        if ( $next_1_name eq $next_2_name ) {
-#@            $next_1 = $it_1->();
-#@            $next_2 = $it_2->();
+        my $next_1_name = ${$next_1}[0];
+        my $next_2_name = ${$next_2}[0];
 
-#@            return [ $current_1, $current_2 ];
-#@        }
+        if ( $next_1_name eq $next_2_name ) {
 
-#@        my @sorted = _sort( $next_1_name, $next_2_name );
-#@        use Data::Dx;
-#@        Dx @sorted;
+            # both files have the same name
+            my $result = [ $next_1, $next_2 ];
+            $next_1 = $it_1->();
+            $next_2 = $it_2->();
+            return $result;
+        }
 
-#@        # The first iterators file name comes first
-#@        if ( $next_1_name eq $sorted[0] ) {
-#@            $next_1 = $it_1->();
-#@            return [ $current_1, undef ];
-#@        }
+        my @sorted = sort $next_1_name, $next_2_name;
 
-#@        # The second iterators file name comes first
-#@        $next_2 = $it_2->();
-#@        return [ undef, $current_2 ];
-#@    };
-#@}
+        if ( $next_1_name eq $sorted[0] ) {
+
+            # The first iterators file name comes first
+            my $result = [ $next_1, undef ];
+            $next_1 = $it_1->();
+            return $result;
+        }
+
+        # The second iterators file name comes first
+        my $result = [ undef, $next_2 ];
+        $next_2 = $it_2->();
+        return $result;
+    };
+}
 
 sub _partial {
     my $f          = shift;
