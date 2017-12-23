@@ -25,6 +25,9 @@
 [-ErrorHandling::RequireCheckingReturnValueOfEval]
 
 #
+[-Freenode::DollarAB]
+
+#
 [-Freenode::Prototypes]
 
 #

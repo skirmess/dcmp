@@ -188,7 +188,6 @@ equivalent_modules = Moo Moo::Role
 [Freenode::ConditionalImplicitReturn]
 [Freenode::DeprecatedFeatures]
 [Freenode::DiscouragedModules]
-[Freenode::DollarAB]
 [Freenode::Each]
 #[Freenode::EmptyReturn]
 [Freenode::IndirectObjectNotation]
