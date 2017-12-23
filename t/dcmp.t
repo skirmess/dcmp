@@ -79,8 +79,8 @@ sub _test_dcmp {
     };
 
     # ----------------------------------------------------------
-    my $dcmp_filename_1         = "file1${suffix_bin}.dcmp";
-    my $dcmp_filename_2         = "file2${suffix_bin}.dcmp";
+    my $dcmp_filename_1         = Local::Normalize_Filename::normalize_filename("file1${suffix_bin}.dcmp");
+    my $dcmp_filename_2         = Local::Normalize_Filename::normalize_filename("file2${suffix_bin}.dcmp");
     my $dir                     = Local::Normalize_Filename::normalize_filename("dir${suffix_bin}");
     my $dir_escaped             = App::DCMP::_escape_filename($dir);
     my $dir2                    = Local::Normalize_Filename::normalize_filename("dir2${suffix_bin}");
@@ -105,7 +105,7 @@ sub _test_dcmp {
     my $valid_link2_escaped     = App::DCMP::_escape_filename($valid_link2);
 
     # ----------------------------------------------------------
-    my $dir_1 = File::Spec->catdir( tempdir(), "dir1_${dir_1_suffix_bin}" );
+    my $dir_1 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir1_${dir_1_suffix_bin}") );
     mkdir $dir_1;
 
     my $chdir_1;
@@ -150,7 +150,7 @@ RECORD_FILE
     }
 
     # ----------------------------------------------------------
-    my $dir_2 = File::Spec->catdir( tempdir(), "dir2_${dir_2_suffix_bin}" );
+    my $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
     mkdir $dir_2;
 
     my $chdir_2;
@@ -196,7 +196,7 @@ RECORD_FILE
     is_deeply( \@output, \@output_expected, '... and prints the correct output' );
 
     # ----------------------------------------------------------
-    $dir_2 = File::Spec->catdir( tempdir(), "dir2_${dir_2_suffix_bin}" );
+    $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
     mkdir $dir_2;
 
     if ( $type2 == TYPE_FS ) {
@@ -295,7 +295,7 @@ RECORD_FILE
     }
 
     if ( $type2 == TYPE_FS ) {
-        $dir_2 = File::Spec->catdir( tempdir(), "dir2_${dir_2_suffix_bin}" );
+        $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
         mkdir $dir_2;
 
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
@@ -408,7 +408,7 @@ RECORD_FILE
         return [ $filename, App::DCMP::FILE_TYPE_OTHER() ];
     };
 
-    $dir_1 = File::Spec->catdir( tempdir(), "dir1_${dir_1_suffix_bin}" );
+    $dir_1 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir1_${dir_1_suffix_bin}") );
     mkdir $dir_1;
 
     if ( $type1 == TYPE_FS ) {
@@ -433,7 +433,7 @@ RECORD_FILE
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
     }
 
-    $dir_2 = File::Spec->catdir( tempdir(), "dir2_${dir_2_suffix_bin}" );
+    $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
     mkdir $dir_2;
 
     if ( $type2 == TYPE_FS ) {

@@ -29,6 +29,11 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO Invalid conversion in sprintf: "%C" at bin/dcmp line 491.
+# TODO debug msg = Cannot read file file%C0.txt in %s: No such file or directory
+# TODO debug cwd = /Users/travis/build/skirmess/dcmp/tmp/t_compare_file_dcmp_file_fs_t/default_12/dir%C0
+# TODO _die_with_cwd "string %cx..." ===> 	positional params
+#
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO *** same as diff! ***
@@ -486,8 +491,6 @@ sub _die_with_cwd {
     require Cwd;
     my $cwd = Cwd::cwd() || '<unknown>';
 
-    print STDERR "debug msg = $msg\n";
-    print STDERR "debug cwd = $cwd\n";
     my $die = sprintf $msg, $cwd;
 
     die "$die\n";
