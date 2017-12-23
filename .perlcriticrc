@@ -143,7 +143,6 @@ allow = $@ $! $/ $0 $^O $.
 
 [Variables::ProhibitReusedNames]
 [Variables::ProhibitUnusedVariables]
-[Variables::ProtectPrivateVars]
 [Variables::RequireInitializationForLocalVars]
 [Variables::RequireLexicalLoopIterators]
 [Variables::RequireLocalizedPunctuationVars]

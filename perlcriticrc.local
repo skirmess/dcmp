@@ -79,3 +79,6 @@ terminal_funcs = _die_with_cwd
 
 [Variables::ProhibitPunctuationVars]
 allow = $@ $! $/ $0 $^O $.
+
+#
+[-Variables::ProtectPrivateVars]
