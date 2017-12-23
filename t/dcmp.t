@@ -5,8 +5,6 @@ use strict;
 use warnings;
 use autodie;
 
-use locale;
-
 use Test::More 0.88;
 use Test::TempDir::Tiny;
 
@@ -191,7 +189,7 @@ RECORD_FILE
           [ App::DCMP::FILE_ADDITIONAL(), $valid_link ];
     }
 
-    @output_expected = sort { $a->[1] cmp $b->[1] } @output_expected;
+    @output_expected = _sort_output(@output_expected);
 
     is_deeply( \@output, \@output_expected, '... and prints the correct output' );
 
@@ -394,7 +392,7 @@ RECORD_FILE
           [ App::DCMP::FILE_MISSING(), $valid_link2 ];
     }
 
-    @output_expected = sort { $a->[1] cmp $b->[1] } @output_expected;
+    @output_expected = _sort_output(@output_expected);
 
     is_deeply( \@output, \@output_expected, '... and prints the correct output' ) or do {
         use Data::Dumper;
@@ -481,6 +479,39 @@ RECORD_FILE
     is_deeply( \@output, \@output_expected, '... and prints the correct output' );
 
     return;
+}
+
+sub _sort_output {
+    my @output_expected = @_;
+
+    use locale;
+    return
+        map { $_->[1] }
+        sort __sort_output
+        map { [ [ File::Spec->splitdir($_->[1])], $_ ] } @output_expected;
+}
+
+sub __sort_output {
+    my @a_dirs = @{ $a->[0] };
+    my @b_dirs = @{ $b->[0] };
+
+    DIR:
+    while(@a_dirs || @b_dirs) {
+        # a < b     -1
+        # a > b     1
+
+        return -1 if !@a_dirs;
+        return 1 if !@b_dirs;
+
+        my $a_dir = shift @a_dirs;
+        my $b_dir = shift @b_dirs;
+
+        next DIR if $a_dir eq $b_dir;
+
+        return $a_dir cmp $b_dir;
+    }
+
+    return 0;
 }
 
 # vim: ts=4 sts=4 sw=4 et: syntax=perl
