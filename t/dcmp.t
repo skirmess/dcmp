@@ -396,7 +396,11 @@ RECORD_FILE
 
     @output_expected = sort { $a->[1] cmp $b->[1] } @output_expected;
 
-    is_deeply( \@output, \@output_expected, '... and prints the correct output' );
+    is_deeply( \@output, \@output_expected, '... and prints the correct output' ) or do {
+        use Data::Dumper;
+        print {*STDERR} Dumper(@output);
+        print {*STDERR} Dumper(@output_expected);
+    };
 
     # ----------------------------------------------------------
     # we are done, dcmp files don't support unknown file types
