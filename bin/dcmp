@@ -29,11 +29,6 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
-# TODO Invalid conversion in sprintf: "%C" at bin/dcmp line 491.
-# TODO debug msg = Cannot read file file%C0.txt in %s: No such file or directory
-# TODO debug cwd = /Users/travis/build/skirmess/dcmp/tmp/t_compare_file_dcmp_file_fs_t/default_12/dir%C0
-# TODO _die_with_cwd "string %cx..." ===> 	positional params
-#
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO *** same as diff! ***
@@ -191,7 +186,7 @@ sub _chdir {
     chdir $basedir or die "Cannot chdir to $basedir: $!\n";
 
     for my $i ( 0 .. $#{$dirs_ref} ) {
-        chdir ${$dirs_ref}[$i] or _die_with_cwd("Cannot chdir to ${$dirs_ref}[$i] in %s: $!");
+        chdir ${$dirs_ref}[$i] or _die_with_cwd( 'Cannot chdir to %2$s in %1$s: %3$s', ${$dirs_ref}[$i], $! );
     }
 
     return;
@@ -208,7 +203,7 @@ sub _collect_file_info {
         if ($is_link) {
             my $target = readlink $filename;
             if ( !defined $target ) {
-                _die_with_cwd("readlink failed for $filename in %s: $!");
+                _die_with_cwd( 'readlink failed for %2$s in %1$s: %3$s', $filename, $! );
             }
 
             return [ $filename, FILE_TYPE_SYMLINK, $target ];
@@ -232,7 +227,7 @@ sub _collect_file_info {
         return [ $filename, FILE_TYPE_OTHER ];
     }
 
-    _die_with_cwd("Cannot stat file $filename in %s: $!");
+    _die_with_cwd( 'Cannot stat file %2$s in %1$s: %3$s', $filename, $! );
 }
 
 sub _collect_file_info_dcmp_file {
@@ -247,10 +242,10 @@ sub _collect_file_info_dcmp_file {
     require Digest::MD5;
     my $md5 = Digest::MD5->new();
 
-    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
-    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    open my $fh, '<', $filename or _die_with_cwd( 'Cannot read file %2$s in %1$s: %3$s', $filename, $! );
+    binmode $fh or _die_with_cwd( 'binmode failed for %2$s in %1$s: %3$s', $filename, $! );
     $md5->addfile($fh);
-    close $fh or _die_with_cwd("Cannot read file $filename in %s: $!");
+    close $fh or _die_with_cwd( 'Cannot read file %2$s in %1$s: %3$s', $filename, $! );
 
     push @{$file_info_ref}, lc $md5->hexdigest();
 
@@ -295,8 +290,8 @@ sub _compare_file_fs_fs {
     for my $f ( $chdir_1, $chdir_2 ) {
         $f->($dirs_ref);
 
-        open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
-        binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+        open my $fh, '<', $filename or _die_with_cwd( 'Cannot read file %2$s in %1$s: %3$s', $filename, $! );
+        binmode $fh or _die_with_cwd( 'binmode failed for %2$s in %1$s: %3$s', $filename, $! );
         push @fh, $fh;
     }
 
@@ -322,11 +317,11 @@ sub _compare_file_dcmp_file_fs {
 
     $chdir->($dirs_ref);
 
-    open my $fh, '<', $filename or _die_with_cwd("Cannot read file $filename in %s: $!");
+    open my $fh, '<', $filename or _die_with_cwd( 'Cannot read file %2$s in %1$s: %3$s', $filename, $! );
 
-    binmode $fh or _die_with_cwd("binmode failed for $filename in %s: $!");
+    binmode $fh or _die_with_cwd( 'binmode failed for %2$s in %1$s: %3$s', $filename, $! );
     $digest_md5->addfile($fh);
-    close $fh or die _die_with_cwd("Cannot read file $filename in %s: $!");
+    close $fh or die _die_with_cwd( 'Cannot read file %2$s in %1$s: %3$s', $filename, $! );
 
     return 1 if lc $md5 eq lc $digest_md5->hexdigest();
     return;
@@ -486,12 +481,12 @@ sub _dcmp {
 # And if not then there's not much we can do, as file names don't tell us
 # how they are encoded.
 sub _die_with_cwd {
-    my ($msg) = @_;
+    my ( $msg, @args ) = @_;
 
     require Cwd;
     my $cwd = Cwd::cwd() || '<unknown>';
 
-    my $die = sprintf $msg, $cwd;
+    my $die = sprintf $msg, $cwd, @args;
 
     die "$die\n";
 }
@@ -527,11 +522,11 @@ sub _iterator_dir_fs {
         @ignore{ @{$ignore_ref} } = ();
     }
 
-    opendir my $fh, q{.} or _die_with_cwd("Cannot read directory %s: $!");
+    opendir my $fh, q{.} or _die_with_cwd( 'Cannot read directory %s: %s', $! );
 
     my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh;
 
-    closedir $fh or _die_with_cwd("Cannot read directory %s: $!");
+    closedir $fh or _die_with_cwd( 'Cannot read directory %s: %s', $! );
 
     return sub {
         return if !@stack;

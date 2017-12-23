@@ -35,6 +35,13 @@ sub main {
 
         $cwd = "/tmp/dir_$suffix_bin";
         is( exception { App::DCMP::_die_with_cwd('hello >%s< world') }, "hello >$cwd< world\n", '... inserts the correct dir in the string' );
+
+        is( exception { App::DCMP::_die_with_cwd( 'a>%s<b>%s<c>%s<d', 'A', 'B' ) }, "a>$cwd<b>A<c>B<d\n", '... inserts the correct dir in the string with multiple arguments' );
+
+        is( exception { App::DCMP::_die_with_cwd( 'a>%1$s<b>%2$s<c>%3$s<d', 'A',  'B' ) },  "a>$cwd<b>A<c>B<d\n",   '... inserts the correct dir in the string with multiple arguments (positional arguments numbered in order)' );
+        is( exception { App::DCMP::_die_with_cwd( 'a>%2$s<b>%3$s<c>%1$s<d', 'A',  'B' ) },  "a>A<b>B<c>$cwd<d\n",   '... inserts the correct dir in the string with multiple arguments (positional arguments numbered out of order)' );
+        is( exception { App::DCMP::_die_with_cwd( 'a>%3$s<b>%1$s<c>%2$s<d', 'A',  'B' ) },  "a>B<b>$cwd<c>A<d\n",   '... inserts the correct dir in the string with multiple arguments (positional arguments numbered out of order)' );
+        is( exception { App::DCMP::_die_with_cwd( 'a>%3$s<b>%1$s<c>%2$s<d', '%s', '%C' ) }, "a>%C<b>$cwd<c>%s<d\n", '... inserts the correct dir in the string with multiple arguments (positional arguments numbered out of order with % in arguments)' );
     }
 
     note(q{----------------------------------------------------------});
