@@ -50,10 +50,6 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
-#
-# TODO ~~~~~~~~~~~~~~~ OLD ~~~~~~~~~~~~~~~
-#
 # TODO support - for stdin/stdout for dcmp file
 # TODO try to fix some more critic exceptions
 # TODO LEAVE_SRC?
