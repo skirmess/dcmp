@@ -61,6 +61,13 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #
 # TODO ** usage **
 #
+# TODO      dcmp -i .git -I runtime/11.0/dev |-v|-V] dir1 dir2
+# TODO      dcmp -i .git -I runtime/11.0/dev |-v|-V] dir1 file2
+# TODO      dcmp -i .git -I runtime/11.0/dev |-v|-V] dir1 -
+# TODO      dcmp -i .git -I runtime/11.0/dev |-v|-V] -- - dir2
+#
+# TODO      dcmp -i .git -I runtime/11.0/dev |-v|-V] -c 	<- creates file to stdout
+#
 # TODO dcmp [-vV] <dir1/file1> <dir2/file2>
 # TODO 	-v  use ^ and M- notation     (including space and tab)
 # TODO 	-V  unicode replacement chars (including space and tab)
