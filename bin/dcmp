@@ -486,6 +486,8 @@ sub _die_with_cwd {
     require Cwd;
     my $cwd = Cwd::cwd() || '<unknown>';
 
+    print STDERR "debug msg = $msg\n";
+    print STDERR "debug cwd = $cwd\n";
     my $die = sprintf $msg, $cwd;
 
     die "$die\n";
