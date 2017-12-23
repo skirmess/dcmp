@@ -126,7 +126,7 @@ sub _test_dcmp {
         }
 
         open $fh, '>', File::Spec->catfile( $dir_1, $file );
-        print {$fh} "hello world\n";
+        print {$fh} 'hello world';
         close $fh;
     }
     else {
@@ -140,7 +140,7 @@ DIR $dir_escaped
 FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
 LINK $valid_link_escaped $file_escaped
-FILE $file_escaped 12 6f5902ac237024bdd0c176cb93063dc4
+FILE $file_escaped 11 5eb63bbbe01eeed093cb22bb8f5acdc3
 -DIR
 RECORD_FILE
         close $fh;
@@ -214,7 +214,7 @@ RECORD_FILE
         }
 
         open $fh, '>', File::Spec->catfile( $dir_2, $file );
-        print {$fh} "hello world\n";
+        print {$fh} 'hello world';
         close $fh;
     }
     else {
@@ -228,7 +228,7 @@ DIR $dir_escaped
 FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
 LINK $valid_link_escaped $file_escaped
-FILE $file_escaped 12 6f5902ac237024bdd0c176cb93063dc4
+FILE $file_escaped 11 5eb63bbbe01eeed093cb22bb8f5acdc3
 -DIR
 RECORD_FILE
         close $fh;
@@ -257,13 +257,7 @@ RECORD_FILE
         @output_expected = ();
     }
 
-    is_deeply( \@output, \@output_expected, '... and prints the correct output' ) or do {
-
-        # TODO debug
-        use Data::Dumper;
-        print {*STDERR} Dumper(@output);
-        print {*STDERR} Dumper(@output_expected);
-    };
+    is_deeply( \@output, \@output_expected, '... and prints the correct output' );
 
     # ----------------------------------------------------------
     if ( $type1 == TYPE_FS ) {
