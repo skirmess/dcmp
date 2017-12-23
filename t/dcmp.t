@@ -257,7 +257,13 @@ RECORD_FILE
         @output_expected = ();
     }
 
-    is_deeply( \@output, \@output_expected, '... and prints the correct output' );
+    is_deeply( \@output, \@output_expected, '... and prints the correct output' ) or do {
+
+        # TODO debug
+        require Data::Dumper;
+        print {*STDERR} Dumper(@output);
+        print {*STDERR} Dumper(@output_expected);
+    };
 
     # ----------------------------------------------------------
     if ( $type1 == TYPE_FS ) {

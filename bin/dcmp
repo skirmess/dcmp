@@ -31,13 +31,24 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 #
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# TODO TODO rename left/right with 1/2 or reference/workspace or something
-# TODO   diff calls it file1/file2
-# TODO       %<     lines from FILE1
-# TODO       %>     lines from FILE2
-# TODO       %=     lines common to FILE1 and FILE2
+# TODO *** same as diff! ***
+# TODO ski@pernaia:~/working/dcmp-dev2$ echo a > a
+# TODO ski@pernaia:~/working/dcmp-dev2$ echo b > b
+# TODO ski@pernaia:~/working/dcmp-dev2$ diff -u a b
+# TODO --- a   2017-12-23 18:27:03.731142222 +0000
+# TODO +++ b   2017-12-23 18:27:05.922161764 +0000
+# TODO @@ -1 +1 @@
+# TODO -a
+# TODO +b
+# TODO ski@pernaia:~/working/dcmp-dev2$ mkdir A B
+# TODO ski@pernaia:~/working/dcmp-dev2$ touch A/a B/b
+# TODO ski@pernaia:~/working/dcmp-dev2$ dcmp A B
+# TODO -ksh93: dcmp: not found [No such file or directory]
+# TODO ski@pernaia:~/working/dcmp-dev2$  ../dcmp/dcmp A B
+# TODO + a
+# TODO - b
 #
-# TODO ~~~~~~~~~~~~~~~     ~~~~~~~~~~~~~~~
+# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO add check for dcmp file for DIR x, -DIR, DIR x -> exception 2x same dir
 #
