@@ -29,6 +29,8 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO t/lib supports_newline_in_filename (like symlink with test)
+#
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO *** same as diff! ***
@@ -818,7 +820,9 @@ sub _unescape_filename {
     return $filename;
 }
 
+################################################################################
 ### untested
+################################################################################
 
 ###sub _get_main_options_and_command {
 ###    my %opt;
