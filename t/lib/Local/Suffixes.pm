@@ -9,7 +9,7 @@ use Encode;
 sub suffix_iterator {
     my @suffixes;
 
-    #                 text string => binary string
+    # text string => binary string
 
     # empty string
     push @suffixes, [ q{} => q{} ];
