@@ -29,7 +29,7 @@ sub main {
         note( encode( 'UTF-8', "suffix: $suffix_text" ) );
 
         my $file        = "file${suffix_bin}.txt";
-        my $ignore_file = "ignore${suffix_bin}txt";
+        my $ignore_file = "ignore${suffix_bin}.txt";
 
         # ----------------------------------------------------------
         note('no ignore paths, no ignore files, no dirs');
