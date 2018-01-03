@@ -537,6 +537,7 @@ sub _ignore {
             my $path = File::Spec->catdir( @{$dirs_ref}, $name );
 
             for my $ignore_path (@ignore_paths) {
+                print STDERR "i>$ignore_path<\np>$path<\n";
                 return 1 if $path =~ m{ \A \Q$ignore_path\E (?:/|\z) }xsm;
             }
         }
