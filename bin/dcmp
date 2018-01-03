@@ -29,6 +29,7 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
+# TODO windows is case tolerant. check compare functions for things like 'Dir', 'dir' and 'DIR'
 # TODO t/lib supports_newline_in_filename (like symlink with test)
 #
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -520,14 +521,12 @@ sub _ignore {
     @ignore_file{ @{$ignore_files_ref} } = ();
     my @ignore_paths = @{$ignore_paths_ref};
 
+    # TODO - check of ignore_paths outside of this func:
     # TODO ignore paths must be cleaned up with File::Spec->canonpath (replaces \ with / on Windows)
-    # TODO use ignore path!
-    # TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
     # TODO is_absolute -> abort. must be relative to dcmp dir!
-    # TODO sub subsumes has check we need!
-    #
-    # -I some\path   ->
-    # TODO see sub path of Path::Tiny
+
+    # TODO checks to add to this func:
+    # TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
 
     return sub {
         my ($name) = @_;

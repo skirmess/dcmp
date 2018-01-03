@@ -22,8 +22,6 @@ main();
 sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
-    #my $basedir = cwd();
-
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
