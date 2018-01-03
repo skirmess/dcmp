@@ -512,6 +512,40 @@ sub _die_with_cwd {
     }
 }
 
+# TODO
+sub _ignore {
+    my ( $ignore_paths_ref, $ignore_files_ref, $dirs_ref ) = @_;
+
+    my %ignore_file;
+    @ignore_file{ @{$ignore_files_ref} } = ();
+    my @ignore_paths = @{$ignore_paths_ref};
+
+    # TODO ignore paths must be cleaned up with File::Spec->canonpath (replaces \ with / on Windows)
+    # TODO use ignore path!
+    # TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
+    # TODO is_absolute -> abort. must be relative to dcmp dir!
+    # TODO sub subsumes has check we need!
+    #
+    # -I some\path   ->
+    # TODO see sub path of Path::Tiny
+
+    return sub {
+        my ($name) = @_;
+
+        return 1 if exists $ignore_file{$name};
+
+        if (@ignore_paths) {
+            my $path = File::Spec->catdir( @{$dirs_ref}, $name );
+
+            for my $ignore_path (@ignore_paths) {
+                return 1 if $path =~ m{ \A \Q$ignore_path\E (?:/|\Z) }xsm;
+            }
+        }
+
+        return;
+    };
+}
+
 sub _iterator_dir_fs {
     my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
 
