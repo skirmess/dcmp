@@ -527,6 +527,8 @@ sub _ignore {
 
     # TODO checks to add to this func:
     # TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
+    #
+    # TODO canonpath removes last /?
 
     return sub {
         my ($name) = @_;
@@ -539,6 +541,7 @@ sub _ignore {
             print STDERR "=============\n";
             print STDERR File::Spec->catdir('a', 'b'), "\n";
             print STDERR File::Spec->canonpath(File::Spec->catdir('a', 'b')), "\n";
+            print STDERR File::Spec->canonpath(File::Spec->catdir('a', 'b') . '\\'), "\n";
             print STDERR "-------------\n";
             for my $ignore_path (@ignore_paths) {
                 print STDERR "i>$ignore_path<\np>$path<\n";
