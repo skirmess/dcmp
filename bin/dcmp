@@ -519,6 +519,7 @@ sub _ignore {
 
     my %ignore_file;
     @ignore_file{ @{$ignore_files_ref} } = ();
+
     # TODO test if correctly sorted!
     my @ignore_paths = sort { length $a <=> length $b } @{$ignore_paths_ref};
 
@@ -540,11 +541,11 @@ sub _ignore {
 
             my $path;
             my $ignore_path_ind = 0;
-            PATH_ELEM:
+          PATH_ELEM:
             for my $path_elem ( @{$dirs_ref}, $name ) {
-                $path = defined $path ? File::Spec->catdir($path, $path_elem) : $path_elem;
+                $path = defined $path ? File::Spec->catdir( $path, $path_elem ) : $path_elem;
 
-                IGNORE_PATH:
+              IGNORE_PATH:
                 while ( $ignore_path_ind < @ignore_paths ) {
                     next PATH_ELEM if length $path < length $ignore_paths[$ignore_path_ind];
 
