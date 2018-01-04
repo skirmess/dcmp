@@ -175,7 +175,7 @@ sub main {
         note('five ignore paths, no ignore files, one dir');
         {
             my @ignore_files;
-            my @ignore_paths = ( 'a', 'b', $ignore_path, 'c', 'e' );
+            my @ignore_paths = ( 'a', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', $ignore_path, 'c', 'e' );
             my @dirs = ($dir1);
 
             my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );

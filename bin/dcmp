@@ -519,7 +519,8 @@ sub _ignore {
 
     my %ignore_file;
     @ignore_file{ @{$ignore_files_ref} } = ();
-    my @ignore_paths = @{$ignore_paths_ref};
+    # TODO test if correctly sorted!
+    my @ignore_paths = sort { length $a <=> length $b } @{$ignore_paths_ref};
 
     # TODO - check of ignore_paths outside of this func:
     # TODO ignore paths must be cleaned up with File::Spec->canonpath (replaces \ with / on Windows)
@@ -536,16 +537,30 @@ sub _ignore {
         return 1 if exists $ignore_file{$name};
 
         if (@ignore_paths) {
-            my $path = File::Spec->catdir( @{$dirs_ref}, $name );
 
-            print STDERR "=============\n";
-            print STDERR File::Spec->catdir('a', 'b'), "\n";
-            print STDERR File::Spec->canonpath(File::Spec->catdir('a', 'b')), "\n";
-            print STDERR File::Spec->canonpath(File::Spec->catdir('a', 'b') . '\\'), "\n";
-            print STDERR "-------------\n";
-            for my $ignore_path (@ignore_paths) {
-                print STDERR "i>$ignore_path<\np>$path<\n";
-                return 1 if $path =~ m{ \A \Q$ignore_path\E (?:/|\z) }xsm;
+            my $path;
+            my $ignore_path_ind = 0;
+            PATH_ELEM:
+            for my $path_elem ( @{$dirs_ref}, $name ) {
+                $path = defined $path ? File::Spec->catdir($path, $path_elem) : $path_elem;
+
+                IGNORE_PATH:
+                while ( $ignore_path_ind < @ignore_paths ) {
+                    next PATH_ELEM if length $path < length $ignore_paths[$ignore_path_ind];
+
+                    if ( length $path == length $ignore_paths[$ignore_path_ind] ) {
+                        return 1 if $path eq $ignore_paths[$ignore_path_ind];
+
+                        $ignore_path_ind++;
+                        next IGNORE_PATH;
+                    }
+
+                    $ignore_path_ind++;
+                    next IGNORE_PATH;
+                }
+
+                # all ignore entries are checked and none matched
+                last PATH_ELEM;
             }
         }
 
