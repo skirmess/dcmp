@@ -30,6 +30,17 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
 # TODO windows is case tolerant. check compare functions for things like 'Dir', 'dir' and 'DIR'
+# TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
+# TODO case tolerant check -> add to functions (_ignore and other) and how to test?
+#
+# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# TODO check of ignore_paths outside of _ignore sub:
+# TODO - ignore paths must be cleaned up with File::Spec->canonpath (sometimes replaces \ with / on Windows, but consistent)
+# TODO - is_absolute -> abort. must be relative to dcmp dir!
+#
+# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 # TODO t/lib supports_newline_in_filename (like symlink with test)
 #
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -513,24 +524,12 @@ sub _die_with_cwd {
     }
 }
 
-# TODO
 sub _ignore {
     my ( $ignore_paths_ref, $ignore_files_ref, $dirs_ref ) = @_;
 
     my %ignore_file;
     @ignore_file{ @{$ignore_files_ref} } = ();
-
-    # TODO test if correctly sorted!
     my @ignore_paths = sort { length $a <=> length $b } @{$ignore_paths_ref};
-
-    # TODO - check of ignore_paths outside of this func:
-    # TODO ignore paths must be cleaned up with File::Spec->canonpath (replaces \ with / on Windows)
-    # TODO is_absolute -> abort. must be relative to dcmp dir!
-
-    # TODO checks to add to this func:
-    # TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
-    #
-    # TODO canonpath removes last /?
 
     return sub {
         my ($name) = @_;
@@ -538,7 +537,6 @@ sub _ignore {
         return 1 if exists $ignore_file{$name};
 
         if (@ignore_paths) {
-
             my $path;
             my $ignore_path_ind = 0;
           PATH_ELEM:
