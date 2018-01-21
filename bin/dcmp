@@ -543,19 +543,14 @@ sub _ignore {
             for my $path_elem ( @{$dirs_ref}, $name ) {
                 $path = defined $path ? File::Spec->catdir( $path, $path_elem ) : $path_elem;
 
-              IGNORE_PATH:
                 while ( $ignore_path_ind < @ignore_paths ) {
                     next PATH_ELEM if length $path < length $ignore_paths[$ignore_path_ind];
 
                     if ( length $path == length $ignore_paths[$ignore_path_ind] ) {
                         return 1 if $path eq $ignore_paths[$ignore_path_ind];
-
-                        $ignore_path_ind++;
-                        next IGNORE_PATH;
                     }
 
                     $ignore_path_ind++;
-                    next IGNORE_PATH;
                 }
 
                 # all ignore entries are checked and none matched
