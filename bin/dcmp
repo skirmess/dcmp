@@ -29,12 +29,6 @@ use constant FILE_CONTENT_DIFFERS => 5;    # M
 use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 #
-# TODO windows is case tolerant. check compare functions for things like 'Dir', 'dir' and 'DIR'
-# TODO case sensitive on windows ($is_case_tolerant = File::Spec->case_tolerant();)
-# TODO case tolerant check -> add to functions (_ignore and other) and how to test?
-#
-# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
 # TODO check of ignore_paths outside of _ignore sub:
 # TODO - ignore paths must be cleaned up with File::Spec->canonpath (sometimes replaces \ with / on Windows, but consistent)
 # TODO - is_absolute -> abort. must be relative to dcmp dir!
@@ -59,6 +53,10 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO ski@pernaia:~/working/dcmp-dev2$  ../dcmp/dcmp A B
 # TODO + a
 # TODO - b
+#
+# TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# TODO flag for ignore case (e.g. on Windows). By default always compare case in filenames
 #
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -524,37 +522,35 @@ sub _die_with_cwd {
     }
 }
 
-sub _ignore {
-    my ( $ignore_paths_ref, $ignore_files_ref, $dirs_ref ) = @_;
+# TODO check code coverage again
+sub _ignored {
+    my ( $ignore_paths_ref, $ignore_files_ref ) = @_;
 
     my %ignore_file;
     @ignore_file{ @{$ignore_files_ref} } = ();
+
     my @ignore_paths = sort { length $a <=> length $b } @{$ignore_paths_ref};
 
     return sub {
-        my ($name) = @_;
+        my ( $dirs_ref, $name ) = @_;
 
-        return 1 if exists $ignore_file{$name};
+        my $path;
+        my $ignore_path_ind = 0;
+      PATH_ELEM:
+        for my $path_elem ( @{$dirs_ref}, $name ) {
 
-        if (@ignore_paths) {
-            my $path;
-            my $ignore_path_ind = 0;
-          PATH_ELEM:
-            for my $path_elem ( @{$dirs_ref}, $name ) {
+            return 1 if exists $ignore_file{$path_elem};
+
+            if (@ignore_paths) {
                 $path = defined $path ? File::Spec->catdir( $path, $path_elem ) : $path_elem;
 
                 while ( $ignore_path_ind < @ignore_paths ) {
-                    next PATH_ELEM if length $path < length $ignore_paths[$ignore_path_ind];
+                    return 1 if $path eq $ignore_paths[$ignore_path_ind];
 
-                    if ( length $path == length $ignore_paths[$ignore_path_ind] ) {
-                        return 1 if $path eq $ignore_paths[$ignore_path_ind];
-                    }
+                    next PATH_ELEM if length $path < length $ignore_paths[$ignore_path_ind];
 
                     $ignore_path_ind++;
                 }
-
-                # all ignore entries are checked and none matched
-                last PATH_ELEM;
             }
         }
 
@@ -562,19 +558,15 @@ sub _ignore {
     };
 }
 
+# TODO check code coverage again
 sub _iterator_dir_fs {
-    my ( $chdir, $collect_file_info, $ignore_ref, $dirs_ref ) = @_;
+    my ( $chdir, $collect_file_info, $ignored, $dirs_ref ) = @_;
 
     $chdir->($dirs_ref);
 
-    my %ignore;
-    if ( defined $ignore_ref ) {
-        @ignore{ @{$ignore_ref} } = ();
-    }
-
     opendir my $fh, q{.} or _die_with_cwd( 'Cannot read directory %s: %s', $! );
 
-    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !exists $ignore{$_} } readdir $fh;
+    my @stack = map { $collect_file_info->($_) } sort grep { $_ ne q{.} && $_ ne q{..} && !$ignored->( $dirs_ref, $_ ) } readdir $fh;
 
     closedir $fh or _die_with_cwd( 'Cannot read directory %s: %s', $! );
 
@@ -584,13 +576,9 @@ sub _iterator_dir_fs {
     };
 }
 
+# TODO check code coverage again
 sub _load_dcmp_file {
-    my ( $filename, $ignore_ref ) = @_;
-
-    my %ignore;
-    if ( defined $ignore_ref ) {
-        @ignore{ @{$ignore_ref} } = ();
-    }
+    my ( $filename, $ignored ) = @_;
 
     my %path;
     my %file_seen;
@@ -630,8 +618,13 @@ sub _load_dcmp_file {
             next LINE;
         }
 
+        # We do not add ignored files to our %path hash. If the current
+        # directory we're processing is ignored, everything in it is ignored
+        # too.
+        my $is_ignored = @dirs == 0 ? 0 : $dirs[-1][1];
+
         # The current file is under $path
-        my $path = File::Spec->catdir(@dirs);
+        my $path = File::Spec->catdir( map { $_->[0] } @dirs );
 
         #
         chomp $line;
@@ -653,13 +646,19 @@ sub _load_dcmp_file {
         }
         $file_seen{$path}{$name} = 1;
 
+        if ( !$is_ignored ) {
+            $is_ignored = $ignored->( [ map { $_->[0] } @dirs ], $name );
+        }
+
         #
         if ( $action eq 'FILE' ) {
             die "Incorrect number of arguments for FILE entry at line $. in file $filename\n" if @line != 2;
 
-            my ( $size, $md5 ) = @line;
+            if ( !$is_ignored ) {
+                my ( $size, $md5 ) = @line;
+                push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
+            }
 
-            push @{ $path{$path} }, [ $name, FILE_TYPE_REGULAR, $size, $md5 ];
             next LINE;
         }
 
@@ -667,8 +666,11 @@ sub _load_dcmp_file {
         if ( $action eq 'DIR' ) {
             die "Incorrect number of arguments for DIR entry at line $. in file $filename\n" if @line != 0;
 
-            push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
-            push @dirs, $name;
+            push @dirs, [ $name, $is_ignored ];
+
+            if ( !$is_ignored ) {
+                push @{ $path{$path} }, [ $name, FILE_TYPE_DIRECTORY ];
+            }
 
             next LINE;
         }
@@ -676,8 +678,11 @@ sub _load_dcmp_file {
         #
         if ( $action eq 'LINK' ) {
             die "Incorrect number of arguments for LINK entry at line $. in file $filename\n" if @line != 1;
-            my ($target) = @line;
-            push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
+
+            if ( !$is_ignored ) {
+                my ($target) = @line;
+                push @{ $path{$path} }, [ $name, FILE_TYPE_SYMLINK, _unescape_filename($target) ];
+            }
 
             next LINE;
         }
@@ -689,35 +694,12 @@ sub _load_dcmp_file {
 
     die "Unbalanced -DIR at end of file $filename\n" if !$last_line_seen;
 
-    # Remove ignored files from out loaded dcmp file.
-    #
-    # Note: We cannot skip them above, otherwise the DIR/-DIR code would
-    # get out of sync.
-  PATH:
-    for my $path ( keys %path ) {
-        for my $dir ( File::Spec->splitdir($path) ) {
-            if ( exists $ignore{$dir} ) {
-                delete $path{$path};
-                next PATH;
-            }
-        }
-
-        @{ $path{$path} } = grep { !exists $ignore{ ${$_}[0] } } @{ $path{$path} };
-    }
-
     # the returned sub is used instead of _iterate_dir_fs if the information
     # comes from a dcmp file instead of a directory structure on the disk.
     return sub {
         my ($dirs_ref) = @_;
         my $path = File::Spec->catdir( @{$dirs_ref} );
-
-        my @stack;
-        if ( defined $path{$path} ) {
-            my %stack = map { $_->[0] => $_ } @{ $path{$path} };
-            for my $name ( sort keys %stack ) {
-                push @stack, $stack{$name};
-            }
-        }
+        my @stack = sort { $a->[0] cmp $b->[0] } @{ $path{$path} };
 
         return sub {
             return if !@stack;
@@ -813,6 +795,7 @@ sub _print_changes {
     };
 }
 
+# TODO check code coverage again
 sub _print_dcmp_file {
     my ($iterate_dir) = @_;
 

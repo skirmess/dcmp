@@ -105,8 +105,8 @@ sub _test_merge {
 
         my @dirs;
 
-        my $it_1 = App::DCMP::_iterator_dir_fs( $chdir_1, $collect_file_info, \@dirs );
-        my $it_2 = App::DCMP::_iterator_dir_fs( $chdir_2, $collect_file_info, \@dirs );
+        my $it_1 = App::DCMP::_iterator_dir_fs( $chdir_1, $collect_file_info, sub { }, \@dirs );
+        my $it_2 = App::DCMP::_iterator_dir_fs( $chdir_2, $collect_file_info, sub { }, \@dirs );
 
         my $it = App::DCMP::_merge_iterators( $it_1, $it_2 );
         is( ref $it, ref sub { }, '_merge_iterators() returns a sub' );

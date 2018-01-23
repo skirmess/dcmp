@@ -38,11 +38,11 @@ sub main {
             my @ignore_paths;
             my @dirs;
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -52,11 +52,11 @@ sub main {
             my @ignore_paths;
             my @dirs;
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), 1,     '... which returns 1 for an ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), 1,     '... which returns 1 for an ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -66,11 +66,11 @@ sub main {
             my @ignore_paths;
             my @dirs;
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), 1,     '... which returns 1 for an ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), 1,     '... which returns 1 for an ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -80,13 +80,13 @@ sub main {
             my @ignore_paths;
             my @dirs;
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
             push @ignore_files, $ignore_file;
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file (changed @ignore_files is ignored)' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file (changed @ignore_files is ignored)' );
         }
 
         my $dir1        = "dir1${suffix_bin}";
@@ -100,11 +100,11 @@ sub main {
             my @ignore_paths = ($ignore_path);
             my @dirs;
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -114,11 +114,11 @@ sub main {
             my @ignore_paths = ($ignore_path);
             my @dirs         = ($dir2);
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -128,11 +128,11 @@ sub main {
             my @ignore_paths = ($ignore_path);
             my @dirs         = ($dir1);
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), 1,     '... which returns 1 for an ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), 1,     '... which returns 1 for an ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -142,11 +142,11 @@ sub main {
             my @ignore_paths = ($dir1);
             my @dirs         = ($dir2);
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file' );
         }
 
         # ----------------------------------------------------------
@@ -156,19 +156,19 @@ sub main {
             my @ignore_paths = ($dir1);
             my @dirs         = ($dir1);
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        1, '... which returns 1 for an ignored file' );
-            is( $ignore->($ignore_file), 1, '... which returns 1 for another ignored file' );
+            is( $ignore->( \@dirs, $file ),        1, '... which returns 1 for an ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), 1, '... which returns 1 for another ignored file' );
 
             @dirs = ($dir2);
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file (changed @dirs is used)' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file (changed @dirs is used)' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file (changed @dirs is used)' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file (changed @dirs is used)' );
 
             @ignore_paths = ($dir2);
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file (changed @ignore_path is ignored)' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file (changed @ignore_path is ignored)' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file (changed @ignore_path is ignored)' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file (changed @ignore_path is ignored)' );
         }
 
         # ----------------------------------------------------------
@@ -178,11 +178,11 @@ sub main {
             my @ignore_paths = ( 'a', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', $ignore_path, 'c', 'e' );
             my @dirs = ($dir1);
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), 1,     '... which returns 1 for an ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), 1,     '... which returns 1 for an ignored file' );
         }
 
         my $dir3 = "dir3${suffix_bin}";
@@ -196,15 +196,15 @@ sub main {
             my @ignore_paths = ($ignore_path);
             my @dirs = ( $dir1, $dir2, $dir3 );
 
-            my $ignore = App::DCMP::_ignore( \@ignore_paths, \@ignore_files, \@dirs );
+            my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), undef, '... which returns undef for another not ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), undef, '... which returns undef for another not ignored file' );
 
             push @dirs, $dir4;
-            is( $ignore->($file),        undef, '... which returns undef for a not ignored file' );
-            is( $ignore->($ignore_file), 1,     '... which returns 1 for an ignored file' );
+            is( $ignore->( \@dirs, $file ),        undef, '... which returns undef for a not ignored file' );
+            is( $ignore->( \@dirs, $ignore_file ), 1,     '... which returns 1 for an ignored file' );
         }
     }
 

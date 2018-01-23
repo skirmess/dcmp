@@ -47,7 +47,13 @@ FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QCannot read file $dcmp_file: \E /xsm", '_load_dcmp_file() throws an exception if close fails' );
+        like(
+            exception {
+                App::DCMP::_load_dcmp_file( $dcmp_file, sub { } );
+            },
+            "/ ^ \QCannot read file $dcmp_file: \E /xsm",
+            '_load_dcmp_file() throws an exception if close fails'
+        );
     }
 
     # ----------------------------------------------------------

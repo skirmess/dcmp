@@ -32,7 +32,10 @@ sub main {
 
         my $dcmp_file = File::Spec->catfile( tempdir(), "file${suffix_bin}.dcmp" );
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file) }, "/ ^ \QCannot read file $dcmp_file: \E /xsm", '_load_dcmp_file throws an exception if the dcmp file cannot be read' );
+        my $ignore = App::DCMP::_ignored( [], [] );
+        is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ) }, "/ ^ \QCannot read file $dcmp_file: \E /xsm", '_load_dcmp_file throws an exception if the dcmp file cannot be read' );
 
         my $dir                    = "dir${suffix_bin}";
         my $dir_text               = "dir${suffix_text}";
@@ -57,7 +60,7 @@ sub main {
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file) }, "/ ^ \QFile $dcmp_file is not a valid dcmp file\E \$ /xsm", '_load_dcmp_file() throws an exception if the dcmp file contains no version header' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ) }, "/ ^ \QFile $dcmp_file is not a valid dcmp file\E \$ /xsm", '_load_dcmp_file() throws an exception if the dcmp file contains no version header' );
 
         #
         note('invalid enty in dcmp file');
@@ -69,7 +72,7 @@ INVALID entry
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file) }, "/ ^ \QInvalid entry on line 2 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if the dcmp file contains an invalid entry' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ) }, "/ ^ \QInvalid entry on line 2 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if the dcmp file contains an invalid entry' );
 
         #
         note('to many -DIR in dcmp file');
@@ -88,7 +91,7 @@ LINK $valid_link_escaped $file_escaped
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QUnbalanced -DIR on line 6 in file $dcmp_file\E \$ /xsm", q{_load_dcmp_file() throws an exception if there are to many '-DIR'} );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QUnbalanced -DIR on line 6 in file $dcmp_file\E \$ /xsm", q{_load_dcmp_file() throws an exception if there are to many '-DIR'} );
 
         #
         note('missing -DIR at end in dcmp file');
@@ -105,7 +108,7 @@ LINK $valid_link_escaped $file_escaped
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QUnbalanced -DIR at end of file $dcmp_file\E \$ /xsm", q{_load_dcmp_file() throws an exception if there are to few '-DIR'} );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QUnbalanced -DIR at end of file $dcmp_file\E \$ /xsm", q{_load_dcmp_file() throws an exception if there are to few '-DIR'} );
 
         #
         note('duplicate file in directory');
@@ -124,7 +127,7 @@ LINK $valid_link_escaped $file_escaped
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QDuplicate entry for $file at line 6 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there are multiple files with the same name in the same directory' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QDuplicate entry for $file at line 6 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there are multiple files with the same name in the same directory' );
 
         #
         note('invalid dir entry');
@@ -138,7 +141,7 @@ DIR $dir_escaped invalid
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments for DIR entry at line 2 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a DIR entry with invalid arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments for DIR entry at line 2 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a DIR entry with invalid arguments' );
 
         #
         open $fh, '>', $dcmp_file;
@@ -150,7 +153,7 @@ DIR
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments at line 2 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a DIR entry with no arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments at line 2 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a DIR entry with no arguments' );
 
         #
         note('invalid file entry');
@@ -165,7 +168,7 @@ FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e invalid
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a FILE entry with to many arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a FILE entry with to many arguments' );
 
         open $fh, '>', $dcmp_file;
         print {$fh} <<"RECORD_FILE";
@@ -177,7 +180,7 @@ FILE $file2_escaped 0
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
 
         open $fh, '>', $dcmp_file;
         print {$fh} <<"RECORD_FILE";
@@ -189,7 +192,7 @@ FILE $file2_escaped
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments for FILE entry at line 3 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a FILE entry with to few arguments' );
 
         #
         note('invalid link entry');
@@ -205,7 +208,7 @@ LINK $valid_link_escaped $file_escaped invalid
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments for LINK entry at line 4 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a LINK entry with to many arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments for LINK entry at line 4 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a LINK entry with to many arguments' );
 
         open $fh, '>', $dcmp_file;
         print {$fh} <<"RECORD_FILE";
@@ -218,7 +221,7 @@ LINK $valid_link_escaped
 RECORD_FILE
         close $fh;
 
-        like( exception { App::DCMP::_load_dcmp_file($dcmp_file); }, "/ ^ \QIncorrect number of arguments for LINK entry at line 4 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a LINK entry with to few arguments' );
+        like( exception { App::DCMP::_load_dcmp_file( $dcmp_file, $ignore ); }, "/ ^ \QIncorrect number of arguments for LINK entry at line 4 in file $dcmp_file\E \$ /xsm", '_load_dcmp_file() throws an exception if there is a LINK entry with to few arguments' );
 
         #
         note('load valid dcmp file');
@@ -251,7 +254,10 @@ RECORD_FILE
                 note( encode( 'UTF-8', q{### @ignore = ('} . join( q{', '}, @ignore ) . q{')} ) );
             }
 
-            my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, \@ignore );
+            my $ignore = App::DCMP::_ignored( [], \@ignore );
+            is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+            my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
             is( ref $iterator_dir_record, ref sub { }, '_load_records() returns a sub' );
 
             my @dirs = qw(no_such_dir);
@@ -340,7 +346,11 @@ RECORD_FILE
         close $fh;
 
         my @ignore;
-        my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, \@ignore );
+
+        $ignore = App::DCMP::_ignored( [], \@ignore );
+        is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+        my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
 
         is( ref $iterator_dir_record, ref sub { }, '_load_records() returns a sub' );
 
@@ -382,7 +392,11 @@ RECORD_FILE
             close $fh;
 
             @ignore = ();
-            $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, \@ignore );
+
+            $ignore = App::DCMP::_ignored( [], \@ignore );
+            is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+            $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
 
             is( ref $iterator_dir_record, ref sub { }, '_load_records() returns a sub' );
 
@@ -400,7 +414,83 @@ RECORD_FILE
 
             is( $it->(), undef, '... calling it again returns undef' );
         }
+
+        #
+        note('with ignore path');
+
+        my $dir4         = "dir4${suffix_bin}";
+        my $dir4_text    = "dir4${suffix_text}";
+        my $dir4_escaped = App::DCMP::_escape_filename($dir4);
+        my $dir5         = "dir5${suffix_bin}";
+        my $dir5_text    = "dir5${suffix_text}";
+        my $dir5_escaped = App::DCMP::_escape_filename($dir5);
+
+        open $fh, '>', $dcmp_file;
+        print {$fh} <<"RECORD_FILE";
+dcmp v1
+LINK $invalid_link_escaped $invalid_target_escaped
+DIR $dir_escaped
+LINK $valid_link_escaped $file_escaped
+DIR $dir4_escaped
+FILE $file_escaped 12 6f5902ac237024bdd0c176cb93063dc4
+DIR $dir5_escaped
+FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
+-DIR
+-DIR
+-DIR
+-DIR
+RECORD_FILE
+        close $fh;
+
+        for my $state ( 0 .. 5 ) {
+            my @ignore =
+                $state == 0 ? ()
+              : $state == 1 ? ('no_such_dir')
+              : $state == 2 ? ( File::Spec->canonpath( File::Spec->catdir($dir) ) )
+              : $state == 3 ? ( File::Spec->canonpath( File::Spec->catdir( $dir, $dir4 ) ) )
+              : $state == 4 ? ( File::Spec->canonpath( File::Spec->catdir( $dir, $dir4, $dir5 ) ) )
+              : $state == 5 ? ( 'no_such_dir', File::Spec->canonpath( File::Spec->catdir( $dir, $dir4, $dir5 ) ) )
+              :               BAIL_OUT 'internal error';
+
+            if ( !@ignore ) {
+                note(q{### @ignore = ()});
+            }
+            else {
+                note( encode( 'UTF-8', q{### @ignore = ('} . join( q{', '}, @ignore ) . q{')} ) );
+            }
+
+            my $ignore = App::DCMP::_ignored( \@ignore, [] );
+            is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+            my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
+            is( ref $iterator_dir_record, ref sub { }, '_load_records() returns a sub' );
+
+            my @dirs = qw(no_such_dir);
+            my $it   = $iterator_dir_record->( \@dirs );
+            is( ref $it, ref sub { }, '... the returned sub returns a sub' );
+            my $x_ref = $it->();
+            is( $x_ref, undef, '... which returns undef for a non-existing path' );
+
+            #
+            note( encode( 'UTF-8', "check '$dir_text/$dir4_text/$dir5_text'" ) );
+            @dirs = ( $dir, $dir4, $dir5 );
+            $it = $iterator_dir_record->( \@dirs );
+            is( ref $it, ref sub { }, '... the returned sub returns a sub' );
+
+            if ( $state < 2 ) {
+                $x_ref = $it->();
+                is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+                is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
+                is( ${$x_ref}[0],     $file2,                             '... correct name' );
+                is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );
+                is( ${$x_ref}[2],     0,                                  '... correct size' );
+                is( ${$x_ref}[3],     'd41d8cd98f00b204e9800998ecf8427e', '... correct md5' );
+            }
+
+            is( $it->(), undef, '... calling it again returns undef' );
+        }
     }
+
     #
     done_testing();
 

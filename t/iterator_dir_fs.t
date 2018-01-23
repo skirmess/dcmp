@@ -69,7 +69,10 @@ sub main {
 
             my @dirs;
 
-            my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, undef, \@dirs );
+            my $ignore = App::DCMP::_ignored( [], [] );
+            is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+            my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
             is( ref $it, ref sub { }, '_iterator_dir_fs() returns a sub' );
 
             #
@@ -150,7 +153,10 @@ sub main {
 
             chdir $basedir;
 
-            my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, undef, \@dirs );
+            my $ignore = App::DCMP::_ignored( [], [] );
+            is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+            my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
             is( ref $it, ref sub { }, '_iterator_dir_fs() returns a sub' );
 
             #
@@ -237,7 +243,10 @@ sub main {
                     note( encode( 'UTF-8', q{### @ignore = ('} . join( q{', '}, @ignore ) . q{')} ) );
                 }
 
-                my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, \@ignore, \@dirs );
+                my $ignore = App::DCMP::_ignored( [], \@ignore );
+                is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+                my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
                 is( ref $it, ref sub { }, '_iterator_dir_fs() returns a sub' );
 
                 #
@@ -283,6 +292,148 @@ sub main {
 
                 note('exhausted');
                 is( $it->(), undef, 'iterator is exhausted' );
+            }
+        }
+
+        {
+            #
+            note('ignore some path');
+            my $tmpdir = tempdir();
+
+            chdir $tmpdir;
+
+            my $file_f = "f${suffix_bin}.txt";
+
+            open my $fh, '>', $file_f;
+            close $fh;
+
+            my $dir_a = "a${suffix_bin}";
+            mkdir $dir_a;
+            chdir $dir_a;
+
+            my $file_e = "e${suffix_bin}.txt";
+
+            open $fh, '>', $file_e;
+            close $fh;
+
+            my $dir_b = "b${suffix_bin}";
+            mkdir $dir_b;
+            chdir $dir_b;
+
+            my $dir_c = "c${suffix_bin}";
+            mkdir $dir_c;
+            chdir $dir_c;
+
+            my $file_d = "d${suffix_bin}.txt";
+
+            open $fh, '>', $file_d;
+            close $fh;
+
+            chdir $basedir;
+
+            my $chdir = sub {
+                App::DCMP::_chdir( $tmpdir, @_ );
+            };
+
+            for my $state ( 0 .. 5 ) {
+                my @ignore =
+                    $state == 0 ? ()
+                  : $state == 1 ? ('no_such_dir')
+                  : $state == 2 ? ( File::Spec->canonpath( File::Spec->catdir($dir_a) ) )
+                  : $state == 3 ? ( File::Spec->canonpath( File::Spec->catdir( $dir_a, $dir_b ) ) )
+                  : $state == 4 ? ( File::Spec->canonpath( File::Spec->catdir( $dir_a, $dir_b, $dir_c ) ) )
+                  : $state == 5 ? ( 'no_such_dir', File::Spec->canonpath( File::Spec->catdir( $dir_a, $dir_b, $dir_c ) ) )
+                  :               BAIL_OUT 'internal error';
+
+                if ( !@ignore ) {
+                    note(q{### @ignore = ()});
+                }
+                else {
+                    note( encode( 'UTF-8', q{### @ignore = ('} . join( q{', '}, @ignore ) . q{')} ) );
+                }
+
+                my $ignore = App::DCMP::_ignored( \@ignore, [] );
+                is( ref $ignore, ref sub { }, '_ignore returns a sub' );
+
+                my @dirs = ();
+                note(q{### @dirs = ()});
+
+                my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
+                is( ref $it, ref sub { }, '_iterator_dir_fs() returns a sub' );
+
+                my $file_info;
+                if ( $state != 2 ) {
+                    note( encode( 'UTF-8', $dir_a ) );
+                    $file_info = $it->();
+                    is( ref $file_info, ref [], 'file info is an array ref' );
+                    is( scalar @{$file_info}, 2, '... consisting of three values' );
+                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_a), '... the file name' );
+                    like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                    is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
+                }
+
+                $file_info = $it->();
+                note( encode( 'UTF-8', $file_f ) );
+                is( ref $file_info, ref [], 'file info is an array ref' );
+                is( scalar @{$file_info}, 3, '... consisting of three values' );
+                is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_f), '... the file name' );
+                like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
+                is( ${$file_info}[2], 0, '... the file size' );
+
+                note('exhausted');
+                is( $it->(), undef, 'iterator is exhausted' );
+
+                @dirs = ($dir_a);
+                note( encode( 'UTF-8', q{### @dirs = ('} . join( q{', '}, @dirs ) . q{')} ) );
+
+                $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
+                is( ref $it, ref sub { }, '_iterator_dir_fs() returns a sub' );
+
+                if ( $state < 2 || $state > 3 ) {
+                    note( encode( 'UTF-8', $dir_b ) );
+                    $file_info = $it->();
+                    is( ref $file_info, ref [], 'file info is an array ref' );
+                    is( scalar @{$file_info}, 2, '... consisting of three values' );
+                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_b), '... the file name' );
+                    like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                    is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
+                }
+
+                if ( $state != 2 ) {
+                    note( encode( 'UTF-8', $file_e ) );
+                    my $file_info = $it->();
+                    is( ref $file_info, ref [], 'file info is an array ref' );
+                    is( scalar @{$file_info}, 3, '... consisting of three values' );
+                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_e), '... the file name' );
+                    like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                    is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
+                    is( ${$file_info}[2], 0, '... the file size' );
+                }
+
+                note('exhausted');
+                is( $it->(), undef, 'iterator is exhausted' );
+
+                @dirs = ( $dir_a, $dir_b, $dir_c );
+                note( encode( 'UTF-8', q{### @dirs = ('} . join( q{', '}, @dirs ) . q{')} ) );
+
+                $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
+                is( ref $it, ref sub { }, '_iterator_dir_fs() returns a sub' );
+
+                if ( $state < 2 ) {
+                    note( encode( 'UTF-8', $file_d ) );
+                    my $file_info = $it->();
+                    is( ref $file_info, ref [], 'file info is an array ref' );
+                    is( scalar @{$file_info}, 3, '... consisting of three values' );
+                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
+                    like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
+                    is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
+                    is( ${$file_info}[2], 0, '... the file size' );
+                }
+
+                note('exhausted');
+                is( $it->(), undef, 'iterator is exhausted' );
+
             }
         }
     }

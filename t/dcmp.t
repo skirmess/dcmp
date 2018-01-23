@@ -113,7 +113,7 @@ sub _test_dcmp {
 
     if ( $type1 == TYPE_FS ) {
         $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_1 );
-        $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, \&App::DCMP::_collect_file_info, undef );
+        $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, \&App::DCMP::_collect_file_info, sub { } );
 
         mkdir File::Spec->catdir( $dir_1, $dir );
 
@@ -145,7 +145,7 @@ FILE $file_escaped 11 5eb63bbbe01eeed093cb22bb8f5acdc3
 RECORD_FILE
         close $fh;
 
-        $it_1 = App::DCMP::_load_dcmp_file($dcmp_file_1);
+        $it_1 = App::DCMP::_load_dcmp_file( $dcmp_file_1, sub { } );
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
     }
 
@@ -158,7 +158,7 @@ RECORD_FILE
 
     if ( $type2 == TYPE_FS ) {
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, undef );
+        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
@@ -169,7 +169,7 @@ dcmp v1
 RECORD_FILE
         close $fh;
 
-        $it_2 = App::DCMP::_load_dcmp_file($dcmp_file_2);
+        $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
     }
 
@@ -201,7 +201,7 @@ RECORD_FILE
 
     if ( $type2 == TYPE_FS ) {
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, undef );
+        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
 
         mkdir File::Spec->catdir( $dir_2, $dir );
 
@@ -233,7 +233,7 @@ FILE $file_escaped 11 5eb63bbbe01eeed093cb22bb8f5acdc3
 RECORD_FILE
         close $fh;
 
-        $it_2 = App::DCMP::_load_dcmp_file($dcmp_file_2);
+        $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
     }
 
@@ -290,7 +290,7 @@ FILE $file_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 RECORD_FILE
         close $fh;
 
-        $it_1 = App::DCMP::_load_dcmp_file($dcmp_file_1);
+        $it_1 = App::DCMP::_load_dcmp_file( $dcmp_file_1, sub { } );
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
     }
 
@@ -299,7 +299,7 @@ RECORD_FILE
         mkdir $dir_2;
 
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, undef );
+        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
 
         mkdir File::Spec->catdir( $dir_2, $dir );
 
@@ -353,7 +353,7 @@ FILE $file2_escaped 13 6f5902ac237024bdd0c176cb93063dc4
 RECORD_FILE
         close $fh;
 
-        $it_2 = App::DCMP::_load_dcmp_file($dcmp_file_2);
+        $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
     }
 
@@ -416,7 +416,7 @@ RECORD_FILE
         close $fh;
 
         $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_1 );
-        $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, $collect_file_info_file_type_other, undef );
+        $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, $collect_file_info_file_type_other, sub { } );
     }
     else {
         my $dcmp_file_1 = File::Spec->catfile( $dir_2, $dcmp_filename_1 );
@@ -429,7 +429,7 @@ FILE $file_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 RECORD_FILE
         close $fh;
 
-        $it_1 = App::DCMP::_load_dcmp_file($dcmp_file_1);
+        $it_1 = App::DCMP::_load_dcmp_file( $dcmp_file_1, sub { } );
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
     }
 
@@ -441,7 +441,7 @@ RECORD_FILE
         close $fh;
 
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, $collect_file_info_file_type_other, undef );
+        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, $collect_file_info_file_type_other, sub { } );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
@@ -454,7 +454,7 @@ FILE $file_escaped 13 6f5902ac237024bdd0c176cb93063dc4
 RECORD_FILE
         close $fh;
 
-        $it_2 = App::DCMP::_load_dcmp_file($dcmp_file_2);
+        $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
     }
 
