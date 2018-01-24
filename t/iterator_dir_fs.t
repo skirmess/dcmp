@@ -302,29 +302,29 @@ sub main {
 
             chdir $tmpdir;
 
-            my $file_f = "f${suffix_bin}.txt";
+            my $file_f = Local::Normalize_Filename::normalize_filename("f${suffix_bin}.txt");
 
             open my $fh, '>', $file_f;
             close $fh;
 
-            my $dir_a = "a${suffix_bin}";
+            my $dir_a = Local::Normalize_Filename::normalize_filename("a${suffix_bin}");
             mkdir $dir_a;
             chdir $dir_a;
 
-            my $file_e = "e${suffix_bin}.txt";
+            my $file_e = Local::Normalize_Filename::normalize_filename("e${suffix_bin}.txt");
 
             open $fh, '>', $file_e;
             close $fh;
 
-            my $dir_b = "b${suffix_bin}";
+            my $dir_b = Local::Normalize_Filename::normalize_filename("b${suffix_bin}");
             mkdir $dir_b;
             chdir $dir_b;
 
-            my $dir_c = "c${suffix_bin}";
+            my $dir_c = Local::Normalize_Filename::normalize_filename("c${suffix_bin}");
             mkdir $dir_c;
             chdir $dir_c;
 
-            my $file_d = "d${suffix_bin}.txt";
+            my $file_d = Local::Normalize_Filename::normalize_filename("d${suffix_bin}.txt");
 
             open $fh, '>', $file_d;
             close $fh;
