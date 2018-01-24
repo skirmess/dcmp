@@ -52,7 +52,7 @@ RECORD_FILE
                 App::DCMP::_load_dcmp_file( $dcmp_file, sub { } );
             },
             "/ ^ \QCannot read file $dcmp_file: \E /xsm",
-            '_load_dcmp_file() throws an exception if close fails'
+            '_load_dcmp_file() throws an exception if close fails',
         );
     }
 

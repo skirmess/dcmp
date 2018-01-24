@@ -254,7 +254,7 @@ RECORD_FILE
                 note( encode( 'UTF-8', q{### @ignore = ('} . join( q{', '}, @ignore ) . q{')} ) );
             }
 
-            my $ignore = App::DCMP::_ignored( [], \@ignore );
+            $ignore = App::DCMP::_ignored( [], \@ignore );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
             my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
@@ -443,7 +443,7 @@ RECORD_FILE
         close $fh;
 
         for my $state ( 0 .. 5 ) {
-            my @ignore =
+            @ignore =
                 $state == 0 ? ()
               : $state == 1 ? ('no_such_dir')
               : $state == 2 ? ( File::Spec->canonpath( File::Spec->catdir($dir) ) )
@@ -459,16 +459,16 @@ RECORD_FILE
                 note( encode( 'UTF-8', q{### @ignore = ('} . join( q{', '}, @ignore ) . q{')} ) );
             }
 
-            my $ignore = App::DCMP::_ignored( \@ignore, [] );
+            $ignore = App::DCMP::_ignored( \@ignore, [] );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-            my $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
+            $iterator_dir_record = App::DCMP::_load_dcmp_file( $dcmp_file, $ignore );
             is( ref $iterator_dir_record, ref sub { }, '_load_records() returns a sub' );
 
-            my @dirs = qw(no_such_dir);
-            my $it   = $iterator_dir_record->( \@dirs );
+            @dirs = qw(no_such_dir);
+            $it   = $iterator_dir_record->( \@dirs );
             is( ref $it, ref sub { }, '... the returned sub returns a sub' );
-            my $x_ref = $it->();
+            $x_ref = $it->();
             is( $x_ref, undef, '... which returns undef for a non-existing path' );
 
             #

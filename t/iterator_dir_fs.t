@@ -355,7 +355,7 @@ sub main {
                 my $ignore = App::DCMP::_ignored( \@ignore, [] );
                 is( ref $ignore, ref sub { }, '_ignore returns a sub' );
 
-                my @dirs = ();
+                my @dirs;
                 note(q{### @dirs = ()});
 
                 my $it = App::DCMP::_iterator_dir_fs( $chdir, $collect_file_info, $ignore, \@dirs );
@@ -402,7 +402,7 @@ sub main {
 
                 if ( $state != 2 ) {
                     note( encode( 'UTF-8', $file_e ) );
-                    my $file_info = $it->();
+                    $file_info = $it->();
                     is( ref $file_info, ref [], 'file info is an array ref' );
                     is( scalar @{$file_info}, 3, '... consisting of three values' );
                     is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_e), '... the file name' );
@@ -422,7 +422,7 @@ sub main {
 
                 if ( $state < 2 ) {
                     note( encode( 'UTF-8', $file_d ) );
-                    my $file_info = $it->();
+                    $file_info = $it->();
                     is( ref $file_info, ref [], 'file info is an array ref' );
                     is( scalar @{$file_info}, 3, '... consisting of three values' );
                     is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
