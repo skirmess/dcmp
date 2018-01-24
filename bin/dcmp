@@ -699,7 +699,7 @@ sub _load_dcmp_file {
     return sub {
         my ($dirs_ref) = @_;
         my $path = File::Spec->catdir( @{$dirs_ref} );
-        my @stack = sort { $a->[0] cmp $b->[0] } @{ $path{$path} };
+        my @stack = defined $path{$path} ? sort { $a->[0] cmp $b->[0] } @{ $path{$path} } : ();
 
         return sub {
             return if !@stack;
