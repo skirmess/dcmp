@@ -390,7 +390,7 @@ sub _dcmp {
 
             if ( !defined $x_1 ) {
 
-                # file is only present in the right tree;
+                # file is only present in the second tree;
                 my ( $name, $mode ) = @{$x_2}[ 0, 1 ];
                 $printer->( \@dirs, FILE_MISSING, $name );
                 $differences = 1;
