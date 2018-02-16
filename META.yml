@@ -53,5 +53,4 @@ resources:
   homepage: https://github.com/skirmess/dcmp
   repository: https://github.com/skirmess/dcmp.git
 version: '0.001'
-x_authority: cpan:SKIRMESS
 x_serialization_backend: 'YAML::Tiny version 1.70'
