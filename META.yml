@@ -28,10 +28,6 @@ meta-spec:
 name: App-dcmp
 no_index:
   directory:
-    - corpus
-    - dzil-inc
-    - examples
-    - inc
     - t
     - xt
 provides:
