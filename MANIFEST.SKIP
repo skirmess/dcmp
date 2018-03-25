@@ -1,0 +1,4 @@
+MANIFEST.SKIP
+readme.txt
+test.t
+wip.*
