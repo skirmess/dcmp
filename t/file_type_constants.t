@@ -9,8 +9,8 @@ use Test::More 0.88;
 
 use lib qw(.);
 
-use FindBin qw($Bin);
-use lib "$Bin/lib";
+use FindBin qw($RealBin);
+use lib "$RealBin/lib";
 
 use Local::Declared;
 

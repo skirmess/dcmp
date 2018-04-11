@@ -16,8 +16,8 @@ use File::Spec;
 
 use lib qw(.);
 
-use FindBin qw($Bin);
-use lib "$Bin/lib";
+use FindBin qw($RealBin);
+use lib "$RealBin/lib";
 
 use Local::Suffixes;
 use Local::Normalize_Filename;
