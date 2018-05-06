@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -17,6 +16,7 @@ use FindBin qw($RealBin);
 use lib "$RealBin/lib";
 
 use Local::Suffixes;
+use Local::Test::Util;
 
 main();
 
@@ -24,6 +24,7 @@ sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     package App::DCMP;
     use subs qw(close);
@@ -39,13 +40,11 @@ sub main {
         my $file2         = "file2${suffix_bin}.txt";
         my $file2_escaped = App::DCMP::_escape_filename($file2);
 
-        open my $fh, '>', $dcmp_file;
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file, <<"RECORD_FILE");
 dcmp v1
 FILE $file2_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
 RECORD_FILE
-        close $fh;
 
         like(
             exception {

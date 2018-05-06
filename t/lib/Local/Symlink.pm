@@ -3,7 +3,6 @@ package Local::Symlink;
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 {
     my $_symlink_supported;
@@ -12,10 +11,8 @@ use autodie;
         if ( !defined $_symlink_supported ) {
             $_symlink_supported = 0;
 
-            no autodie;
-
             eval {
-                symlink q{}, q{};
+                symlink q{}, q{};    ## no critic (InputOutput::RequireCheckedSyscalls)
                 $_symlink_supported = 1;
             };
         }

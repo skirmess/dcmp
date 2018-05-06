@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -21,6 +20,7 @@ use lib "$RealBin/lib";
 use Local::Fifo;
 use Local::Suffixes;
 use Local::Symlink;
+use Local::Test::Util;
 
 main();
 
@@ -28,6 +28,7 @@ sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
@@ -53,24 +54,22 @@ sub main {
             note( encode( 'UTF-8', "dir suffix: $dir_suffix_text" ) );
 
             my $tmpdir = tempdir();
-            chdir $tmpdir;
+            $test->chdir($tmpdir);
 
             my $ws = "ws$dir_suffix_bin";
 
-            mkdir $ws;
-            chdir $ws;
+            $test->mkdir($ws);
+            $test->chdir($ws);
 
             # cwd returns Unix dir separator on Windows but tempdir returns
             # Windows path separator on Windows. The error message in dcmp is
             # generated with cwd.
             $tmpdir = cwd();
 
-            open my $fh, '>', $file;
-            print {$fh} "hello world\n";
-            close $fh;
+            $test->touch( $file, "hello world\n" );
             my $file_size = -s $file;
 
-            mkdir $dir;
+            $test->mkdir($dir);
 
             # ----------------------------------------------------------
             note( encode( 'UTF-8', $invalid_file_text ) );
@@ -98,8 +97,8 @@ sub main {
           SKIP: {
                 skip 'The symlink function is unimplemented' if !Local::Symlink::symlink_supported();
 
-                symlink $file,           $valid_link;
-                symlink $invalid_target, $invalid_link;
+                $test->symlink( $file,           $valid_link );
+                $test->symlink( $invalid_target, $invalid_link );
 
                 # ----------------------------------------------------------
                 note( encode( 'UTF-8', $valid_link_text ) );

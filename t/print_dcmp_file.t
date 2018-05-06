@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::More 0.88;
 use Test::TempDir::Tiny;
@@ -21,15 +20,16 @@ use lib "$RealBin/lib";
 use Local::Normalize_Filename;
 use Local::Suffixes;
 use Local::Symlink;
+use Local::Test::Util;
 
 main();
 
 sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
-    my $basedir = cwd();
-
+    my $basedir         = cwd();
     my $suffix_iterator = _suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
@@ -49,26 +49,23 @@ sub main {
         my $valid_link_escaped     = App::DCMP::_escape_filename($valid_link);
 
         my $tmpdir = tempdir();
-        chdir $tmpdir;
+        $test->chdir($tmpdir);
 
-        open my $fh, '>', $file;
-        print {$fh} 'hello world';
-        close $fh;
+        $test->touch( $file, 'hello world' );
         my $file_size = -s $file;
 
         my $expected_output_lines = 5;
         if ( Local::Symlink::symlink_supported() ) {
-            symlink $file,           $valid_link;
-            symlink $invalid_target, $invalid_link;
+            $test->symlink( $file,           $valid_link );
+            $test->symlink( $invalid_target, $invalid_link );
             $expected_output_lines += 2;
         }
 
-        mkdir $dir;
+        $test->mkdir($dir);
 
-        open $fh, '>', File::Spec->catfile( $dir, $file2 );
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir, $file2 ) );
 
-        chdir $basedir;
+        $test->chdir($basedir);
 
         my $chdir             = sub { return App::DCMP::_chdir( $tmpdir, @_ ); };
         my $collect_file_info = sub { return App::DCMP::_collect_file_info_dcmp_file(@_); };

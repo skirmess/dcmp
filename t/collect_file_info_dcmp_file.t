@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -20,6 +19,7 @@ use lib "$RealBin/lib";
 
 use Local::Suffixes;
 use Local::Symlink;
+use Local::Test::Util;
 
 main();
 
@@ -27,6 +27,7 @@ sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
@@ -53,11 +54,11 @@ sub main {
 
             # ----------------------------------------------------------
             my $tmpdir = tempdir();
-            chdir $tmpdir;
+            $test->chdir($tmpdir);
 
             my $ws = "ws$dir_suffix_bin";
-            mkdir $ws;
-            chdir $ws;
+            $test->mkdir($ws);
+            $test->chdir($ws);
 
             # cwd returns Unix dir separator on Windows but tempdir returns
             # Windows path separator on Windows. The error message in dcmp is
@@ -65,25 +66,21 @@ sub main {
             $tmpdir = cwd();
 
             # ----------------------------------------------------------
-            open my $fh, '>', $file;
-            print {$fh} 'hello world';
-            close $fh;
+            $test->touch( $file, 'hello world' );
             my $file_size = -s $file;
             my $md5       = Digest::MD5->new();
             $md5->add('hello world');
             my $md5_sum = lc $md5->hexdigest();
 
             # ----------------------------------------------------------
-            open $fh, '>:encoding(UTF-8)', $file2;
-            print {$fh} "hello world\t\x{20ac}\t\x{00C0}\t\x{0041}\x{0300}";
-            close $fh;
+            $test->touch_utf8( $file2, "hello world\t\x{20ac}\t\x{00C0}\t\x{0041}\x{0300}" );
             my $file_utf8_size = -s $file2;
             $md5 = Digest::MD5->new();
             $md5->add( encode( 'UTF-8', "hello world\t\x{20ac}\t\x{00C0}\t\x{0041}\x{0300}" ) );
             my $md5_utf8_sum = lc $md5->hexdigest();
 
             # ----------------------------------------------------------
-            mkdir $dir;
+            $test->mkdir($dir);
 
             # ----------------------------------------------------------
             like( exception { App::DCMP::_collect_file_info_dcmp_file($invalid_file) }, "/ ^ \QCannot stat file $invalid_file in $tmpdir: \E /xsm", '_collect_file_info_dcmp_file throws an exception if stat failes' );
@@ -119,8 +116,8 @@ sub main {
           SKIP: {
                 skip 'The symlink function is unimplemented' if !Local::Symlink::symlink_supported();
 
-                symlink $file,           $valid_link;
-                symlink $invalid_target, $invalid_link;
+                $test->symlink( $file,           $valid_link );
+                $test->symlink( $invalid_target, $invalid_link );
 
                 # ----------------------------------------------------------
                 note( encode( 'UTF-8', $valid_link_text ) );

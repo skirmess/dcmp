@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::More 0.88;
 use Test::TempDir::Tiny;
@@ -19,6 +18,7 @@ use lib "$RealBin/lib";
 
 use Local::Normalize_Filename;
 use Local::Suffixes;
+use Local::Test::Util;
 
 main();
 
@@ -51,6 +51,8 @@ sub main {
 sub _test_merge {
     my ( $suffix_text, $suffix_bin, $dir_1_suffix_text, $dir_1_suffix_bin, $dir_2_suffix_text, $dir_2_suffix_bin ) = @_;
 
+    my $test = Local::Test::Util->new;
+
     note(q{----------------------------------------------------------});
     note( encode( 'UTF-8', "file suffix: $suffix_text" ) );
     note( encode( 'UTF-8', "dir 1 suffix: $dir_1_suffix_text" ) );
@@ -65,38 +67,29 @@ sub _test_merge {
     my $file_e = "e{$suffix_bin}.txt";
 
     my $tmpdir_1 = File::Spec->catdir( tempdir(), "base${dir_1_suffix_bin}" );
-    mkdir $tmpdir_1;
+    $test->mkdir($tmpdir_1);
 
     my $tmpdir_2 = File::Spec->catdir( tempdir(), "base${dir_2_suffix_bin}" );
-    mkdir $tmpdir_2;
+    $test->mkdir($tmpdir_2);
 
-    chdir $tmpdir_1;
+    $test->chdir($tmpdir_1);
 
-    open my $fh, '>', $file_a;
-    close $fh;
+    $test->touch($file_a);
+    $test->touch($file_b);
+    $test->touch($file_d);
 
-    open $fh, '>', $file_b;
-    close $fh;
+    $test->chdir($tmpdir_2);
 
-    open $fh, '>', $file_d;
-    close $fh;
-
-    chdir $tmpdir_2;
-
-    open $fh, '>', $file_a;
-    close $fh;
-
-    open $fh, '>', $file_c;
-    close $fh;
+    $test->touch($file_a);
+    $test->touch($file_c);
 
     for my $pass ( 0 .. 1 ) {
 
         if ( $pass == 1 ) {
-            open $fh, '>', $file_e;
-            close $fh;
+            $test->touch($file_e);
         }
 
-        chdir $basedir;
+        $test->chdir($basedir);
 
         my $chdir_1 = sub { App::DCMP::_chdir( $tmpdir_1, @_ ); };
         my $chdir_2 = sub { App::DCMP::_chdir( $tmpdir_2, @_ ); };

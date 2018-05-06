@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -21,6 +20,7 @@ use lib "$RealBin/lib";
 
 use Local::Suffixes;
 use Local::Normalize_Filename;
+use Local::Test::Util;
 
 main();
 
@@ -28,6 +28,7 @@ sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
 
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
@@ -58,17 +59,15 @@ sub main {
             # generated with cwd.
 
             my $_tmpdir = File::Spec->catdir( $tmpdir, $dir );
-            mkdir $_tmpdir;
-            chdir $_tmpdir;
+            $test->mkdir($_tmpdir);
+            $test->chdir($_tmpdir);
             $_tmpdir = cwd();
 
-            chdir $basedir;
+            $test->chdir($basedir);
 
             like( exception { $compare_file->( $file, undef, undef ) }, "/ ^ \QCannot read file $file in $_tmpdir\E /xsm", '_compare_file function throws an error if the file cannot be read' );
 
-            open my $fh, '>', File::Spec->catfile( $tmpdir, $dir, $file );
-            print {$fh} 'hello world';
-            close $fh;
+            $test->touch( File::Spec->catfile( $tmpdir, $dir, $file ), 'hello world' );
 
             my $md5 = Digest::MD5->new();
             $md5->add('hello world');

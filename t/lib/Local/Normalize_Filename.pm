@@ -3,11 +3,16 @@ package Local::Normalize_Filename;
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
+use Test::Builder;
 use Test::TempDir::Tiny;
 
 use Cwd qw(cwd);
+
+use FindBin qw($RealBin);
+use lib "$RealBin/lib";
+
+use Local::Test::Util;
 
 # If the OS/filesystem normalizes the Unicode file name, the file name read
 # with readdir might return a UTF-8 string that differs from the UTF-8 string
@@ -15,6 +20,7 @@ use Cwd qw(cwd);
 # normalize the file name in the same way.
 {
     my %normalized_filename;
+    my $test = Local::Test::Util->new;
 
     sub normalize_filename {
         my ($filename) = @_;
@@ -23,15 +29,21 @@ use Cwd qw(cwd);
             my $tmpdir  = tempdir();
             my $basedir = cwd();
 
-            chdir $tmpdir;
-            open my $fh, '>', $filename;
-            close $fh;
+            $test->chdir($tmpdir);
+            $test->touch($filename);
 
-            opendir $fh, q{.};
+            my $fh;
+            if ( !opendir $fh, q{.} ) {
+                Test::Builder->new->BAIL_OUT("opendir .: $!");
+            }
+
             my @dents = grep { $_ ne q{.} && $_ ne q{..} } readdir $fh;
-            closedir $fh;
 
-            chdir $basedir;
+            if ( !closedir $fh ) {
+                Test::Builder->new->BAIL_OUT("opendir .: $!");
+            }
+
+            $test->chdir($basedir);
 
             die "Expected a single file in $tmpdir but got " . scalar(@dents) . " for $filename: " . join( q{ }, @dents ) . "\n" if @dents != 1;
 

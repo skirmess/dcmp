@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::MockModule;
@@ -21,6 +20,7 @@ use lib "$RealBin/lib";
 
 use Local::Normalize_Filename;
 use Local::Suffixes;
+use Local::Test::Util;
 
 main();
 
@@ -53,6 +53,8 @@ sub main {
 sub _test_compare_file_fs_fs {
     my ( $suffix_text, $suffix_bin, $dir_1_suffix_text, $dir_1_suffix_bin, $dir_2_suffix_text, $dir_2_suffix_bin ) = @_;
 
+    my $test = Local::Test::Util->new;
+
     note(q{----------------------------------------------------------});
     note( encode( 'UTF-8', "suffix: $suffix_text" ) );
     note( encode( 'UTF-8', "dir 1 suffix: $dir_1_suffix_text" ) );
@@ -79,9 +81,8 @@ sub _test_compare_file_fs_fs {
 
     like( exception { $compare_file->($file) }, "/ ^ \QCannot chdir to $tmpdir_1\E /xsm", 'first _chdir throws an error if basedir does not exist' );
 
-    mkdir File::Spec->catdir( $tmpdir_1, $dir_1 );
-    open my $fh, '>', File::Spec->catfile( $tmpdir_1, $dir_1, $file );
-    close $fh;
+    $test->mkdir( File::Spec->catdir( $tmpdir_1, $dir_1 ) );
+    $test->touch( File::Spec->catfile( $tmpdir_1, $dir_1, $file ) );
 
     like( exception { $compare_file->($file) }, "/ ^ \QCannot chdir to $tmpdir_2\E /xsm", 'second _chdir throws an error if basedir does not exist' );
 
@@ -92,16 +93,16 @@ sub _test_compare_file_fs_fs {
     # Windows path separator on Windows. The error message in dcmp is
     # generated with cwd.
     $tmpdir_1 = File::Spec->catdir( tempdir(), $dir_1 );
-    mkdir $tmpdir_1;
-    chdir $tmpdir_1;
+    $test->mkdir($tmpdir_1);
+    $test->chdir($tmpdir_1);
     $tmpdir_1 = cwd();
 
     $tmpdir_2 = File::Spec->catdir( tempdir(), $dir_2 );
-    mkdir $tmpdir_2;
-    chdir $tmpdir_2;
+    $test->mkdir($tmpdir_2);
+    $test->chdir($tmpdir_2);
     $tmpdir_2 = cwd();
 
-    chdir $basedir;
+    $test->chdir($basedir);
 
     $chdir_1 = sub { App::DCMP::_chdir( $tmpdir_1, @_ ) };
     $chdir_2 = sub { App::DCMP::_chdir( $tmpdir_2, @_ ) };
@@ -109,29 +110,12 @@ sub _test_compare_file_fs_fs {
     $compare_file = App::DCMP::_compare_file( $chdir_1, $chdir_2, \@dirs );
     is( ref $compare_file, ref sub { }, '_compare_file returns a function' );
 
-    open $fh, '>', File::Spec->catfile( $tmpdir_1, $file );
-    print {$fh} "hello world\n";
-    close $fh;
-
-    open $fh, '>', File::Spec->catfile( $tmpdir_2, $file );
-    print {$fh} "hello world\n";
-    close $fh;
-
-    open $fh, '>', File::Spec->catfile( $tmpdir_1, $file2 );
-    print {$fh} "hello world 1\n";
-    close $fh;
-
-    open $fh, '>', File::Spec->catfile( $tmpdir_2, $file2 );
-    print {$fh} "hello world 2\n";
-    close $fh;
-
-    open $fh, '>', File::Spec->catfile( $tmpdir_1, $file3_1 );
-    print {$fh} "hello world 1\n";
-    close $fh;
-
-    open $fh, '>', File::Spec->catfile( $tmpdir_2, $file3_2 );
-    print {$fh} "hello world 2\n";
-    close $fh;
+    $test->touch( File::Spec->catfile( $tmpdir_1, $file ),    "hello world\n" );
+    $test->touch( File::Spec->catfile( $tmpdir_2, $file ),    "hello world\n" );
+    $test->touch( File::Spec->catfile( $tmpdir_1, $file2 ),   "hello world 1\n" );
+    $test->touch( File::Spec->catfile( $tmpdir_2, $file2 ),   "hello world 2\n" );
+    $test->touch( File::Spec->catfile( $tmpdir_1, $file3_1 ), "hello world 1\n" );
+    $test->touch( File::Spec->catfile( $tmpdir_2, $file3_2 ), "hello world 2\n" );
 
     like( exception { $compare_file->($file3_1) }, "/ ^ \QCannot read file $file3_1 in $tmpdir_2: \E /xsm", '_compare_file_fs_fs throws an error if the first file cannot be read' );
     like( exception { $compare_file->($file3_2) }, "/ ^ \QCannot read file $file3_2 in $tmpdir_1: \E /xsm", '_compare_file_fs_fs throws an error if the second file cannot be read' );

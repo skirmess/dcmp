@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -18,6 +17,7 @@ use FindBin qw($RealBin);
 use lib "$RealBin/lib";
 
 use Local::Suffixes;
+use Local::Test::Util;
 
 main();
 
@@ -31,6 +31,7 @@ sub main {
     *App::DCMP::close = sub { return };
 
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
@@ -39,16 +40,14 @@ sub main {
         my $file = "file${suffix_bin}.txt";
 
         my $tmpdir = tempdir();
-        chdir $tmpdir;
+        $test->chdir($tmpdir);
 
         # cwd returns Unix dir separator on Windows but tempdir returns
         # Windows path separator on Windows. The error message in dcmp is
         # generated with cwd.
         $tmpdir = cwd();
 
-        open my $fh, '>', $file;
-        print {$fh} "hello world\n";
-        close $fh;
+        $test->touch( $file, "hello world\n" );
 
         like( exception { App::DCMP::_collect_file_info_dcmp_file($file) }, "/ ^ \QCannot read file $file in $tmpdir: \E /xsm", '_collect_file_info_dcmp_file throws an exception if close failes' );
     }

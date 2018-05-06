@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -19,6 +18,7 @@ use FindBin qw($RealBin);
 use lib "$RealBin/lib";
 
 use Local::Suffixes;
+use Local::Test::Util;
 
 main();
 
@@ -35,24 +35,24 @@ sub main {
         App::DCMP::_collect_file_info(@_);
     };
 
-    my $basedir = cwd();
-
+    my $basedir         = cwd();
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
         note( encode( 'UTF-8', "suffix: $suffix_text" ) );
 
         my $tmpdir = File::Spec->catdir( tempdir(), "dir${suffix_bin}" );
-        mkdir $tmpdir;
-        chdir $tmpdir;
+        $test->mkdir($tmpdir);
+        $test->chdir($tmpdir);
 
         # cwd returns Unix dir separator on Windows but tempdir returns
         # Windows path separator on Windows. The error message in dcmp is
         # generated with cwd.
         $tmpdir = cwd();
 
-        chdir $basedir;
+        $test->chdir($basedir);
 
         my $chdir = sub {
             App::DCMP::_chdir( $tmpdir, @_ );

@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::More 0.88;
 use Test::TempDir::Tiny;
@@ -19,6 +18,7 @@ use lib "$RealBin/lib";
 use Local::Normalize_Filename;
 use Local::Suffixes;
 use Local::Symlink;
+use Local::Test::Util;
 
 main();
 
@@ -29,9 +29,9 @@ sub main {
         App::DCMP::_collect_file_info(@_);
     };
 
-    my $basedir = cwd();
-
+    my $basedir         = cwd();
     my $suffix_iterator = Local::Suffixes::suffix_iterator();
+    my $test            = Local::Test::Util->new;
 
     while ( my ( $suffix_text, $suffix_bin ) = $suffix_iterator->() ) {
         note(q{----------------------------------------------------------});
@@ -46,22 +46,19 @@ sub main {
             note('setup configuration for tests with empty @dirs');
             my $tmpdir = tempdir();
 
-            chdir $tmpdir;
-            open my $fh, '>', $file_a;
-            close $fh;
+            $test->chdir($tmpdir);
+            $test->touch($file_a);
 
-            open $fh, '>', $file_b;
-            print {$fh} "hello world\n";
-            close $fh;
+            $test->touch( $file_b, "hello world\n" );
             my $file_size = -s $file_b;
 
-            mkdir $dir_c;
+            $test->mkdir($dir_c);
 
             if ( Local::Symlink::symlink_supported() ) {
-                symlink $file_a, $symlink_d;
+                $test->symlink( $file_a, $symlink_d );
             }
 
-            chdir $basedir;
+            $test->chdir($basedir);
 
             my $chdir = sub {
                 App::DCMP::_chdir( $tmpdir, @_ );
@@ -130,28 +127,25 @@ sub main {
 
             #
             note('setup tests for 26 directories in @dir');
-            chdir $tmpdir;
+            $test->chdir($tmpdir);
             my @dirs = map { "$_${suffix_bin}" } 'a' .. 'z';
             for my $d (@dirs) {
-                mkdir $d;
-                chdir $d;
+                $test->mkdir($d);
+                $test->chdir($d);
             }
 
-            open my $fh, '>', $file_aa;
-            close $fh;
+            $test->touch($file_aa);
 
-            open $fh, '>', $file_bb;
-            print {$fh} "hello world\n";
-            close $fh;
+            $test->touch( $file_bb, "hello world\n" );
             my $file_size = -s $file_bb;
 
-            mkdir $dir_cc;
+            $test->mkdir($dir_cc);
 
             if ( Local::Symlink::symlink_supported() ) {
-                symlink $file_aa, $symlink_dd;
+                $test->symlink( $file_aa, $symlink_dd );
             }
 
-            chdir $basedir;
+            $test->chdir($basedir);
 
             my $ignore = App::DCMP::_ignored( [], [] );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
@@ -206,21 +200,20 @@ sub main {
             note('ignore some dirs');
             my $tmpdir = tempdir();
 
-            chdir $tmpdir;
+            $test->chdir($tmpdir);
 
             my $dir_a  = "a${suffix_bin}";
             my $dir_b  = "b${suffix_bin}";
             my $dir_c  = "c${suffix_bin}";
             my $file_d = "d${suffix_bin}.txt";
 
-            mkdir $dir_a;
-            mkdir $dir_b;
-            mkdir $dir_c;
+            $test->mkdir($dir_a);
+            $test->mkdir($dir_b);
+            $test->mkdir($dir_c);
 
-            open my $fh, '>', $file_d;
-            close $fh;
+            $test->touch($file_d);
 
-            chdir $basedir;
+            $test->chdir($basedir);
 
             my $chdir = sub {
                 App::DCMP::_chdir( $tmpdir, @_ );
@@ -300,36 +293,33 @@ sub main {
             note('ignore some path');
             my $tmpdir = tempdir();
 
-            chdir $tmpdir;
+            $test->chdir($tmpdir);
 
             my $file_f = Local::Normalize_Filename::normalize_filename("f${suffix_bin}.txt");
 
-            open my $fh, '>', $file_f;
-            close $fh;
+            $test->touch($file_f);
 
             my $dir_a = Local::Normalize_Filename::normalize_filename("a${suffix_bin}");
-            mkdir $dir_a;
-            chdir $dir_a;
+            $test->mkdir($dir_a);
+            $test->chdir($dir_a);
 
             my $file_e = Local::Normalize_Filename::normalize_filename("e${suffix_bin}.txt");
 
-            open $fh, '>', $file_e;
-            close $fh;
+            $test->touch($file_e);
 
             my $dir_b = Local::Normalize_Filename::normalize_filename("b${suffix_bin}");
-            mkdir $dir_b;
-            chdir $dir_b;
+            $test->mkdir($dir_b);
+            $test->chdir($dir_b);
 
             my $dir_c = Local::Normalize_Filename::normalize_filename("c${suffix_bin}");
-            mkdir $dir_c;
-            chdir $dir_c;
+            $test->mkdir($dir_c);
+            $test->chdir($dir_c);
 
             my $file_d = Local::Normalize_Filename::normalize_filename("d${suffix_bin}.txt");
 
-            open $fh, '>', $file_d;
-            close $fh;
+            $test->touch($file_d);
 
-            chdir $basedir;
+            $test->chdir($basedir);
 
             my $chdir = sub {
                 App::DCMP::_chdir( $tmpdir, @_ );

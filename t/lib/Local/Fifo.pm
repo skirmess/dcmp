@@ -13,8 +13,6 @@ use POSIX 'mkfifo';
         if ( !defined $_fifo_supported ) {
             $_fifo_supported = 0;
 
-            no autodie;
-
             eval {
                 mkfifo q{}, 0666;
                 $_fifo_supported = 1;

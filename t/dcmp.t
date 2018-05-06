@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use locale;
 
@@ -24,6 +23,7 @@ use lib "$RealBin/lib";
 use Local::Normalize_Filename;
 use Local::Suffixes;
 use Local::Symlink;
+use Local::Test::Util;
 
 main();
 
@@ -62,6 +62,8 @@ sub main {
 
 sub _test_dcmp {
     my ( $suffix_text, $suffix_bin, $dir_1_suffix_text, $dir_1_suffix_bin, $dir_2_suffix_text, $dir_2_suffix_bin, $symlink_supported, $type1, $type2 ) = @_;
+
+    my $test = Local::Test::Util->new;
 
     note(q{----------------------------------------------------------});
     note( encode( 'UTF-8', "file suffix: $suffix_text" ) );
@@ -106,7 +108,7 @@ sub _test_dcmp {
 
     # ----------------------------------------------------------
     my $dir_1 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir1_${dir_1_suffix_bin}") );
-    mkdir $dir_1;
+    $test->mkdir($dir_1);
 
     my $chdir_1;
     my $it_1;
@@ -115,25 +117,20 @@ sub _test_dcmp {
         $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_1 );
         $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, \&App::DCMP::_collect_file_info, sub { } );
 
-        mkdir File::Spec->catdir( $dir_1, $dir );
+        $test->mkdir( File::Spec->catdir( $dir_1, $dir ) );
 
-        open my $fh, '>', File::Spec->catfile( $dir_1, $dir, $file2 );
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir_1, $dir, $file2 ) );
 
         if ($symlink_supported) {
-            symlink $invalid_target, File::Spec->catfile( $dir_1, $invalid_link );
-            symlink $file,           File::Spec->catfile( $dir_1, $valid_link );
+            $test->symlink( $invalid_target, File::Spec->catfile( $dir_1, $invalid_link ) );
+            $test->symlink( $file,           File::Spec->catfile( $dir_1, $valid_link ) );
         }
 
-        open $fh, '>', File::Spec->catfile( $dir_1, $file );
-        print {$fh} 'hello world';
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir_1, $file ), 'hello world' );
     }
     else {
         my $dcmp_file_1 = File::Spec->catfile( $dir_1, $dcmp_filename_1 );
-        open my $fh, '>', $dcmp_file_1;
-
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file_1, <<"RECORD_FILE");
 dcmp v1
 LINK $invalid_link_escaped $invalid_target_escaped
 DIR $dir_escaped
@@ -143,7 +140,6 @@ LINK $valid_link_escaped $file_escaped
 FILE $file_escaped 11 5eb63bbbe01eeed093cb22bb8f5acdc3
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_1 = App::DCMP::_load_dcmp_file( $dcmp_file_1, sub { } );
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
@@ -151,7 +147,7 @@ RECORD_FILE
 
     # ----------------------------------------------------------
     my $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
-    mkdir $dir_2;
+    $test->mkdir($dir_2);
 
     my $chdir_2;
     my $it_2;
@@ -162,12 +158,10 @@ RECORD_FILE
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
-        open my $fh, '>', $dcmp_file_2;
-        print {$fh} <<'RECORD_FILE';
+        $test->touch( $dcmp_file_2, <<'RECORD_FILE');
 dcmp v1
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
@@ -197,31 +191,26 @@ RECORD_FILE
 
     # ----------------------------------------------------------
     $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
-    mkdir $dir_2;
+    $test->mkdir($dir_2);
 
     if ( $type2 == TYPE_FS ) {
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
         $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
 
-        mkdir File::Spec->catdir( $dir_2, $dir );
+        $test->mkdir( File::Spec->catdir( $dir_2, $dir ) );
 
-        open my $fh, '>', File::Spec->catfile( $dir_2, $dir, $file2 );
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir_2, $dir, $file2 ) );
 
         if ($symlink_supported) {
-            symlink $invalid_target, File::Spec->catfile( $dir_2, $invalid_link );
-            symlink $file,           File::Spec->catfile( $dir_2, $valid_link );
+            $test->symlink( $invalid_target, File::Spec->catfile( $dir_2, $invalid_link ) );
+            $test->symlink( $file,           File::Spec->catfile( $dir_2, $valid_link ) );
         }
 
-        open $fh, '>', File::Spec->catfile( $dir_2, $file );
-        print {$fh} 'hello world';
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir_2, $file ), 'hello world' );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
-        open my $fh, '>', $dcmp_file_2;
-
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file_2, <<"RECORD_FILE");
 dcmp v1
 LINK $invalid_link_escaped $invalid_target_escaped
 DIR $dir_escaped
@@ -231,7 +220,6 @@ LINK $valid_link_escaped $file_escaped
 FILE $file_escaped 11 5eb63bbbe01eeed093cb22bb8f5acdc3
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
@@ -261,20 +249,16 @@ RECORD_FILE
 
     # ----------------------------------------------------------
     if ( $type1 == TYPE_FS ) {
-        mkdir File::Spec->catdir( $dir_1, $dir4 );
+        $test->mkdir( File::Spec->catdir( $dir_1, $dir4 ) );
 
-        open my $fh, '>', File::Spec->catdir( $dir_1, $dir4, $file );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_1, $dir4, $file ) );
 
         # yes, dir3 as file for different type
-        open $fh, '>', File::Spec->catdir( $dir_1, $dir3 );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_1, $dir3 ) );
     }
     else {
         my $dcmp_file_1 = File::Spec->catfile( $dir_2, $dcmp_filename_1 );
-        open my $fh, '>', $dcmp_file_1;
-
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file_1, <<"RECORD_FILE");
 dcmp v1
 LINK $invalid_link_escaped $invalid_target_escaped
 DIR $dir_escaped
@@ -288,7 +272,6 @@ FILE $file_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_1 = App::DCMP::_load_dcmp_file( $dcmp_file_1, sub { } );
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
@@ -296,45 +279,36 @@ RECORD_FILE
 
     if ( $type2 == TYPE_FS ) {
         $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
-        mkdir $dir_2;
+        $test->mkdir($dir_2);
 
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
         $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
 
-        mkdir File::Spec->catdir( $dir_2, $dir );
+        $test->mkdir( File::Spec->catdir( $dir_2, $dir ) );
 
-        open my $fh, '>', File::Spec->catfile( $dir_2, $dir, $file2 );
-        print {$fh} "test\n";
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir_2, $dir, $file2 ), "test\n" );
 
-        mkdir File::Spec->catdir( $dir_2, $dir2 );
+        $test->mkdir( File::Spec->catdir( $dir_2, $dir2 ) );
 
-        open $fh, '>', File::Spec->catdir( $dir_2, $dir2, $file2 );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_2, $dir2, $file2 ) );
 
         if ($symlink_supported) {
-            symlink $invalid_target2, File::Spec->catfile( $dir_2, $invalid_link );
-            symlink $file,            File::Spec->catfile( $dir_2, $valid_link2 );
+            $test->symlink( $invalid_target2, File::Spec->catfile( $dir_2, $invalid_link ) );
+            $test->symlink( $file,            File::Spec->catfile( $dir_2, $valid_link2 ) );
         }
 
-        open $fh, '>', File::Spec->catfile( $dir_2, $file );
-        print {$fh} "\nhello world\n";
-        close $fh;
+        $test->touch( File::Spec->catfile( $dir_2, $file ), "\nhello world\n" );
 
-        mkdir File::Spec->catdir( $dir_2, $dir3 );
+        $test->mkdir( File::Spec->catdir( $dir_2, $dir3 ) );
 
-        open $fh, '>', File::Spec->catdir( $dir_2, $dir3, $file2 );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_2, $dir3, $file2 ) );
 
         # yes, dir4 as file for different type
-        open $fh, '>', File::Spec->catdir( $dir_2, $dir4 );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_2, $dir4 ) );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
-        open my $fh, '>', $dcmp_file_2;
-
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file_2, <<"RECORD_FILE");
 dcmp v1
 LINK $invalid_link_escaped $invalid_target2_escaped
 LINK $valid_link2_escaped $file_escaped
@@ -351,7 +325,6 @@ FILE $file2_escaped 13 6f5902ac237024bdd0c176cb93063dc4
 -DIR
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );
@@ -409,50 +382,42 @@ RECORD_FILE
     };
 
     $dir_1 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir1_${dir_1_suffix_bin}") );
-    mkdir $dir_1;
+    $test->mkdir($dir_1);
 
     if ( $type1 == TYPE_FS ) {
-        open my $fh, '>', File::Spec->catdir( $dir_1, $file );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_1, $file ) );
 
         $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_1 );
         $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, $collect_file_info_file_type_other, sub { } );
     }
     else {
         my $dcmp_file_1 = File::Spec->catfile( $dir_2, $dcmp_filename_1 );
-        open my $fh, '>', $dcmp_file_1;
-
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file_1, <<"RECORD_FILE");
 dcmp v1
 FILE $file_escaped 0 d41d8cd98f00b204e9800998ecf8427e
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_1 = App::DCMP::_load_dcmp_file( $dcmp_file_1, sub { } );
         is( ref $it_1, ref sub { }, '_load_records() returns a sub' );
     }
 
     $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
-    mkdir $dir_2;
+    $test->mkdir($dir_2);
 
     if ( $type2 == TYPE_FS ) {
-        open my $fh, '>', File::Spec->catdir( $dir_2, $file );
-        close $fh;
+        $test->touch( File::Spec->catdir( $dir_2, $file ) );
 
         $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
         $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, $collect_file_info_file_type_other, sub { } );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
-        open my $fh, '>', $dcmp_file_2;
-
-        print {$fh} <<"RECORD_FILE";
+        $test->touch( $dcmp_file_2, <<"RECORD_FILE");
 dcmp v1
 FILE $file_escaped 13 6f5902ac237024bdd0c176cb93063dc4
 -DIR
 RECORD_FILE
-        close $fh;
 
         $it_2 = App::DCMP::_load_dcmp_file( $dcmp_file_2, sub { } );
         is( ref $it_2, ref sub { }, '_load_records() returns a sub' );

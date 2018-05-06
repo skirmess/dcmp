@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::Fatal;
 use Test::More 0.88;
@@ -19,11 +18,14 @@ use lib "$RealBin/lib";
 
 use Local::Suffixes;
 use Local::Symlink;
+use Local::Test::Util;
 
 main();
 
 sub main {
     require_ok('bin/dcmp') or BAIL_OUT();
+
+    my $test = Local::Test::Util->new;
 
     package App::DCMP;
     use subs 'readlink';
@@ -50,17 +52,17 @@ sub main {
                 my $dir = "dir1${dir_suffix_bin}";
 
                 my $tmpdir = tempdir();
-                chdir $tmpdir;
+                $test->chdir($tmpdir);
 
-                mkdir $dir;
-                chdir $dir;
+                $test->mkdir($dir);
+                $test->chdir($dir);
 
                 $tmpdir = cwd();
 
                 my $file = "file${suffix_bin}.txt";
                 my $link = "link${suffix_bin}.txt";
 
-                symlink $file, $link;
+                $test->symlink( $file, $link );
 
                 like( exception { App::DCMP::_collect_file_info($link) }, "/ ^ \Qreadlink failed for $link in $tmpdir: \E /xsm", '_collect_file_info throws an exception if readlink failes' );
             }

@@ -3,7 +3,6 @@
 use 5.006;
 use strict;
 use warnings;
-use autodie;
 
 use Test::More 0.88;
 use Test::TempDir::Tiny;
@@ -19,6 +18,9 @@ use FindBin qw($RealBin);
 use lib "$RealBin/lib";
 
 use Local::Suffixes;
+use Local::Test::Util;
+
+my $test = Local::Test::Util->new;
 
 main();
 
@@ -32,7 +34,7 @@ sub _fail_chdir_if {
         return 0;
     }
 
-    return chdir $dir;
+    return $test->chdir($dir);
 }
 
 sub main {
@@ -57,12 +59,12 @@ sub main {
         #
         note('basedir, no dirs');
         my $tmpdir = tempdir();
-        chdir $tmpdir;
-        mkdir $dir;
-        chdir $dir;
+        $test->chdir($tmpdir);
+        $test->mkdir($dir);
+        $test->chdir($dir);
 
         $tmpdir = cwd();
-        chdir $basedir;
+        $test->chdir($basedir);
 
         note("\$tmpdir = $tmpdir");
 
@@ -72,7 +74,7 @@ sub main {
         #
         note('chdir to basedir fails, no dirs');
 
-        chdir $basedir;
+        $test->chdir($basedir);
 
         $fail_chdir_on = $tmpdir;
         like( exception { App::DCMP::_chdir( $tmpdir, undef ) }, "/ ^ \QCannot chdir to $tmpdir: \E /xsm", '_chdir($tmpdir, undef) throws am error' );
@@ -125,21 +127,21 @@ sub main {
             #
             note( 'basedir, ' . scalar @{$dirs_ref} . ' dirs' );
             $tmpdir = tempdir();
-            chdir $tmpdir;
-            mkdir $dir;
-            chdir $dir;
+            $test->chdir($tmpdir);
+            $test->mkdir($dir);
+            $test->chdir($dir);
 
             $tmpdir = cwd();
             note("\$tmpdir = $tmpdir");
 
             for my $d ( @{$dirs_ref} ) {
-                mkdir $d;
-                chdir $d;
+                $test->mkdir($d);
+                $test->chdir($d);
             }
 
             my $expected_dir = cwd();
             note("\$expected_dir = $expected_dir");
-            chdir $basedir;
+            $test->chdir($basedir);
 
             is( App::DCMP::_chdir( $tmpdir, $dirs_ref ), undef, '_chdir($tmpdir, $dirs_ref) returns undef' );
             is( cwd(), $expected_dir, '... and the cwd is correct' );
@@ -150,9 +152,9 @@ sub main {
             $fail_chdir_on = ${$dirs_ref}[6];
 
             my $last_good_dir = File::Spec->catdir( $tmpdir, @{$dirs_ref}[ 0 .. 5 ] );
-            chdir $last_good_dir;
+            $test->chdir($last_good_dir);
             $last_good_dir = cwd();
-            chdir $basedir;
+            $test->chdir($basedir);
 
             like( exception { App::DCMP::_chdir( $tmpdir, $dirs_ref ) }, "/ ^ \QCannot chdir to ${$dirs_ref}[6] in $last_good_dir: \E /xsm", '_chdir($tmpdir, $dirs_ref) throws an error' );
             is( cwd(), $last_good_dir, '... and the cwd is changed up to where the error happend' );
