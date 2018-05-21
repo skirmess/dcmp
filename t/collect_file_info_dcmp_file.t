@@ -114,7 +114,7 @@ sub main {
             is( ${$file_info}[3],     $md5_utf8_sum,                  '... the md5 sum' );
 
           SKIP: {
-                skip 'The symlink function is unimplemented' if !Local::Symlink::symlink_supported();
+                skip 'The symlink function is unimplemented', 1 if !Local::Symlink::symlink_supported();
 
                 $test->symlink( $file,           $valid_link );
                 $test->symlink( $invalid_target, $invalid_link );

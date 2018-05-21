@@ -35,7 +35,7 @@ sub main {
     *App::DCMP::readlink = sub { return; };
 
   SKIP: {
-        skip 'The symlink function is unimplemented' if !Local::Symlink::symlink_supported();
+        skip 'The symlink function is unimplemented', 1 if !Local::Symlink::symlink_supported();
 
         my $suffix_iterator = Local::Suffixes::suffix_iterator();
 

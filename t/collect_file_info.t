@@ -95,7 +95,7 @@ sub main {
             is( ${$file_info}[2],     $file_size,                     '... the file size' );
 
           SKIP: {
-                skip 'The symlink function is unimplemented' if !Local::Symlink::symlink_supported();
+                skip 'The symlink function is unimplemented', 1 if !Local::Symlink::symlink_supported();
 
                 $test->symlink( $file,           $valid_link );
                 $test->symlink( $invalid_target, $invalid_link );
@@ -120,7 +120,7 @@ sub main {
             }
 
           SKIP: {
-                skip 'The mkfifo function is unimplemented' if !Local::Fifo::fifo_supported();
+                skip 'The mkfifo function is unimplemented', 1 if !Local::Fifo::fifo_supported();
 
                 mkfifo $fifo, 0666;
 
