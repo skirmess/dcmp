@@ -1,5 +1,5 @@
 {
-   "abstract" : "dcmp - Compare directories and produce CVS-like output",
+   "abstract" : "compare directories and produce CVS-like output",
    "author" : [
       "Sven Kirmess <sven.kirmess@kzone.ch>"
    ],

@@ -1,6 +1,6 @@
 # NAME
 
-dcmp - Compare directories and produce CVS-like output
+dcmp - compare directories and produce CVS-like output
 
 # VERSION
 
