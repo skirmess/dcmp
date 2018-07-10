@@ -40,17 +40,17 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 # TODO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # TODO *** same as diff! ***
-# TODO ski@pernaia:~/working/dcmp-dev2$ echo a > a
-# TODO ski@pernaia:~/working/dcmp-dev2$ echo b > b
-# TODO ski@pernaia:~/working/dcmp-dev2$ diff -u a b
+# TODO $ echo a > a
+# TODO $ echo b > b
+# TODO $ diff -u a b
 # TODO --- a   2017-12-23 18:27:03.731142222 +0000
 # TODO +++ b   2017-12-23 18:27:05.922161764 +0000
 # TODO @@ -1 +1 @@
 # TODO -a
 # TODO +b
-# TODO ski@pernaia:~/working/dcmp-dev2$ mkdir A B
-# TODO ski@pernaia:~/working/dcmp-dev2$ touch A/a B/b
-# TODO ski@pernaia:~/working/dcmp-dev2$  ../dcmp/dcmp A B
+# TODO $ mkdir A B
+# TODO $ touch A/a B/b
+# TODO $  ../dcmp/dcmp A B
 # TODO + a
 # TODO - b
 #
@@ -188,7 +188,7 @@ use constant LINK_TARGET_DIFFERS  => 6;    # L
 
 # chdir() allows for a maximum path length after which it fails. This can be
 # worked around by changing to one directory at a time which allows us to
-# change us into unliimted deep directory trees on operating systems that
+# change us into unlimited deep directory trees on operating systems that
 # support unlimited wide directory trees.
 sub _chdir {
     my ( $basedir, $dirs_ref ) = @_;
