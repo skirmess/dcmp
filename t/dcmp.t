@@ -114,8 +114,8 @@ sub _test_dcmp {
     my $it_1;
 
     if ( $type1 == TYPE_FS ) {
-        $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_1 );
-        $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, \&App::DCMP::_collect_file_info, sub { } );
+        $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir,           $dir_1 );
+        $it_1    = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, \&App::DCMP::_collect_file_info, sub { } );
 
         $test->mkdir( File::Spec->catdir( $dir_1, $dir ) );
 
@@ -153,8 +153,8 @@ RECORD_FILE
     my $it_2;
 
     if ( $type2 == TYPE_FS ) {
-        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
+        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir,           $dir_2 );
+        $it_2    = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );
@@ -194,8 +194,8 @@ RECORD_FILE
     $test->mkdir($dir_2);
 
     if ( $type2 == TYPE_FS ) {
-        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
+        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir,           $dir_2 );
+        $it_2    = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
 
         $test->mkdir( File::Spec->catdir( $dir_2, $dir ) );
 
@@ -281,8 +281,8 @@ RECORD_FILE
         $dir_2 = File::Spec->catdir( tempdir(), Local::Normalize_Filename::normalize_filename("dir2_${dir_2_suffix_bin}") );
         $test->mkdir($dir_2);
 
-        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
+        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir,           $dir_2 );
+        $it_2    = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, \&App::DCMP::_collect_file_info, sub { } );
 
         $test->mkdir( File::Spec->catdir( $dir_2, $dir ) );
 
@@ -387,8 +387,8 @@ RECORD_FILE
     if ( $type1 == TYPE_FS ) {
         $test->touch( File::Spec->catdir( $dir_1, $file ) );
 
-        $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_1 );
-        $it_1 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, $collect_file_info_file_type_other, sub { } );
+        $chdir_1 = App::DCMP::_partial( \&App::DCMP::_chdir,           $dir_1 );
+        $it_1    = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_1, $collect_file_info_file_type_other, sub { } );
     }
     else {
         my $dcmp_file_1 = File::Spec->catfile( $dir_2, $dcmp_filename_1 );
@@ -408,8 +408,8 @@ RECORD_FILE
     if ( $type2 == TYPE_FS ) {
         $test->touch( File::Spec->catdir( $dir_2, $file ) );
 
-        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir, $dir_2 );
-        $it_2 = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, $collect_file_info_file_type_other, sub { } );
+        $chdir_2 = App::DCMP::_partial( \&App::DCMP::_chdir,           $dir_2 );
+        $it_2    = App::DCMP::_partial( \&App::DCMP::_iterator_dir_fs, $chdir_2, $collect_file_info_file_type_other, sub { } );
     }
     else {
         my $dcmp_file_2 = File::Spec->catfile( $dir_2, $dcmp_filename_2 );

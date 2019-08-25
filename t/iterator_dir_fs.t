@@ -75,9 +75,9 @@ sub main {
             #
             note('first file info');
             my $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3, '... consisting of three values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_a), '... the file name' );
+            is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+            is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_a), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
             is( ${$file_info}[2], 0, '... the file size' );
@@ -85,9 +85,9 @@ sub main {
             #
             note('second file info');
             $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3, '... consisting of three values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_b), '... the file name' );
+            is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+            is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_b), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
             is( ${$file_info}[2], $file_size, '... the file size' );
@@ -95,9 +95,9 @@ sub main {
             #
             note('third file info');
             $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 2, '... consisting of two values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_c), '... the file name' );
+            is( ref $file_info,       ref [],                                                'file info is an array ref' );
+            is( scalar @{$file_info}, 2,                                                     '... consisting of two values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_c), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
 
@@ -105,9 +105,9 @@ sub main {
                 #
                 note('fourth file info');
                 $file_info = $it->();
-                is( ref $file_info, ref [], 'file info is an array ref' );
-                is( scalar @{$file_info}, 3, '... consisting of three values' );
-                is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($symlink_d), '... the file name' );
+                is( ref $file_info,       ref [],                                                    'file info is an array ref' );
+                is( scalar @{$file_info}, 3,                                                         '... consisting of three values' );
+                is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($symlink_d), '... the file name' );
                 like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                 is( ${$file_info}[1], App::DCMP::FILE_TYPE_SYMLINK(), '... which is from a symlink' );
                 is( ${$file_info}[2], $file_a, '... the links target' );
@@ -156,9 +156,9 @@ sub main {
             #
             note('first file info');
             my $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3, '... consisting of three values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_aa), '... the file name' );
+            is( ref $file_info,       ref [],                                                  'file info is an array ref' );
+            is( scalar @{$file_info}, 3,                                                       '... consisting of three values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_aa), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
             is( ${$file_info}[2], 0, '... the file size' );
@@ -166,9 +166,9 @@ sub main {
             #
             note('second file info');
             $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3, '... consisting of three values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_bb), '... the file name' );
+            is( ref $file_info,       ref [],                                                  'file info is an array ref' );
+            is( scalar @{$file_info}, 3,                                                       '... consisting of three values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_bb), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
             is( ${$file_info}[2], $file_size, '... the file size' );
@@ -176,9 +176,9 @@ sub main {
             #
             note('third file info');
             $file_info = $it->();
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 2, '... consisting of two values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_cc), '... the file name' );
+            is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+            is( scalar @{$file_info}, 2,                                                      '... consisting of two values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_cc), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
 
@@ -186,9 +186,9 @@ sub main {
                 #
                 note('fourth file info');
                 $file_info = $it->();
-                is( ref $file_info, ref [], 'file info is an array ref' );
-                is( scalar @{$file_info}, 3, '... consisting of three values' );
-                is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($symlink_dd), '... the file name' );
+                is( ref $file_info,       ref [],                                                     'file info is an array ref' );
+                is( scalar @{$file_info}, 3,                                                          '... consisting of three values' );
+                is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($symlink_dd), '... the file name' );
                 like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                 is( ${$file_info}[1], App::DCMP::FILE_TYPE_SYMLINK(), '... which is from a symlink' );
                 is( ${$file_info}[2], $file_aa, '... the links target' );
@@ -247,9 +247,9 @@ sub main {
                 if ( $state == 0 ) {
                     note( encode( 'UTF-8', $dir_a ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 2, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_a), '... the file name' );
+                    is( ref $file_info,       ref [],                                                'file info is an array ref' );
+                    is( scalar @{$file_info}, 2,                                                     '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_a), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
                 }
@@ -257,27 +257,27 @@ sub main {
                 if ( $state < 2 ) {
                     note( encode( 'UTF-8', $dir_b ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 2, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_b), '... the file name' );
+                    is( ref $file_info,       ref [],                                                'file info is an array ref' );
+                    is( scalar @{$file_info}, 2,                                                     '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_b), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
                 }
 
                 note( encode( 'UTF_8', $dir_c ) );
                 $file_info = $it->();
-                is( ref $file_info, ref [], 'file info is an array ref' );
-                is( scalar @{$file_info}, 2, '... consisting of three values' );
-                is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_c), '... the file name' );
+                is( ref $file_info,       ref [],                                                'file info is an array ref' );
+                is( scalar @{$file_info}, 2,                                                     '... consisting of three values' );
+                is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_c), '... the file name' );
                 like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                 is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
 
                 if ( $state < 3 ) {
                     note( encode( 'UTF-8', $file_d ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 3, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
+                    is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+                    is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
@@ -355,18 +355,18 @@ sub main {
                 if ( $state != 2 ) {
                     note( encode( 'UTF-8', $dir_a ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 2, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_a), '... the file name' );
+                    is( ref $file_info,       ref [],                                                'file info is an array ref' );
+                    is( scalar @{$file_info}, 2,                                                     '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_a), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
                 }
 
                 $file_info = $it->();
                 note( encode( 'UTF-8', $file_f ) );
-                is( ref $file_info, ref [], 'file info is an array ref' );
-                is( scalar @{$file_info}, 3, '... consisting of three values' );
-                is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_f), '... the file name' );
+                is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+                is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+                is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_f), '... the file name' );
                 like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                 is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                 is( ${$file_info}[2], 0, '... the file size' );
@@ -383,9 +383,9 @@ sub main {
                 if ( $state < 2 || $state > 3 ) {
                     note( encode( 'UTF-8', $dir_b ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 2, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($dir_b), '... the file name' );
+                    is( ref $file_info,       ref [],                                                'file info is an array ref' );
+                    is( scalar @{$file_info}, 2,                                                     '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($dir_b), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_DIRECTORY(), '... which is from a directory' );
                 }
@@ -393,9 +393,9 @@ sub main {
                 if ( $state != 2 ) {
                     note( encode( 'UTF-8', $file_e ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 3, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_e), '... the file name' );
+                    is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+                    is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_e), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );
@@ -413,9 +413,9 @@ sub main {
                 if ( $state < 2 ) {
                     note( encode( 'UTF-8', $file_d ) );
                     $file_info = $it->();
-                    is( ref $file_info, ref [], 'file info is an array ref' );
-                    is( scalar @{$file_info}, 3, '... consisting of three values' );
-                    is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
+                    is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+                    is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+                    is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
                     like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
                     is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
                     is( ${$file_info}[2], 0, '... the file size' );

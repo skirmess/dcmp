@@ -175,7 +175,7 @@ sub main {
         {
             my @ignore_files;
             my @ignore_paths = ( 'a', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', $ignore_path, 'c', 'e' );
-            my @dirs = ($dir1);
+            my @dirs         = ($dir1);
 
             my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );
@@ -193,7 +193,7 @@ sub main {
         {
             my @ignore_files;
             my @ignore_paths = ($ignore_path);
-            my @dirs = ( $dir1, $dir2, $dir3 );
+            my @dirs         = ( $dir1, $dir2, $dir3 );
 
             my $ignore = App::DCMP::_ignored( \@ignore_paths, \@ignore_files );
             is( ref $ignore, ref sub { }, '_ignore returns a sub' );

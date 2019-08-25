@@ -80,7 +80,7 @@ sub main {
             note( encode( 'UTF-8', $dir_text ) );
 
             my $file_info = App::DCMP::_collect_file_info($dir);
-            is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
+            is( ref $file_info,       ref [],                           '_collect_file_info() returns an array ref' );
             is( scalar @{$file_info}, 2,                                '... consisting of two values' );
             is( ${$file_info}[0],     $dir,                             '... the file name' );
             is( ${$file_info}[1],     App::DCMP::FILE_TYPE_DIRECTORY(), '... the type (directory)' );
@@ -88,7 +88,7 @@ sub main {
             # ----------------------------------------------------------
             note( encode( 'UTF-8', $file_text ) );
             $file_info = App::DCMP::_collect_file_info($file);
-            is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
+            is( ref $file_info,       ref [],                         '_collect_file_info() returns an array ref' );
             is( scalar @{$file_info}, 3,                              '... consisting of three values' );
             is( ${$file_info}[0],     $file,                          '... the file name' );
             is( ${$file_info}[1],     App::DCMP::FILE_TYPE_REGULAR(), '... the type (regular)' );
@@ -103,7 +103,7 @@ sub main {
                 # ----------------------------------------------------------
                 note( encode( 'UTF-8', $valid_link_text ) );
                 $file_info = App::DCMP::_collect_file_info($valid_link);
-                is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
+                is( ref $file_info,       ref [],                         '_collect_file_info() returns an array ref' );
                 is( scalar @{$file_info}, 3,                              '... consisting of three values' );
                 is( ${$file_info}[0],     $valid_link,                    '... the file name' );
                 is( ${$file_info}[1],     App::DCMP::FILE_TYPE_SYMLINK(), '... the type (symlink)' );
@@ -112,7 +112,7 @@ sub main {
                 # ----------------------------------------------------------
                 note( encode( 'UTF-8', $invalid_link_text ) );
                 $file_info = App::DCMP::_collect_file_info($invalid_link);
-                is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
+                is( ref $file_info,       ref [],                         '_collect_file_info() returns an array ref' );
                 is( scalar @{$file_info}, 3,                              '... consisting of three values' );
                 is( ${$file_info}[0],     $invalid_link,                  '... the file name' );
                 is( ${$file_info}[1],     App::DCMP::FILE_TYPE_SYMLINK(), '... the type (symlink)' );
@@ -127,7 +127,7 @@ sub main {
                 # ----------------------------------------------------------
                 note( encode( 'UTF-8', $fifo_text ) );
                 $file_info = App::DCMP::_collect_file_info($fifo);
-                is( ref $file_info, ref [], '_collect_file_info() returns an array ref' );
+                is( ref $file_info,       ref [],                       '_collect_file_info() returns an array ref' );
                 is( scalar @{$file_info}, 2,                            '... consisting of two values' );
                 is( ${$file_info}[0],     $fifo,                        '... the file name' );
                 is( ${$file_info}[1],     App::DCMP::FILE_TYPE_OTHER(), '... the type (other)' );

@@ -107,8 +107,8 @@ sub _test_merge {
         #
         note( encode( 'UTF-8', "$file_a / $file_a" ) );
         my $merged_file_info = $it->();
-        is( ref $merged_file_info, ref [], 'merged file info is an array ref' );
-        is( scalar @{$merged_file_info}, 2, '... consisting of two values' );
+        is( ref $merged_file_info,       ref [], 'merged file info is an array ref' );
+        is( scalar @{$merged_file_info}, 2,      '... consisting of two values' );
         is( ref ${$merged_file_info}[0], ref [], '... first value is an array ref' );
         is( ref ${$merged_file_info}[1], ref [], '... second value is an array ref' );
 
@@ -129,15 +129,15 @@ sub _test_merge {
         #
         note( encode( 'UTF-8', "undef / $file_b" ) );
         $merged_file_info = $it->();
-        is( ref $merged_file_info, ref [], 'merged file info is an array ref' );
-        is( scalar @{$merged_file_info}, 2, '... consisting of two values' );
+        is( ref $merged_file_info,       ref [], 'merged file info is an array ref' );
+        is( scalar @{$merged_file_info}, 2,      '... consisting of two values' );
         is( ref ${$merged_file_info}[0], ref [], '... first value is an array ref' );
-        is( ${$merged_file_info}[1], undef, '... second value is undef' );
+        is( ${$merged_file_info}[1],     undef,  '... second value is undef' );
 
         $file_info = ${$merged_file_info}[0];
-        is( ref $file_info, ref [], 'file info is an array ref' );
-        is( scalar @{$file_info}, 3, '... consisting of three values' );
-        is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_b), '... the file name' );
+        is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+        is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+        is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_b), '... the file name' );
         like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
         is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
         is( ${$file_info}[2], 0, '... the file size' );
@@ -146,15 +146,15 @@ sub _test_merge {
         note( encode( 'UTF-8', "$file_c / undef" ) );
         $merged_file_info = $it->();
 
-        is( ref $merged_file_info, ref [], 'merged file info is an array ref' );
-        is( scalar @{$merged_file_info}, 2,     '... consisting of two values' );
-        is( ${$merged_file_info}[0],     undef, '... first value is undef' );
+        is( ref $merged_file_info,       ref [], 'merged file info is an array ref' );
+        is( scalar @{$merged_file_info}, 2,      '... consisting of two values' );
+        is( ${$merged_file_info}[0],     undef,  '... first value is undef' );
         is( ref ${$merged_file_info}[1], ref [], '... second value is an array ref' );
 
         $file_info = ${$merged_file_info}[1];
-        is( ref $file_info, ref [], 'file info is an array ref' );
-        is( scalar @{$file_info}, 3, '... consisting of three values' );
-        is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_c), '... the file name' );
+        is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+        is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+        is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_c), '... the file name' );
         like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
         is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
         is( ${$file_info}[2], 0, '... the file size' );
@@ -162,15 +162,15 @@ sub _test_merge {
         #
         note( encode( 'UTF-8', "undef / $file_d" ) );
         $merged_file_info = $it->();
-        is( ref $merged_file_info, ref [], 'merged file info is an array ref' );
-        is( scalar @{$merged_file_info}, 2, '... consisting of two values' );
+        is( ref $merged_file_info,       ref [], 'merged file info is an array ref' );
+        is( scalar @{$merged_file_info}, 2,      '... consisting of two values' );
         is( ref ${$merged_file_info}[0], ref [], '... first value is an array ref' );
-        is( ${$merged_file_info}[1], undef, '... second value is undef' );
+        is( ${$merged_file_info}[1],     undef,  '... second value is undef' );
 
         $file_info = ${$merged_file_info}[0];
-        is( ref $file_info, ref [], 'file info is an array ref' );
-        is( scalar @{$file_info}, 3, '... consisting of three values' );
-        is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
+        is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+        is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+        is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_d), '... the file name' );
         like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
         is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
         is( ${$file_info}[2], 0, '... the file size' );
@@ -180,15 +180,15 @@ sub _test_merge {
             note( encode( 'UTF-8', "$file_e / undef" ) );
             $merged_file_info = $it->();
 
-            is( ref $merged_file_info, ref [], 'merged file info is an array ref' );
-            is( scalar @{$merged_file_info}, 2,     '... consisting of two values' );
-            is( ${$merged_file_info}[0],     undef, '... first value is undef' );
+            is( ref $merged_file_info,       ref [], 'merged file info is an array ref' );
+            is( scalar @{$merged_file_info}, 2,      '... consisting of two values' );
+            is( ${$merged_file_info}[0],     undef,  '... first value is undef' );
             is( ref ${$merged_file_info}[1], ref [], '... second value is an array ref' );
 
             $file_info = ${$merged_file_info}[1];
-            is( ref $file_info, ref [], 'file info is an array ref' );
-            is( scalar @{$file_info}, 3, '... consisting of three values' );
-            is( ${$file_info}[0], Local::Normalize_Filename::normalize_filename($file_e), '... the file name' );
+            is( ref $file_info,       ref [],                                                 'file info is an array ref' );
+            is( scalar @{$file_info}, 3,                                                      '... consisting of three values' );
+            is( ${$file_info}[0],     Local::Normalize_Filename::normalize_filename($file_e), '... the file name' );
             like( ${$file_info}[1], '/ ^ [0-9]+ $ /xsm', '... the mode' );
             is( ${$file_info}[1], App::DCMP::FILE_TYPE_REGULAR(), '... which is from a file' );
             is( ${$file_info}[2], 0, '... the file size' );

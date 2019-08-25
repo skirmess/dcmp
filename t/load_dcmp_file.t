@@ -249,7 +249,7 @@ RECORD_FILE
 
             if ( $state < 2 ) {
                 $x_ref = $it->();
-                is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+                is( ref $x_ref,       ref [],                             '... the sub returned from the sub returns an array ref' );
                 is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
                 is( ${$x_ref}[0],     $file2,                             '... correct name' );
                 is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );
@@ -267,7 +267,7 @@ RECORD_FILE
 
             if ( $state < 2 ) {
                 $x_ref = $it->();
-                is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+                is( ref $x_ref,       ref [],                           '... the sub returned from the sub returns an array ref' );
                 is( scalar @{$x_ref}, 2,                                '... with 2 elements' );
                 is( ${$x_ref}[0],     $dir,                             '... correct name' );
                 is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_DIRECTORY(), '... correct mode' );
@@ -275,7 +275,7 @@ RECORD_FILE
 
             if ( $state == 0 ) {
                 $x_ref = $it->();
-                is( ref $x_ref, ref [], '... calling it again returns an array ref' );
+                is( ref $x_ref,       ref [],                             '... calling it again returns an array ref' );
                 is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
                 is( ${$x_ref}[0],     $file,                              '... correct name' );
                 is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );
@@ -284,7 +284,7 @@ RECORD_FILE
             }
 
             $x_ref = $it->();
-            is( ref $x_ref, ref [], '... calling it again returns an array ref' );
+            is( ref $x_ref,       ref [],                         '... calling it again returns an array ref' );
             is( scalar @{$x_ref}, 3,                              '... with 3 elements' );
             is( ${$x_ref}[0],     $invalid_link,                  '... correct name' );
             is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_SYMLINK(), '... correct mode' );
@@ -292,7 +292,7 @@ RECORD_FILE
 
             if ( $state < 3 ) {
                 $x_ref = $it->();
-                is( ref $x_ref, ref [], '... calling it again returns an array ref' );
+                is( ref $x_ref,       ref [],                         '... calling it again returns an array ref' );
                 is( scalar @{$x_ref}, 3,                              '... with 3 elements' );
                 is( ${$x_ref}[0],     $valid_link,                    '... correct name' );
                 is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_SYMLINK(), '... correct mode' );
@@ -332,7 +332,7 @@ RECORD_FILE
         is( ref $it, ref sub { }, '... the returned sub returns a sub' );
         my $x_ref = $it->();
 
-        is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+        is( ref $x_ref,       ref [],                             '... the sub returned from the sub returns an array ref' );
         is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
         is( ${$x_ref}[0],     $file3,                             '... correct name' );
         is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );
@@ -376,7 +376,7 @@ RECORD_FILE
             is( ref $it, ref sub { }, '... the returned sub returns a sub' );
             $x_ref = $it->();
 
-            is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+            is( ref $x_ref,       ref [],                             '... the sub returned from the sub returns an array ref' );
             is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
             is( ${$x_ref}[0],     $file3,                             '... correct name' );
             is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );
@@ -443,12 +443,12 @@ RECORD_FILE
             #
             note( encode( 'UTF-8', "check '$dir_text/$dir4_text/$dir5_text'" ) );
             @dirs = ( $dir, $dir4, $dir5 );
-            $it = $iterator_dir_record->( \@dirs );
+            $it   = $iterator_dir_record->( \@dirs );
             is( ref $it, ref sub { }, '... the returned sub returns a sub' );
 
             if ( $state < 2 ) {
                 $x_ref = $it->();
-                is( ref $x_ref, ref [], '... the sub returned from the sub returns an array ref' );
+                is( ref $x_ref,       ref [],                             '... the sub returned from the sub returns an array ref' );
                 is( scalar @{$x_ref}, 4,                                  '... with 4 elements' );
                 is( ${$x_ref}[0],     $file2,                             '... correct name' );
                 is( ${$x_ref}[1],     App::DCMP::FILE_TYPE_REGULAR(),     '... correct mode' );

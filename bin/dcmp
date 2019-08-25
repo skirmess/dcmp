@@ -698,8 +698,8 @@ sub _load_dcmp_file {
     # comes from a dcmp file instead of a directory structure on the disk.
     return sub {
         my ($dirs_ref) = @_;
-        my $path = File::Spec->catdir( @{$dirs_ref} );
-        my @stack = defined $path{$path} ? sort { $a->[0] cmp $b->[0] } @{ $path{$path} } : ();
+        my $path       = File::Spec->catdir( @{$dirs_ref} );
+        my @stack      = defined $path{$path} ? sort { $a->[0] cmp $b->[0] } @{ $path{$path} } : ();
 
         return sub {
             return if !@stack;
@@ -990,7 +990,7 @@ Sven Kirmess <sven.kirmess@kzone.ch>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2002-2018 by Sven Kirmess.
+This software is Copyright (c) 2002-2019 by Sven Kirmess.
 
 This is free software, licensed under:
 

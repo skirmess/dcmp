@@ -4,12 +4,14 @@ use 5.006;
 use strict;
 use warnings;
 
+our $VERSION = '0.001';
+
 # copied from 'perldoc constant'
 sub declared ($) {
     use constant 1.01;    # don't omit this!
     my $name = shift;
     $name =~ s/^::/main::/xsm;
-    my $pkg = caller;
+    my $pkg       = caller;
     my $full_name = $name =~ /::/xsm ? $name : "${pkg}::$name";
     return $constant::declared{$full_name};
 }
