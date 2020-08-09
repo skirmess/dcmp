@@ -4,4 +4,5 @@
 .build
 .perlcritic_package.yml
 App-dcmp-*
+dzil-inc
 tmp
